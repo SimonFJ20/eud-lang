@@ -26,19 +26,19 @@ Lidt uvigtigt, da det ikke er et seriøst sprog. Tænker bare [Reference countin
 
 ```
 // explicit typing
-i32 a = 3 + 4 * 5
+let a: i32 = 3 + 4 * 5
 
-u32 b = (3 + 4) * 5
+let b: u32 = (3 + 4) * 5
 
 // lineending ';' optional
-f64 pi = 3.14;
+let pi: f64 = 3.14;
 
 if a > 4 then
     print("yes")
 end
 
 func myFunc() -> i32
-    string h = "hello world"
+    let h: string = "hello world"
     print(h)
     return 1
 end
@@ -169,7 +169,7 @@ func i32 myFunc()
 
 Den simpleste måde at køre koden er AST walking, dette er slow af, men meget nemt at implementere.
 
-```
+```java
 Value evaluateMultiplicationNode(MultiplicationNode node) {
     Value left = evaluateExpression(node.left);
     Value right = evaluateExpression(node.right);
