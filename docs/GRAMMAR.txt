@@ -5,12 +5,7 @@ toplevel_statements :   (_ toplevel_statement (_nl_ toplevel_statement):*):? _
 
 toplevel_statement  :   exported
                     |   import
-                    |   type_def
-                    |   trait_def
-                    |   struct_def
-                    |   func_def
-                    |   inferred_init_stmt
-                    |   typed_init_stmt
+                    |   statement
 
 exported            :   "export" __ exportable
 
