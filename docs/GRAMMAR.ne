@@ -245,7 +245,7 @@ member_access       ->  member_access _ "." _ IDENTIFIER
 computed_member     ->  computed_member _ "[" _ expression _ "]"
                     |   func_call
 
-func_call           ->  value _ "(" _ expressions _ ")"
+func_call           ->  func_call _ "(" _ expressions _ ")"
                     |   value
 
 value               ->  INT
