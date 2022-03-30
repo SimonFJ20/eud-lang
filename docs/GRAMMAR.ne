@@ -15,6 +15,7 @@ exportable          ->  type_def
                     |   func_def
                     |   inferred_init_stmt
                     |   typed_init_stmt
+                    |   declaration_stmt
 
 import              ->  "import" __ STRING
 
@@ -35,6 +36,7 @@ statement           ->  type_def
                     |   if_else
                     |   inferred_init_stmt
                     |   typed_init_stmt
+                    |   declaration_stmt
                     |   expression
 
 type_def            ->  "typedef" __ identifier _ "=" _ type
@@ -101,6 +103,8 @@ inferred_init       ->  declareable _ ":=" _ expression
 typed_init_stmt     ->  "let" __ typed_init
 
 typed_init          ->  typed_declaration _ "=" _ expression
+
+declaration_stmt    ->  "let" __ typed_declaration
 
 typed_object        ->  type _ object_literal
 
@@ -254,16 +258,19 @@ value               ->  int_literal
                     |   string_literal
                     |   typed_array_literal
                     |   typed_object
-                    |   identifier
+                    |   var_access
                     |   "(" _ expression _ ")"
                     |   array_literal
                     |   object_literal
+
+var_access          ->  identifier
 
 int_literal         ->  INT
 float_literal       ->  FLOAT
 char_literal        ->  CHAR
 string_literal      ->  STRING
-identifier          ->  identifier
+
+identifier          ->  IDENTIFIER
 
 _nl_                ->  (_ /[\n;]/ (_ /[\n;/]):*):? _
 _                   ->  __:?
