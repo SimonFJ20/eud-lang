@@ -241,7 +241,7 @@ post_increment      :   post_increment _ "++"
 post_decrement      :   post_decrement _ "--"
                     |   member_access
 
-member_access       :   member_access _ "." _ computed_member
+member_access       :   member_access _ "." _ IDENTIFIER
                     |   computed_member
 
 computed_member     :   computed_member _ "[" _ value _ "]"
