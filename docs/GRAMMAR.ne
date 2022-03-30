@@ -37,15 +37,15 @@ statement           ->  type_def
                     |   typed_init_stmt
                     |   expression
 
-type_def            ->  "typedef" __ IDENTIFIER _ "=" _ type
+type_def            ->  "typedef" __ identifier _ "=" _ type
 
-trait_def           ->  "trait" __ IDENTIFIER __ trait_declarations __ "end"
+trait_def           ->  "trait" __ identifier __ trait_declarations __ "end"
 
 trait_declarations  ->  (_ typed_declaration (_ "," _ typed_declaration):* ",":?):? _
 
-struct_def          ->  "struct" __ IDENTIFIER _ "(" struct_traits ")" __ struct_properties __ "end"
+struct_def          ->  "struct" __ identifier _ "(" struct_traits ")" __ struct_properties __ "end"
 
-struct_traits       ->  (_ IDENTIFIER (_ "," _ IDENTIFIER):* ",":?):? _
+struct_traits       ->  (_ identifier (_ "," _ identifier):* ",":?):? _
 
 struct_properties   ->  (_ struct_property (_nl_ struct_property):*):?
 
@@ -57,9 +57,9 @@ struct_property     ->  typed_declaration
 
 private_method      ->  "private" __ method
 
-method              ->  "func" __ IDENTIFIER _ "(" _ IDENTIFIER _ (", " typed_declarations):? ")" _ "->" _ type __ statements __ "end"
+method              ->  "func" __ identifier _ "(" _ identifier _ (", " typed_declarations):? ")" _ "->" _ type __ statements __ "end"
 
-func_def            ->  "func" __ IDENTIFIER _ "(" typed_declarations ")" _ "->" _ type __ statements __ "end"
+func_def            ->  "func" __ identifier _ "(" typed_declarations ")" _ "->" _ type __ statements __ "end"
 
 return              ->  "return" __ expression
                     |   "return"
@@ -108,7 +108,7 @@ object_literal      ->  "{" key_value_pairs "}"
 
 key_value_pairs     ->  (_ key_value_pair (_ "," _ key_value_pair):* ",":?):? _
 
-key_value_pair      ->  IDENTIFIER _ ":" _ expression
+key_value_pair      ->  identifier _ ":" _ expression
 
 typed_array_literal ->  type _ array_literal
 
@@ -117,13 +117,13 @@ array_literal       ->  "[" expressions "]"
 lamda_literal       ->  single_expr_lam_lit
                     |   multi_expr_lambda
 
-single_expr_lambda  ->  IDENTIFIER _ "=>" _ expression
+single_expr_lambda  ->  identifier _ "=>" _ expression
 
-multi_expr_lambda   ->  "(" declarations ")" => expression
+multi_expr_lambda   ->  "(" declarations ")" _ "=>" expression
 
 unpacked_array      ->  "[" declarations "]"
 
-renamed_identifier  ->  IDENTIFIER __ "as" __ IDENTIFIER
+renamed_identifier  ->  identifier __ "as" __ identifier
 
 declarations        ->  (_ declareable (_ "," _ declareable):* ",":?):? _
 
@@ -134,13 +134,13 @@ typed_declaration   ->  declareable _ ":" _ type
 declareable         ->  unpacked_array
                     |   unpacked_object
                     |   renamed_identifier
-                    |   IDENTIFIER
+                    |   identifier
 
 type                ->  array_type
                     |   object_type
                     |   lamda_type
                     |   KEYWORD
-                    |   IDENTIFIER
+                    |   identifier
 
 array_type          ->  type _ "[" _ "]"
 
@@ -239,7 +239,7 @@ post_increment      ->  post_increment _ "++"
 post_decrement      ->  post_decrement _ "--"
                     |   member_access
 
-member_access       ->  member_access _ "." _ IDENTIFIER
+member_access       ->  member_access _ "." _ identifier
                     |   computed_member
 
 computed_member     ->  computed_member _ "[" _ expression _ "]"
@@ -248,16 +248,22 @@ computed_member     ->  computed_member _ "[" _ expression _ "]"
 func_call           ->  func_call _ "(" _ expressions _ ")"
                     |   value
 
-value               ->  INT
-                    |   FLOAT
-                    |   CHAR
-                    |   STRING
+value               ->  int_literal
+                    |   float_literal
+                    |   char_literal
+                    |   string_literal
                     |   typed_array_literal
                     |   typed_object
-                    |   IDENTIFIER
+                    |   identifier
                     |   "(" _ expression _ ")"
                     |   array_literal
                     |   object_literal
+
+int_literal         ->  INT
+float_literal       ->  FLOAT
+char_literal        ->  CHAR
+string_literal      ->  STRING
+identifier          ->  identifier
 
 _nl_                ->  (_ /[\n;]/ (_ /[\n;/]):*):? _
 _                   ->  __:?
