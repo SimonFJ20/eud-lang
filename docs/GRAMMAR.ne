@@ -123,8 +123,6 @@ multi_expr_lambda   ->  "(" declarations ")" => expression
 
 unpacked_array      ->  "[" declarations "]"
 
-object_array        ->  "{" declarations "}"
-
 renamed_identifier  ->  IDENTIFIER __ "as" __ IDENTIFIER
 
 declarations        ->  (_ declareable (_ "," _ declareable):* ",":?):? _
@@ -244,17 +242,22 @@ post_decrement      ->  post_decrement _ "--"
 member_access       ->  member_access _ "." _ IDENTIFIER
                     |   computed_member
 
-computed_member     ->  computed_member _ "[" _ value _ "]"
-                    |   value
+computed_member     ->  computed_member _ "[" _ expression _ "]"
+                    |   func_call
 
 func_call           ->  value _ "(" _ expressions _ ")"
+                    |   value
 
 value               ->  INT
                     |   FLOAT
                     |   CHAR
                     |   STRING
+                    |   typed_array_literal
+                    |   typed_object
                     |   IDENTIFIER
                     |   "(" _ expression _ ")"
+                    |   array_literal
+                    |   object_literal
 
 _nl_                ->  (_ /[\n;]/ (_ /[\n;/]):*):? _
 _                   ->  __:?
