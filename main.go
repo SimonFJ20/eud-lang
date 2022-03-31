@@ -1,5 +1,8 @@
 package main
 
+import "eud-lang/cli"
+
 func main() {
-	panic("not implemented i guess")
+	cli.Cli()
+	// panic("not implemented i guess")
 }
