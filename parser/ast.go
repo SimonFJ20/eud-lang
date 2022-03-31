@@ -1,8 +1,8 @@
 package parser
 
 type Position interface {
-	row() int
-	col() int
+	Row() int
+	Col() int
 }
 
 type TokenType int
@@ -18,8 +18,8 @@ const (
 
 type Token interface {
 	Position
-	tokenType() TokenType
-	value() string
+	TokenType() TokenType
+	Value() string
 }
 
 type NodeType int
@@ -87,7 +87,7 @@ const (
 
 type Node interface {
 	Position
-	nodeType() NodeType
+	NodeType() NodeType
 }
 
 type Statement interface {
@@ -100,30 +100,30 @@ type ImportNode interface {
 
 type TypeDefNode interface {
 	Statement
-	target() IdentifierNode
+	Target() IdentifierNode
 }
 
 type TraitDefNode interface {
 	Statement
-	target() IdentifierNode
+	Target() IdentifierNode
 }
 
 type StructDefNode interface {
 	Statement
-	target() IdentifierNode
+	Target() IdentifierNode
 }
 
 type FuncDefNode interface {
 	Statement
-	target() IdentifierNode
-	defType() Type
-	params() []TypedDeclarationNode
-	body() []Statement
+	Target() IdentifierNode
+	DefType() Type
+	Params() []TypedDeclarationNode
+	Body() []Statement
 }
 
 type ReturnValueNode interface {
 	Statement
-	value() Expression
+	Value() Expression
 }
 
 type ReturnNode interface {
@@ -140,16 +140,16 @@ type SwitchNode interface {
 
 type ForNode interface {
 	Statement
-	declaration() Expression
-	condition() Expression
-	iteration() Expression
-	body() Expression
+	Declaration() Expression
+	Condition() Expression
+	Iteration() Expression
+	Body() Expression
 }
 
 type WhileNode interface {
 	Statement
-	condition() Expression
-	body() Expression
+	Condition() Expression
+	Body() Expression
 }
 
 type BreakNode interface {
@@ -162,28 +162,28 @@ type ContinueNode interface {
 
 type IfNode interface {
 	Statement
-	condition() Expression
-	body() Expression
+	Condition() Expression
+	Body() Expression
 }
 
 type IfElsNode interface {
 	Statement
-	condition() Expression
-	truthy() Expression
-	falsy() Expression
+	Condition() Expression
+	Truthy() Expression
+	Falsy() Expression
 }
 
 type InferredInitializationNode interface {
 	Statement
-	target() Declareable
-	source() Expression
+	Target() Declareable
+	Source() Expression
 }
 
 type TypedInitializationNode interface {
 	Statement
-	defType() Type
-	target() Declareable
-	source() Expression
+	DefType() Type
+	Target() Declareable
+	Source() Expression
 }
 
 type Expression interface {
@@ -193,63 +193,63 @@ type Expression interface {
 type TypedObjectLiteralNode interface {
 	Expression
 	ObjectLiteralNode
-	defType() Type
+	DefType() Type
 }
 
 type ObjectLiteralNode interface {
 	Expression
-	values() []KeyValuePair
+	Values() []KeyValuePair
 }
 
 type KeyValuePair interface {
 	key() Token
-	value() Expression
+	Value() Expression
 }
 
 type TypedArrayLiteralNode interface {
 	Expression
 	ArrayLiteralNode
-	defType() Type
+	DefType() Type
 }
 
 type ArrayLiteralNode interface {
 	Expression
-	values() []Expression
+	Values() []Expression
 }
 
 type LambdaLiteralNode interface {
-	defType() Type
+	DefType() Type
 	Expression
-	params() []Expression
-	body() Expression
+	Params() []Expression
+	Body() Expression
 }
 
 type TypedDeclarationNode interface {
-	defType() Type
-	target() Declareable
+	DefType() Type
+	Target() Declareable
 }
 
 type ArrayTypeNode interface {
 	Type
-	defType() Type
-	values() []Declareable
+	DefType() Type
+	Values() []Declareable
 }
 
 type ObjectTypeNode interface {
 	Type
-	defType() Type
-	fields() []TypedDeclarationNode
+	DefType() Type
+	Fields() []TypedDeclarationNode
 }
 
 type LambdaTypeNode interface {
 	Type
-	defType() Type
-	params() []TypedDeclarationNode
+	DefType() Type
+	Params() []TypedDeclarationNode
 }
 
 type KeywordTypeNode interface {
 	Type
-	value() Token
+	Value() Token
 }
 
 type IdentifierTypeNode interface {
@@ -264,37 +264,37 @@ type Declareable interface {
 
 type UnpackedArrayNode interface {
 	Declareable
-	targets() []Declareable
+	Targets() []Declareable
 }
 
 type UnpackedObjectNode interface {
 	Declareable
-	targets() []Declareable
+	Targets() []Declareable
 }
 
 type RenamedIdentifierNode interface {
 	Declareable
-	source() []IdentifierNode
-	target() []IdentifierNode
+	Source() []IdentifierNode
+	Target() []IdentifierNode
 }
 
 type AssignmentNode interface {
 	Expression
-	target() Expression
-	source() Expression
+	Target() Expression
+	Source() Expression
 }
 
 type TernaryNode interface {
 	Expression
-	condition() Expression
-	truthy() Expression
-	falsy() Expression
+	Condition() Expression
+	Truthy() Expression
+	Falsy() Expression
 }
 
 type BinaryOperationNode interface {
 	Expression
-	left() Expression
-	right() Expression
+	Left() Expression
+	Right() Expression
 }
 
 type LogicalOrNode = BinaryOperationNode
@@ -319,7 +319,7 @@ type ExponentationNode = BinaryOperationNode
 
 type UnaryOperationNode interface {
 	Expression
-	source() Expression
+	Source() Expression
 }
 
 type LogicalNotNode = UnaryOperationNode
@@ -333,40 +333,40 @@ type PostDecrementNode = UnaryOperationNode
 
 type MemberAccessNode interface {
 	Expression
-	source() Expression
-	specifier() Token
+	Source() Expression
+	Specifier() Token
 }
 
 type ComputedMemberNode interface {
 	Expression
-	source() Expression
-	specifier() Expression
+	Source() Expression
+	Specifier() Expression
 }
 
 type FuncCallNode interface {
 	Expression
-	source() Expression
-	args() []Expression
+	Source() Expression
+	Args() []Expression
 }
 
 type IntLiteralNode interface {
 	Expression
-	value() Token
+	Value() Token
 }
 
 type FloatLiteralNode interface {
 	Expression
-	value() Token
+	Value() Token
 }
 
 type CharLiteralNode interface {
 	Expression
-	value() Token
+	Value() Token
 }
 
 type StringLiteralNode interface {
 	Expression
-	value() Token
+	Value() Token
 }
 
 type VarAccessNode interface {
@@ -376,5 +376,5 @@ type VarAccessNode interface {
 
 type IdentifierNode interface {
 	Declareable
-	value() Token
+	Value() Token
 }
