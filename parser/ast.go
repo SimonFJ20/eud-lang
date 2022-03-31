@@ -1,380 +1,380 @@
 package parser
 
-type Position interface {
-	Row() int
-	Col() int
+type AST_Position interface {
+	AST_Row() int
+	AST_Col() int
 }
 
-type TokenType int
+type AST_TokenType int
 
 const (
-	IDENTIFIER TokenType = iota
-	KEYWORD
-	INT
-	FLOAT
-	CHAR
-	STRING
+	AST_IDENTIFIER AST_TokenType = iota
+	AST_KEYWORD
+	AST_INT
+	AST_FLOAT
+	AST_CHAR
+	AST_STRING
 )
 
-type Token interface {
-	Position
-	TokenType() TokenType
-	Value() string
+type AST_Token interface {
+	AST_Position
+	AST_TokenType() AST_TokenType
+	AST_Value() string
 }
 
-type NodeType int
+type AST_NodeType int
 
 const (
-	Import NodeType = iota
-	TypeDef
-	TraitDef
-	StructDef
-	FuncDef
-	Return
-	Match
-	Switch
-	For
-	While
-	Break
-	Continue
-	If
-	IfEls
-	InferredInitialization
-	TypedInitialization
-	TypedObjectLiteral
-	ObjectLiteral
-	TypedArrayLiteral
-	ArrayLiteral
-	LambdaLiteral
-	Assignment
-	Ternary
-	LogicalOr
-	LogicalAnd
-	BitwiseOr
-	BitwiseXor
-	BitwiseAnd
-	Equality
-	Inequality
-	CompareLT
-	CompareLTE
-	CompareGT
-	CompareGTE
-	BitShiftLeft
-	BitShiftRight
-	Addition
-	Subtraction
-	Multiplication
-	Division
-	Remainder
-	Exponentation
-	LogicalNot
-	BitwiseNot
-	UnaryPlus
-	UnaryNegation
-	PreIncrement
-	PreDecrement
-	PostIncrement
-	PostDecrement
-	MemberAccess
-	ComputedMember
-	FuncCall
-	IntLiteral
-	FloatLiteral
-	CharLiteral
-	StringLiteral
-	VarAccess
+	AST_Import AST_NodeType = iota
+	AST_TypeDef
+	AST_TraitDef
+	AST_StructDef
+	AST_FuncDef
+	AST_Return
+	AST_Match
+	AST_Switch
+	AST_For
+	AST_While
+	AST_Break
+	AST_Continue
+	AST_If
+	AST_IfEls
+	AST_InferredInitialization
+	AST_TypedInitialization
+	AST_TypedObjectLiteral
+	AST_ObjectLiteral
+	AST_TypedArrayLiteral
+	AST_ArrayLiteral
+	AST_LambdaLiteral
+	AST_Assignment
+	AST_Ternary
+	AST_LogicalOr
+	AST_LogicalAnd
+	AST_BitwiseOr
+	AST_BitwiseXor
+	AST_BitwiseAnd
+	AST_Equality
+	AST_Inequality
+	AST_CompareLT
+	AST_CompareLTE
+	AST_CompareGT
+	AST_CompareGTE
+	AST_BitShiftLeft
+	AST_BitShiftRight
+	AST_Addition
+	AST_Subtraction
+	AST_Multiplication
+	AST_Division
+	AST_Remainder
+	AST_Exponentation
+	AST_LogicalNot
+	AST_BitwiseNot
+	AST_UnaryPlus
+	AST_UnaryNegation
+	AST_PreIncrement
+	AST_PreDecrement
+	AST_PostIncrement
+	AST_PostDecrement
+	AST_MemberAccess
+	AST_ComputedMember
+	AST_FuncCall
+	AST_IntLiteral
+	AST_FloatLiteral
+	AST_CharLiteral
+	AST_StringLiteral
+	AST_VarAccess
 )
 
-type Node interface {
-	Position
-	NodeType() NodeType
+type AST_Node interface {
+	AST_Position
+	AST_NodeType() AST_NodeType
 }
 
-type Statement interface {
-	Node
+type AST_Statement interface {
+	AST_Node
 }
 
-type ImportNode interface {
-	Statement
+type AST_ImportNode interface {
+	AST_Statement
 }
 
-type TypeDefNode interface {
-	Statement
-	Target() IdentifierNode
+type AST_TypeDefNode interface {
+	AST_Statement
+	AST_Target() AST_IdentifierNode
 }
 
-type TraitDefNode interface {
-	Statement
-	Target() IdentifierNode
+type AST_TraitDefNode interface {
+	AST_Statement
+	AST_Target() AST_IdentifierNode
 }
 
-type StructDefNode interface {
-	Statement
-	Target() IdentifierNode
+type AST_StructDefNode interface {
+	AST_Statement
+	AST_Target() AST_IdentifierNode
 }
 
-type FuncDefNode interface {
-	Statement
-	Target() IdentifierNode
-	DefType() Type
-	Params() []TypedDeclarationNode
-	Body() []Statement
+type AST_FuncDefNode interface {
+	AST_Statement
+	AST_Target() AST_IdentifierNode
+	AST_DefType() AST_Type
+	AST_Params() []AST_TypedDeclarationNode
+	AST_Body() []AST_Statement
 }
 
-type ReturnValueNode interface {
-	Statement
-	Value() Expression
+type AST_ReturnValueNode interface {
+	AST_Statement
+	AST_Value() AST_Expression
 }
 
-type ReturnNode interface {
-	Statement
+type AST_ReturnNode interface {
+	AST_Statement
 }
 
-type MatchNode interface {
-	Statement
+type AST_MatchNode interface {
+	AST_Statement
 }
 
-type SwitchNode interface {
-	Statement
+type AST_SwitchNode interface {
+	AST_Statement
 }
 
-type ForNode interface {
-	Statement
-	Declaration() Expression
-	Condition() Expression
-	Iteration() Expression
-	Body() Expression
+type AST_ForNode interface {
+	AST_Statement
+	AST_Declaration() AST_Expression
+	AST_Condition() AST_Expression
+	AST_Iteration() AST_Expression
+	AST_Body() AST_Expression
 }
 
-type WhileNode interface {
-	Statement
-	Condition() Expression
-	Body() Expression
+type AST_WhileNode interface {
+	AST_Statement
+	AST_Condition() AST_Expression
+	AST_Body() AST_Expression
 }
 
-type BreakNode interface {
-	Statement
+type AST_BreakNode interface {
+	AST_Statement
 }
 
-type ContinueNode interface {
-	Statement
+type AST_ContinueNode interface {
+	AST_Statement
 }
 
-type IfNode interface {
-	Statement
-	Condition() Expression
-	Body() Expression
+type AST_IfNode interface {
+	AST_Statement
+	AST_Condition() AST_Expression
+	AST_Body() AST_Expression
 }
 
-type IfElsNode interface {
-	Statement
-	Condition() Expression
-	Truthy() Expression
-	Falsy() Expression
+type AST_IfElsNode interface {
+	AST_Statement
+	AST_Condition() AST_Expression
+	AST_Truthy() AST_Expression
+	AST_Falsy() AST_Expression
 }
 
-type InferredInitializationNode interface {
-	Statement
-	Target() Declareable
-	Source() Expression
+type AST_InferredInitializationNode interface {
+	AST_Statement
+	AST_Target() AST_Declareable
+	AST_Source() AST_Expression
 }
 
-type TypedInitializationNode interface {
-	Statement
-	DefType() Type
-	Target() Declareable
-	Source() Expression
+type AST_TypedInitializationNode interface {
+	AST_Statement
+	AST_DefType() AST_Type
+	AST_Target() AST_Declareable
+	AST_Source() AST_Expression
 }
 
-type Expression interface {
-	Node
+type AST_Expression interface {
+	AST_Node
 }
 
-type TypedObjectLiteralNode interface {
-	Expression
-	ObjectLiteralNode
-	DefType() Type
+type AST_TypedObjectLiteralNode interface {
+	AST_Expression
+	AST_ObjectLiteralNode
+	AST_DefType() AST_Type
 }
 
-type ObjectLiteralNode interface {
-	Expression
-	Values() []KeyValuePair
+type AST_ObjectLiteralNode interface {
+	AST_Expression
+	AST_Values() []AST_KeyValuePair
 }
 
-type KeyValuePair interface {
-	key() Token
-	Value() Expression
+type AST_KeyValuePair interface {
+	key() AST_Token
+	AST_Value() AST_Expression
 }
 
-type TypedArrayLiteralNode interface {
-	Expression
-	ArrayLiteralNode
-	DefType() Type
+type AST_TypedArrayLiteralNode interface {
+	AST_Expression
+	AST_ArrayLiteralNode
+	AST_DefType() AST_Type
 }
 
-type ArrayLiteralNode interface {
-	Expression
-	Values() []Expression
+type AST_ArrayLiteralNode interface {
+	AST_Expression
+	AST_Values() []AST_Expression
 }
 
-type LambdaLiteralNode interface {
-	DefType() Type
-	Expression
-	Params() []Expression
-	Body() Expression
+type AST_LambdaLiteralNode interface {
+	AST_DefType() AST_Type
+	AST_Expression
+	AST_Params() []AST_Expression
+	AST_Body() AST_Expression
 }
 
-type TypedDeclarationNode interface {
-	DefType() Type
-	Target() Declareable
+type AST_TypedDeclarationNode interface {
+	AST_DefType() AST_Type
+	AST_Target() AST_Declareable
 }
 
-type ArrayTypeNode interface {
-	Type
-	DefType() Type
-	Values() []Declareable
+type AST_ArrayTypeNode interface {
+	AST_Type
+	AST_DefType() AST_Type
+	AST_Values() []AST_Declareable
 }
 
-type ObjectTypeNode interface {
-	Type
-	DefType() Type
-	Fields() []TypedDeclarationNode
+type AST_ObjectTypeNode interface {
+	AST_Type
+	AST_DefType() AST_Type
+	AST_Fields() []AST_TypedDeclarationNode
 }
 
-type LambdaTypeNode interface {
-	Type
-	DefType() Type
-	Params() []TypedDeclarationNode
+type AST_LambdaTypeNode interface {
+	AST_Type
+	AST_DefType() AST_Type
+	AST_Params() []AST_TypedDeclarationNode
 }
 
-type KeywordTypeNode interface {
-	Type
-	Value() Token
+type AST_KeywordTypeNode interface {
+	AST_Type
+	AST_Value() AST_Token
 }
 
-type IdentifierTypeNode interface {
-	IdentifierNode
-	Type
+type AST_IdentifierTypeNode interface {
+	AST_IdentifierNode
+	AST_Type
 }
 
-type Type interface{}
+type AST_Type interface{}
 
-type Declareable interface {
+type AST_Declareable interface {
 }
 
-type UnpackedArrayNode interface {
-	Declareable
-	Targets() []Declareable
+type AST_UnpackedArrayNode interface {
+	AST_Declareable
+	AST_Targets() []AST_Declareable
 }
 
-type UnpackedObjectNode interface {
-	Declareable
-	Targets() []Declareable
+type AST_UnpackedObjectNode interface {
+	AST_Declareable
+	AST_Targets() []AST_Declareable
 }
 
-type RenamedIdentifierNode interface {
-	Declareable
-	Source() []IdentifierNode
-	Target() []IdentifierNode
+type AST_RenamedIdentifierNode interface {
+	AST_Declareable
+	AST_Source() []AST_IdentifierNode
+	AST_Target() []AST_IdentifierNode
 }
 
-type AssignmentNode interface {
-	Expression
-	Target() Expression
-	Source() Expression
+type AST_AssignmentNode interface {
+	AST_Expression
+	AST_Target() AST_Expression
+	AST_Source() AST_Expression
 }
 
-type TernaryNode interface {
-	Expression
-	Condition() Expression
-	Truthy() Expression
-	Falsy() Expression
+type AST_TernaryNode interface {
+	AST_Expression
+	AST_Condition() AST_Expression
+	AST_Truthy() AST_Expression
+	AST_Falsy() AST_Expression
 }
 
-type BinaryOperationNode interface {
-	Expression
-	Left() Expression
-	Right() Expression
+type AST_BinaryOperationNode interface {
+	AST_Expression
+	AST_Left() AST_Expression
+	AST_Right() AST_Expression
 }
 
-type LogicalOrNode = BinaryOperationNode
-type LogicalAndNode = BinaryOperationNode
-type BitwiseOrNode = BinaryOperationNode
-type BitwiseXorNode = BinaryOperationNode
-type BitwiseAndNode = BinaryOperationNode
-type EqualityNode = BinaryOperationNode
-type InequalityNode = BinaryOperationNode
-type CompareLTNode = BinaryOperationNode
-type CompareLTENode = BinaryOperationNode
-type CompareGTNode = BinaryOperationNode
-type CompareGTENode = BinaryOperationNode
-type BitShiftLeftNode = BinaryOperationNode
-type BitShiftRightNode = BinaryOperationNode
-type AdditionNode = BinaryOperationNode
-type SubtractionNode = BinaryOperationNode
-type MultiplicationNode = BinaryOperationNode
-type DivisionNode = BinaryOperationNode
-type RemainderNode = BinaryOperationNode
-type ExponentationNode = BinaryOperationNode
+type AST_LogicalOrNode = AST_BinaryOperationNode
+type AST_LogicalAndNode = AST_BinaryOperationNode
+type AST_BitwiseOrNode = AST_BinaryOperationNode
+type AST_BitwiseXorNode = AST_BinaryOperationNode
+type AST_BitwiseAndNode = AST_BinaryOperationNode
+type AST_EqualityNode = AST_BinaryOperationNode
+type AST_InequalityNode = AST_BinaryOperationNode
+type AST_CompareLTNode = AST_BinaryOperationNode
+type AST_CompareLTENode = AST_BinaryOperationNode
+type AST_CompareGTNode = AST_BinaryOperationNode
+type AST_CompareGTENode = AST_BinaryOperationNode
+type AST_BitShiftLeftNode = AST_BinaryOperationNode
+type AST_BitShiftRightNode = AST_BinaryOperationNode
+type AST_AdditionNode = AST_BinaryOperationNode
+type AST_SubtractionNode = AST_BinaryOperationNode
+type AST_MultiplicationNode = AST_BinaryOperationNode
+type AST_DivisionNode = AST_BinaryOperationNode
+type AST_RemainderNode = AST_BinaryOperationNode
+type AST_ExponentationNode = AST_BinaryOperationNode
 
-type UnaryOperationNode interface {
-	Expression
-	Source() Expression
+type AST_UnaryOperationNode interface {
+	AST_Expression
+	AST_Source() AST_Expression
 }
 
-type LogicalNotNode = UnaryOperationNode
-type BitwiseNotNode = UnaryOperationNode
-type UnaryPlusNode = UnaryOperationNode
-type UnaryNegationNode = UnaryOperationNode
-type PreIncrementNode = UnaryOperationNode
-type PreDecrementNode = UnaryOperationNode
-type PostIncrementNode = UnaryOperationNode
-type PostDecrementNode = UnaryOperationNode
+type AST_LogicalNotNode = AST_UnaryOperationNode
+type AST_BitwiseNotNode = AST_UnaryOperationNode
+type AST_UnaryPlusNode = AST_UnaryOperationNode
+type AST_UnaryNegationNode = AST_UnaryOperationNode
+type AST_PreIncrementNode = AST_UnaryOperationNode
+type AST_PreDecrementNode = AST_UnaryOperationNode
+type AST_PostIncrementNode = AST_UnaryOperationNode
+type AST_PostDecrementNode = AST_UnaryOperationNode
 
-type MemberAccessNode interface {
-	Expression
-	Source() Expression
-	Specifier() Token
+type AST_MemberAccessNode interface {
+	AST_Expression
+	AST_Source() AST_Expression
+	AST_Specifier() AST_Token
 }
 
-type ComputedMemberNode interface {
-	Expression
-	Source() Expression
-	Specifier() Expression
+type AST_ComputedMemberNode interface {
+	AST_Expression
+	AST_Source() AST_Expression
+	AST_Specifier() AST_Expression
 }
 
-type FuncCallNode interface {
-	Expression
-	Source() Expression
-	Args() []Expression
+type AST_FuncCallNode interface {
+	AST_Expression
+	AST_Source() AST_Expression
+	AST_Args() []AST_Expression
 }
 
-type IntLiteralNode interface {
-	Expression
-	Value() Token
+type AST_IntLiteralNode interface {
+	AST_Expression
+	AST_Value() AST_Token
 }
 
-type FloatLiteralNode interface {
-	Expression
-	Value() Token
+type AST_FloatLiteralNode interface {
+	AST_Expression
+	AST_Value() AST_Token
 }
 
-type CharLiteralNode interface {
-	Expression
-	Value() Token
+type AST_CharLiteralNode interface {
+	AST_Expression
+	AST_Value() AST_Token
 }
 
-type StringLiteralNode interface {
-	Expression
-	Value() Token
+type AST_StringLiteralNode interface {
+	AST_Expression
+	AST_Value() AST_Token
 }
 
-type VarAccessNode interface {
-	Expression
-	IdentifierNode
+type AST_VarAccessNode interface {
+	AST_Expression
+	AST_IdentifierNode
 }
 
-type IdentifierNode interface {
-	Declareable
-	Value() Token
+type AST_IdentifierNode interface {
+	AST_Declareable
+	AST_Value() AST_Token
 }
