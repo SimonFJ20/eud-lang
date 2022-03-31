@@ -41,6 +41,89 @@ type Token = {
     value: string,
 }
 
+class Lexer {
+    private text: string;
+    private pos: number;
+    private char: string;
+    private done: boolean;
+
+    public tokenize(text: string): Token[] {
+        this.text = text;
+        this.pos = 0;
+        this.char = text[0];
+        this.done = false;
+
+        const tokens: Token[] = [];
+
+        while (!this.done) {
+            if (/[1-9]/.test(this.char)) {
+                tokens.push(this.makeInt());
+            } else {
+                switch (this.char) {
+                    case '+':
+                        tokens.push({type: TokenType.ADD_OP, value: this.char});
+                        this.next();
+                        break;
+                    case '-':
+                        tokens.push({type: TokenType.SUB_OP, value: this.char});
+                        this.next();
+                        break;
+                    case '*':
+                        tokens.push(this.makeMulOpOrExpOp());
+                        break;
+                    case '/':
+                        tokens.push({type: TokenType.DIV_OP, value: this.char});
+                        this.next();
+                        break;
+                    case '(':
+                        tokens.push({type: TokenType.LPAREN, value: this.char});
+                        this.next();
+                        break;
+                    case ')':
+                        tokens.push({type: TokenType.RPAREN, value: this.char});
+                        this.next();
+                        break;
+                    default:
+                        throw new Error(
+                            `error: unexpected character '${this.char}' at position ${this.pos}`
+                        );
+                }
+            }
+        }
+        
+        tokens.push({type: TokenType.EOF, value: ''});
+        return tokens;
+    }
+
+    private makeInt(): Token {
+        let value = this.char;
+        for (; !this.done && /\d/.test(this.char); this.next())
+            value += this.char;
+        return {type: TokenType.INT, value};
+    }
+
+    private makeMulOpOrExpOp(): Token {
+        this.next()
+        if (this.char == '*') {
+            this.next();
+            return {type: TokenType.EXP_OP, value: '**'};
+        } else {
+            return {type: TokenType.MUL_OP, value: '*'};
+        }
+    }
+
+    private next() {
+        this.pos++;
+        if (this.pos >= this.text.length) {
+            this.done = true;
+            this.char = '\0';
+        } else {
+            this.char = this.char[this.pos]
+        }
+    }
+
+}
+
 interface BaseNode {}
 
 interface ExpressionNode extends BaseNode {}
