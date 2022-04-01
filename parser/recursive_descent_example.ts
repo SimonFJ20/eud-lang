@@ -4,16 +4,16 @@ Grammar
 
 expression      :   addition
 
-addition        :   addition "+" subtraction
+addition        :   subtraction "+" addition
                 |   subtraction
 
-subtraction     :   subtraction "-" multiplication
+subtraction     :   multiplication "-" subtraction
                 |   multiplication
 
-multiplication  :   multiplication "*" division
+multiplication  :   division "*" multiplication
                 |   division
 
-division        :   division "/" exponentation
+division        :   exponentation "/" division
                 |   exponentation
 
 exponentation   :   value "**" exponentation
