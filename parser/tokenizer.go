@@ -5,33 +5,36 @@ import "fmt"
 type TokenType = int
 
 const (
-	Invalid TokenType = iota
-	Add
-	Sub
-	Mul
-	Div
-	LParen
-	RParen
-	Num
+	InvalidToken TokenType = iota
+	AddToken
+	SubToken
+	MulToken
+	DivToken
+	ExpToken
+	IntToken
+	LParenToken
+	RParenToken
 )
 
 func (t Token) String() string {
-	switch t.TokenType {
-	case Add:
+	switch t.Type {
+	case AddToken:
 		return "add"
-	case Sub:
+	case SubToken:
 		return "sub"
-	case Mul:
+	case MulToken:
 		return "mul"
-	case Div:
+	case DivToken:
 		return "div"
-	case LParen:
+	case ExpToken:
+		return "exp"
+	case LParenToken:
 		return "l_paren"
-	case RParen:
+	case RParenToken:
 		return "r_paren"
-	case Num:
-		return fmt.Sprintf("num{%d}", t.TokenValue)
-	case Invalid:
+	case IntToken:
+		return fmt.Sprintf("num{%d}", t.Value)
+	case InvalidToken:
 		return "invalid"
 	default:
 		return "invalid"
@@ -39,52 +42,57 @@ func (t Token) String() string {
 }
 
 type Token struct {
-	TokenType  TokenType
-	TokenValue int
-	Next       *Token
+	Type  TokenType
+	Value int
+	Next  *Token
 }
 
 func tokenizeRune(r rune) *Token {
 	switch r {
 	case '+':
 		return &Token{
-			TokenType:  Add,
-			TokenValue: 0,
+			Type:  AddToken,
+			Value: 0,
 		}
 	case '-':
 		return &Token{
-			TokenType:  Sub,
-			TokenValue: 0,
+			Type:  SubToken,
+			Value: 0,
 		}
 	case '*':
 		return &Token{
-			TokenType:  Mul,
-			TokenValue: 0,
+			Type:  MulToken,
+			Value: 0,
+		}
+	case '^':
+		return &Token{
+			Type:  ExpToken,
+			Value: 0,
 		}
 	case '/':
 		return &Token{
-			TokenType:  Div,
-			TokenValue: 0,
+			Type:  DivToken,
+			Value: 0,
 		}
 	case '(':
 		return &Token{
-			TokenType:  LParen,
-			TokenValue: 0,
+			Type:  LParenToken,
+			Value: 0,
 		}
 	case ')':
 		return &Token{
-			TokenType:  RParen,
-			TokenValue: 0,
+			Type:  RParenToken,
+			Value: 0,
 		}
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return &Token{
-			TokenType:  Num,
-			TokenValue: int(r) - 48,
+			Type:  IntToken,
+			Value: int(r) - 48,
 		}
 	case ' ':
 		return &Token{
-			TokenType:  Invalid,
-			TokenValue: 0,
+			Type:  InvalidToken,
+			Value: 0,
 		}
 	default:
 		panic(fmt.Sprintf("invalid character %c", r))
@@ -93,17 +101,17 @@ func tokenizeRune(r rune) *Token {
 
 func TokenizeString(s string) *Token {
 	runes := []rune(s)
-	firstToken := TokenizeRune(runes[0])
+	firstToken := tokenizeRune(runes[0])
 	prevToken := firstToken
 
 	for i := 1; i < len(runes); i++ {
 		t := tokenizeRune(runes[i])
-		if prevToken.TokenType == Invalid {
+		if prevToken.Type == InvalidToken {
 			firstToken = t
 			prevToken = t
 		}
-		if t.TokenType != Invalid {
-			prevToken.next = t
+		if t.Type != InvalidToken {
+			prevToken.Next = t
 			prevToken = t
 		}
 	}
