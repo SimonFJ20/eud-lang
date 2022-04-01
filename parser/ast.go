@@ -33,7 +33,7 @@ func (n NodeType) String() string {
 	case RParenNodeType:
 		return "r_paren"
 	case IntNodeType:
-		return fmt.Sprintf("int")
+		return "int"
 	case InvalidNodeType:
 		return "invalid"
 	default:
@@ -43,6 +43,7 @@ func (n NodeType) String() string {
 
 type BaseNode interface {
 	Type() NodeType
+	String() string
 }
 type ExpressionNode interface {
 	BaseNode
@@ -52,6 +53,11 @@ type LeftRightNode struct {
 	Left ExpressionNode
 	Right ExpressionNode
 }
+
+func (n LeftRightNode) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionNode.Type(), n.Left, n.Right)
+}
+
 type AddNode struct {
 	LeftRightNode
 }
@@ -99,6 +105,10 @@ type IntLiteral struct {
 
 func (n IntLiteral) Type() NodeType {
 	return IntNodeType
+}
+
+func (n IntLiteral) String() string {
+	return string(n.Tok.Value)
 }
 
 type Parser struct {
