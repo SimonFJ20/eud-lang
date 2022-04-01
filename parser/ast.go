@@ -190,8 +190,7 @@ func (p *Parser) next() {
 	}
 }
 
-func (p *Parser) Parse(t *Token) {
+func (p *Parser) Parse(t *Token) ExpressionNode {
 	p.tok = t
-
-	p.makeExpression()
+	return p.makeExpression()
 }
