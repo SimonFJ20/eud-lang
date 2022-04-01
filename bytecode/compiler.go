@@ -13,7 +13,7 @@ func Compile(ast parser.BaseNode) (Program, error) {
 	ctx := Context{
 		instructions: []Instruction{},
 	}
-	err := compileBaseNode(ctx, ast)
+	err := compileBaseNode(&ctx, ast)
 	if err != nil {
 		return Program{}, err
 	}
@@ -22,7 +22,14 @@ func Compile(ast parser.BaseNode) (Program, error) {
 	}, nil
 }
 
-func compileBaseNode(ctx Context, node parser.BaseNode) error {
+func compileBaseNode(ctx *Context, node parser.BaseNode) error {
+	switch node.Type() {
+	default:
+		return compileExpression(ctx, node.(parser.ExpressionNode))
+	}
+}
+
+func compileExpression(ctx *Context, node parser.ExpressionNode) error {
 	switch node.Type() {
 	case parser.AddNodeType:
 		return compileAddNode(ctx, node.(parser.AddNode))
@@ -41,13 +48,13 @@ func compileBaseNode(ctx Context, node parser.BaseNode) error {
 	}
 }
 
-func compileAddNode(ctx Context, node parser.AddNode) error {
+func compileAddNode(ctx *Context, node parser.AddNode) error {
 	var err error = nil
-	err = compileIntLiteral(ctx, node.Left.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileIntLiteral(ctx, node.Right.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -55,13 +62,13 @@ func compileAddNode(ctx Context, node parser.AddNode) error {
 	return nil
 }
 
-func compileSubNode(ctx Context, node parser.SubNode) error {
+func compileSubNode(ctx *Context, node parser.SubNode) error {
 	var err error = nil
-	err = compileIntLiteral(ctx, node.Left.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileIntLiteral(ctx, node.Right.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -69,13 +76,13 @@ func compileSubNode(ctx Context, node parser.SubNode) error {
 	return nil
 }
 
-func compileMulNode(ctx Context, node parser.MulNode) error {
+func compileMulNode(ctx *Context, node parser.MulNode) error {
 	var err error = nil
-	err = compileIntLiteral(ctx, node.Left.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileIntLiteral(ctx, node.Right.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -83,13 +90,13 @@ func compileMulNode(ctx Context, node parser.MulNode) error {
 	return nil
 }
 
-func compileDivNode(ctx Context, node parser.DivNode) error {
+func compileDivNode(ctx *Context, node parser.DivNode) error {
 	var err error = nil
-	err = compileIntLiteral(ctx, node.Left.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileIntLiteral(ctx, node.Right.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -97,13 +104,13 @@ func compileDivNode(ctx Context, node parser.DivNode) error {
 	return nil
 }
 
-func compileExpNode(ctx Context, node parser.ExpNode) error {
+func compileExpNode(ctx *Context, node parser.ExpNode) error {
 	var err error = nil
-	err = compileIntLiteral(ctx, node.Left.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileIntLiteral(ctx, node.Right.(parser.IntLiteral))
+	err = compileExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -111,7 +118,7 @@ func compileExpNode(ctx Context, node parser.ExpNode) error {
 	return nil
 }
 
-func compileIntLiteral(ctx Context, node parser.IntLiteral) error {
+func compileIntLiteral(ctx *Context, node parser.IntLiteral) error {
 	ctx.instructions = append(ctx.instructions, Push{Type: I32, Value: node.Tok.Value})
 	return nil
 }

@@ -21,7 +21,7 @@ func main() {
 	program, _ := bytecode.Compile(ast)
 
 	for i := range program.Instructions {
-		fmt.Printf(program.Instructions[i].String())
+		fmt.Println(program.Instructions[i].String())
 	}
 
 	// cli.Cli(
