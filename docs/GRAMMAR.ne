@@ -162,58 +162,58 @@ assignment          ->  ternary _ "=" _ assignment
 ternary             ->  logical_or _ "?" _ ternary _ ":" _ ternary
                     |   logical_or
 
-logical_or          ->  logical_or _ "||" _ logical_and
+logical_or          ->  logical_and _ "||" _ logical_or
                     |   logical_and
 
-logical_and         ->  logical_and _ "&&" _ bitwise_or
+logical_and         ->  bitwise_or _ "&&" _ logical_and
                     |   bitwise_or
 
-bitwise_or          ->  bitwise_or _ "|" _ bitwise_xor
+bitwise_or          ->  bitwise_xor _ "|" _ bitwise_or
                     |   bitwise_xor
 
-bitwise_xor         ->  bitwise_xor _ "^" _ bitwise_and
+bitwise_xor         ->  bitwise_and _ "^" _ bitwise_xor
                     |   bitwise_and
 
-bitwise_and         ->  bitwise_and _ "&" _ equality
+bitwise_and         ->  equality _ "&" _ bitwise_and
                     |   equality
 
-equality            ->  equality _ "==" _ inequality
+equality            ->  inequality _ "==" _ equality
                     |   inequality
 
-inequality          ->  inequality _ "!=" _ compare_lt
+inequality          ->  compare_lt _ "!=" _ inequality
                     |   compare_lt
 
-compare_lt          ->  compare_lt _ "<" _ compare_lte
+compare_lt          ->  compare_lte _ "<" _ compare_lt
                     |   compare_lte
 
-compare_lte         ->  compare_lte _ "<=" _ compare_gt
+compare_lte         ->  compare_gt _ "<=" _ compare_lte
                     |   compare_gt
 
-compare_gt          ->  compare_gt _ ">" _ compare_gte
+compare_gt          ->  compare_gte _ ">" _ compare_gt
                     |   compare_gte
 
-compare_gte         ->  compare_gte _ ">=" _ bit_shift_left
+compare_gte         ->  bit_shift_left _ ">=" _ compare_gte
                     |   bit_shift_left
 
-bit_shift_left      ->  bit_shift_left _ "<<" _ bit_shift_right
+bit_shift_left      ->  bit_shift_right _ "<<" _ bit_shift_left
                     |   bit_shift_right
 
-bit_shift_right     ->  bit_shift_right _ ">>" _ addition
+bit_shift_right     ->  addition _ ">>" _ bit_shift_right
                     |   addition
 
-addition            ->  addition _ "+" _ subtraction
+addition            ->  subtraction _ "+" _ addition
                     |   subtraction
 
-subtraction         ->  subtraction _ "-" _ multiplication
+subtraction         ->  multiplication _ "-" _ subtraction
                     |   multiplication
 
-multiplication      ->  multiplication _ "*" _ division
+multiplication      ->  division _ "*" _ multiplication
                     |   division
 
-division            ->  division _ "/" _ remainder
+division            ->  remainder _ "/" _ division
                     |   remainder
 
-remainder           ->  remainder _ "%" _ exponentation
+remainder           ->  exponentation _ "%" _ remainder
                     |   exponentation
 
 exponentation       ->  increment _ "**" _ exponentation
@@ -237,19 +237,19 @@ pre_increment       ->  "++" pre_increment
 pre_decrement       ->  "--" pre_decrement
                     |   post_increment
 
-post_increment      ->  post_increment _ "++"
-                    |   decrement
+post_increment      ->  post_decrement _ "++"
+                    |   post_decrement
 
-post_decrement      ->  post_decrement _ "--"
+post_decrement      ->  member_access _ "--"
                     |   member_access
 
-member_access       ->  member_access _ "." _ identifier
+member_access       ->  computed_member _ "." _ identifier
                     |   computed_member
 
-computed_member     ->  computed_member _ "[" _ expression _ "]"
+computed_member     ->  func_call _ "[" _ expression _ "]"
                     |   func_call
 
-func_call           ->  func_call _ "(" _ expressions _ ")"
+func_call           ->  value _ "(" _ expressions _ ")"
                     |   value
 
 value               ->  int_literal
