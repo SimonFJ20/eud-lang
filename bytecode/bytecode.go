@@ -1,5 +1,7 @@
 package bytecode
 
+import "fmt"
+
 type Program struct {
 	Instructions   []Instruction
 	Preallocations []AllocationStruct
@@ -184,6 +186,37 @@ type Xnor struct {
 	Type
 }
 
+func (t Type) String() string {
+	switch t {
+	case U8:
+		return "u8"
+	case U16:
+		return "u16"
+	case U32:
+		return "u32"
+	case U64:
+		return "u64"
+	case I16:
+		return "i16"
+	case I32:
+		return "i32"
+	case I64:
+		return "i64"
+	case F32:
+		return "f32"
+	case F64:
+		return "f64"
+	case CHAR:
+		return "char"
+	case USIZE:
+		return "usize"
+	case UPTR:
+		return "uptr"
+	default:
+		return "invalid"
+	}
+}
+
 func (node Allocate) String() string {
 	return "Allocate"
 }
@@ -203,28 +236,31 @@ func (node LoadLocal) String() string {
 	return "LoadLocal"
 }
 func (node Push) String() string {
-	return "Push"
+	return fmt.Sprintf("Push<%s> %d", node.Type, node.Value)
 }
+
+// return fmt.Sprintf("Push<%s>", node.Type)
+
 func (node Pop) String() string {
-	return "Pop"
+	return fmt.Sprintf("Pop<%s>", node.Type)
 }
 func (node Add) String() string {
-	return "Add"
+	return fmt.Sprintf("Add<%s>", node.Type)
 }
 func (node Subtract) String() string {
-	return "Subtract"
+	return fmt.Sprintf("Subtract<%s>", node.Type)
 }
 func (node Multiply) String() string {
-	return "Multiply"
+	return fmt.Sprintf("Multiply<%s>", node.Type)
 }
 func (node Divide) String() string {
-	return "Divide"
+	return fmt.Sprintf("Divide<%s>", node.Type)
 }
 func (node Modules) String() string {
-	return "Modules"
+	return fmt.Sprintf("Modules<%s>", node.Type)
 }
 func (node Exponent) String() string {
-	return "Exponent"
+	return fmt.Sprintf("Exponent<%s>", node.Type)
 }
 func (node JumpIfZero) String() string {
 	return "JumpIfZero"
@@ -233,41 +269,41 @@ func (node JumpNotZero) String() string {
 	return "JumpNotZero"
 }
 func (node CmpEqual) String() string {
-	return "CmpEqual"
+	return fmt.Sprintf("CmpEqual<%s>", node.Type)
 }
 func (node CmpInequal) String() string {
-	return "CmpInequal"
+	return fmt.Sprintf("CmpInequal<%s>", node.Type)
 }
 func (node CmpLT) String() string {
-	return "CmpLT"
+	return fmt.Sprintf("CmpLT<%s>", node.Type)
 }
 func (node CmpGT) String() string {
-	return "CmpGT"
+	return fmt.Sprintf("CmpGT<%s>", node.Type)
 }
 func (node CmpLTE) String() string {
-	return "CmpLTE"
+	return fmt.Sprintf("CmpLTE<%s>", node.Type)
 }
 func (node CmpGTE) String() string {
-	return "CmpGTE"
+	return fmt.Sprintf("CmpGTE<%s>", node.Type)
 }
 func (node Not) String() string {
-	return "Not"
+	return fmt.Sprintf("Not<%s>", node.Type)
 }
 func (node Or) String() string {
-	return "Or"
+	return fmt.Sprintf("Or<%s>", node.Type)
 }
 func (node And) String() string {
-	return "And"
+	return fmt.Sprintf("And<%s>", node.Type)
 }
 func (node Xor) String() string {
-	return "Xor"
+	return fmt.Sprintf("Xor<%s>", node.Type)
 }
 func (node Nor) String() string {
-	return "Nor"
+	return fmt.Sprintf("Nor<%s>", node.Type)
 }
 func (node Nand) String() string {
-	return "Nand"
+	return fmt.Sprintf("Nand<%s>", node.Type)
 }
 func (node Xnor) String() string {
-	return "Xnor"
+	return fmt.Sprintf("Xnor<%s>", node.Type)
 }
