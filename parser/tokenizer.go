@@ -16,8 +16,8 @@ const (
 	RParenToken
 )
 
-func (t Token) String() string {
-	switch t.Type {
+func (t TokenType) String() string {
+	switch t {
 	case AddToken:
 		return "add"
 	case SubToken:
@@ -33,11 +33,20 @@ func (t Token) String() string {
 	case RParenToken:
 		return "r_paren"
 	case IntToken:
-		return fmt.Sprintf("int{%d}", t.Value)
+		return "int"
 	case InvalidToken:
 		return "invalid"
 	default:
 		return "invalid"
+	}
+}
+
+func (t Token) String() string {
+	switch t.Type {
+	case IntToken:
+		return fmt.Sprintf("%s{%d}", t.Type, t.Value)
+	default:
+		return string(t.Type)
 	}
 }
 

@@ -49,13 +49,9 @@ type ExpressionNode interface {
 	BaseNode
 }
 type LeftRightNode struct {
-	ExpressionNode,
-	Left ExpressionNode
+	ExpressionNode
+	Left  ExpressionNode
 	Right ExpressionNode
-}
-
-func (n LeftRightNode) String() string {
-	return fmt.Sprintf("%s(%s, %s)", n.ExpressionNode.Type(), n.Left, n.Right)
 }
 
 type AddNode struct {
@@ -66,12 +62,20 @@ func (n AddNode) Type() NodeType {
 	return AddNodeType
 }
 
+func (n AddNode) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
+}
+
 type SubNode struct {
 	LeftRightNode
 }
 
 func (n SubNode) Type() NodeType {
 	return SubNodeType
+}
+
+func (n SubNode) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
 }
 
 type MulNode struct {
@@ -82,6 +86,10 @@ func (n MulNode) Type() NodeType {
 	return MulNodeType
 }
 
+func (n MulNode) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
+}
+
 type DivNode struct {
 	LeftRightNode
 }
@@ -90,12 +98,20 @@ func (n DivNode) Type() NodeType {
 	return DivNodeType
 }
 
+func (n DivNode) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
+}
+
 type ExpNode struct {
 	LeftRightNode
 }
 
 func (n ExpNode) Type() NodeType {
 	return ExpNodeType
+}
+
+func (n ExpNode) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
 }
 
 type IntLiteral struct {
@@ -129,7 +145,7 @@ func (p *Parser) makeAddition() ExpressionNode {
 		right := p.makeAddition()
 		return AddNode{LeftRightNode{Left: left, Right: right}}
 	} else {
-		return p.makeSubtraction()
+		return left
 	}
 }
 
@@ -143,7 +159,7 @@ func (p *Parser) makeSubtraction() ExpressionNode {
 		right := p.makeSubtraction()
 		return SubNode{LeftRightNode{Left: left, Right: right}}
 	} else {
-		return p.makeMultiplication()
+		return left
 	}
 }
 
@@ -157,7 +173,7 @@ func (p *Parser) makeMultiplication() ExpressionNode {
 		right := p.makeMultiplication()
 		return MulNode{LeftRightNode{Left: left, Right: right}}
 	} else {
-		return p.makeDivision()
+		return left
 	}
 }
 
@@ -171,7 +187,7 @@ func (p *Parser) makeDivision() ExpressionNode {
 		right := p.makeDivision()
 		return DivNode{LeftRightNode{Left: left, Right: right}}
 	} else {
-		return p.makeExponentation()
+		return left
 	}
 }
 
@@ -198,16 +214,22 @@ func (p *Parser) makeValue() ExpressionNode {
 			panic("unexpected: tokenType != RParen")
 		}
 		return expr
-	} else {
+	} else if p.tok.Type == IntToken {
 		return IntLiteral{
 			Tok: p.tok,
 		}
+	} else if token.Type == IntToken {
+		return IntLiteral{
+			Tok: token,
+		}
+	} else {
+		return p.makeExpression()
 	}
 }
 
 func (p *Parser) next() {
-	if p.tok == nil {
-		fmt.Println("finished parsing")
+	if p.tok.Next == nil {
+		// finished parsing
 	} else {
 		p.tok = p.tok.Next
 	}

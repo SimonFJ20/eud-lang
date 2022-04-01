@@ -1,13 +1,14 @@
 package main
 
 import (
+	"eud-lang/bytecode"
 	"eud-lang/parser"
 	"fmt"
 )
 
 func main() {
 
-	text := "3 + 4 * 5"
+	text := "3 + 4 * 5 * 5"
 
 	tokens := parser.TokenizeString(text)
 
@@ -15,13 +16,13 @@ func main() {
 
 	ast := p.Parse(tokens)
 
-	fmt.Printf("%s\b", ast)
+	fmt.Printf("%s\n", ast)
 
-	// program, _ := bytecode.Compile(ast)
+	program, _ := bytecode.Compile(ast)
 
-	// for i := range program.Instructions {
-	// 	fmt.Printf(program.Instructions[i].String())
-	// }
+	for i := range program.Instructions {
+		fmt.Printf(program.Instructions[i].String())
+	}
 
 	// cli.Cli(
 	// panic("not implemented i guess")
