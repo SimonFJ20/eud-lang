@@ -16,7 +16,7 @@ const (
 )
 
 func (t Token) String() string {
-	switch t.tokenType {
+	switch t.TokenType {
 	case Add:
 		return "add"
 	case Sub:
@@ -30,7 +30,7 @@ func (t Token) String() string {
 	case RParen:
 		return "r_paren"
 	case Num:
-		return fmt.Sprintf("num{%d}", t.tokenValue)
+		return fmt.Sprintf("num{%d}", t.TokenValue)
 	case Invalid:
 		return "invalid"
 	default:
@@ -39,88 +39,74 @@ func (t Token) String() string {
 }
 
 type Token struct {
-	tokenType  TokenType
-	tokenValue int
-	next       *Token
+	TokenType  TokenType
+	TokenValue int
+	Next       *Token
 }
 
 func tokenizeRune(r rune) *Token {
 	switch r {
 	case '+':
 		return &Token{
-			tokenType:  Add,
-			tokenValue: 0,
+			TokenType:  Add,
+			TokenValue: 0,
 		}
 	case '-':
 		return &Token{
-			tokenType:  Sub,
-			tokenValue: 0,
+			TokenType:  Sub,
+			TokenValue: 0,
 		}
 	case '*':
 		return &Token{
-			tokenType:  Mul,
-			tokenValue: 0,
+			TokenType:  Mul,
+			TokenValue: 0,
 		}
 	case '/':
 		return &Token{
-			tokenType:  Div,
-			tokenValue: 0,
+			TokenType:  Div,
+			TokenValue: 0,
 		}
 	case '(':
 		return &Token{
-			tokenType:  LParen,
-			tokenValue: 0,
+			TokenType:  LParen,
+			TokenValue: 0,
 		}
 	case ')':
 		return &Token{
-			tokenType:  RParen,
-			tokenValue: 0,
+			TokenType:  RParen,
+			TokenValue: 0,
 		}
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return &Token{
-			tokenType:  Num,
-			tokenValue: int(r) - 48,
+			TokenType:  Num,
+			TokenValue: int(r) - 48,
 		}
 	case ' ':
 		return &Token{
-			tokenType:  Invalid,
-			tokenValue: 0,
+			TokenType:  Invalid,
+			TokenValue: 0,
 		}
 	default:
 		panic(fmt.Sprintf("invalid character %c", r))
 	}
 }
 
-func tokenizeString(s string) *Token {
+func TokenizeString(s string) *Token {
 	runes := []rune(s)
-	firstToken := tokenizeRune(runes[0])
+	firstToken := TokenizeRune(runes[0])
 	prevToken := firstToken
 
 	for i := 1; i < len(runes); i++ {
 		t := tokenizeRune(runes[i])
-		if prevToken.tokenType == Invalid {
+		if prevToken.TokenType == Invalid {
 			firstToken = t
 			prevToken = t
 		}
-		if t.tokenType != Invalid {
+		if t.TokenType != Invalid {
 			prevToken.next = t
 			prevToken = t
 		}
 	}
 
 	return firstToken
-}
-
-func parseToken(t *Token) int {
-	return 0
-}
-
-func main() {
-	token := tokenizeString("+")
-	next := token
-	for next != nil {
-		fmt.Println(next)
-		next = next.next
-	}
-	parseToken(token)
 }
