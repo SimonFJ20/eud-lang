@@ -2,7 +2,7 @@ package parser
 
 import "fmt"
 
-type TokenType = int
+type TokenType int
 
 const (
 	InvalidToken TokenType = iota
@@ -33,7 +33,7 @@ func (t Token) String() string {
 	case RParenToken:
 		return "r_paren"
 	case IntToken:
-		return fmt.Sprintf("num{%d}", t.Value)
+		return fmt.Sprintf("int{%d}", t.Value)
 	case InvalidToken:
 		return "invalid"
 	default:

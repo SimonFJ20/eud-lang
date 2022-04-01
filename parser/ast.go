@@ -2,7 +2,7 @@ package parser
 
 import "fmt"
 
-type NodeType = int
+type NodeType int
 
 const (
 	InvalidNodeType NodeType = iota
@@ -15,6 +15,31 @@ const (
 	LParenNodeType
 	RParenNodeType
 )
+
+func (n NodeType) String() string {
+	switch n {
+	case AddNodeType:
+		return "add"
+	case SubNodeType:
+		return "sub"
+	case MulNodeType:
+		return "mul"
+	case DivNodeType:
+		return "div"
+	case ExpNodeType:
+		return "exp"
+	case LParenNodeType:
+		return "l_paren"
+	case RParenNodeType:
+		return "r_paren"
+	case IntNodeType:
+		return fmt.Sprintf("int")
+	case InvalidNodeType:
+		return "invalid"
+	default:
+		return "invalid"
+	}
+}
 
 type BaseNode interface {
 	Type() NodeType
