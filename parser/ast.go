@@ -108,7 +108,7 @@ func (n IntLiteral) Type() NodeType {
 }
 
 func (n IntLiteral) String() string {
-	return string(n.Tok.Value)
+	return string(n.Tok.String())
 }
 
 type Parser struct {
@@ -121,6 +121,9 @@ func (p *Parser) makeExpression() ExpressionNode {
 
 func (p *Parser) makeAddition() ExpressionNode {
 	left := p.makeSubtraction()
+	if p.tok == nil {
+		return left
+	}
 	if p.tok.Type == AddToken {
 		p.next()
 		right := p.makeAddition()
@@ -132,6 +135,9 @@ func (p *Parser) makeAddition() ExpressionNode {
 
 func (p *Parser) makeSubtraction() ExpressionNode {
 	left := p.makeMultiplication()
+	if p.tok == nil {
+		return left
+	}
 	if p.tok.Type == SubToken {
 		p.next()
 		right := p.makeSubtraction()
@@ -143,6 +149,9 @@ func (p *Parser) makeSubtraction() ExpressionNode {
 
 func (p *Parser) makeMultiplication() ExpressionNode {
 	left := p.makeDivision()
+	if p.tok == nil {
+		return left
+	}
 	if p.tok.Type == MulToken {
 		p.next()
 		right := p.makeMultiplication()
@@ -154,6 +163,9 @@ func (p *Parser) makeMultiplication() ExpressionNode {
 
 func (p *Parser) makeDivision() ExpressionNode {
 	left := p.makeExponentation()
+	if p.tok == nil {
+		return left
+	}
 	if p.tok.Type == DivToken {
 		p.next()
 		right := p.makeDivision()
@@ -165,6 +177,9 @@ func (p *Parser) makeDivision() ExpressionNode {
 
 func (p *Parser) makeExponentation() ExpressionNode {
 	left := p.makeValue()
+	if p.tok == nil {
+		return left
+	}
 	if p.tok.Type == ExpToken {
 		p.next()
 		right := p.makeExponentation()
@@ -177,18 +192,16 @@ func (p *Parser) makeExponentation() ExpressionNode {
 func (p *Parser) makeValue() ExpressionNode {
 	token := p.tok
 	p.next()
-	if p.tok.Type == IntToken {
-		return IntLiteral{
-			Tok: p.tok,
-		}
-	} else if token.Type == LParenToken {
+	if token.Type == LParenToken {
 		expr := p.makeExpression()
 		if p.tok.Type != RParenToken {
 			panic("unexpected: tokenType != RParen")
 		}
 		return expr
 	} else {
-		panic("unexpected: token not valid for makeValue")
+		return IntLiteral{
+			Tok: p.tok,
+		}
 	}
 }
 
