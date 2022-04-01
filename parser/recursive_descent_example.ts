@@ -173,10 +173,10 @@ class Parser {
     }
 
     private makeAddition(): ExpressionNode {
-        const left = this.makeAddition();
+        const left = this.makeSubtraction();
         if (this.tok.type === TokenType.ADD_OP) {
             this.next();
-            const right = this.makeSubtraction();
+            const right = this.makeAddition();
             return new AdditionNode(left, right);
         } else {
             return this.makeSubtraction();
@@ -184,10 +184,10 @@ class Parser {
     }
 
     private makeSubtraction(): ExpressionNode {
-        const left = this.makeSubtraction();
+        const left = this.makeMultiplication();
         if (this.tok.type === TokenType.SUB_OP) {
             this.next();
-            const right = this.makeMultiplication();
+            const right = this.makeSubtraction();
             return new SubtractionNode(left, right);
         } else {
             return this.makeMultiplication();
@@ -195,10 +195,10 @@ class Parser {
     }
 
     private makeMultiplication(): ExpressionNode {
-        const left = this.makeMultiplication();
+        const left = this.makeDivision();
         if (this.tok.type === TokenType.MUL_OP) {
             this.next();
-            const right = this.makeDivision();
+            const right = this.makeMultiplication();
             return new MultiplicationNode(left, right);
         } else {
             return this.makeDivision();
@@ -206,10 +206,10 @@ class Parser {
     }
 
     private makeDivision(): ExpressionNode {
-        const left = this.makeDivision();
+        const left = this.makeExponentation();
         if (this.tok.type === TokenType.DIV_OP) {
             this.next();
-            const right = this.makeExponentation();
+            const right = this.makeDivision();
             return new DivisionNode(left, right);
         } else {
             return this.makeExponentation();
