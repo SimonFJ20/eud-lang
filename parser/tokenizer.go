@@ -46,7 +46,7 @@ func (t Token) String() string {
 	case IntToken:
 		return fmt.Sprintf("%s{%d}", t.Type, t.Value)
 	default:
-		return string(t.Type)
+		return fmt.Sprint(t.Type)
 	}
 }
 
