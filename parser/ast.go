@@ -189,3 +189,9 @@ func (p *Parser) next() {
 		p.tok = p.tok.Next
 	}
 }
+
+func (p *Parser) Parse(t *Token) {
+	p.tok = t
+
+	p.makeExpression()
+}
