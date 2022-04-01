@@ -213,6 +213,7 @@ func (p *Parser) makeValue() ExpressionNode {
 		if p.tok.Type != RParenToken {
 			panic("unexpected: tokenType != RParen")
 		}
+		p.next()
 		return expr
 	} else if p.tok.Type == IntToken {
 		return IntLiteral{
