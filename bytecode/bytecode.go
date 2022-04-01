@@ -1,5 +1,9 @@
 package bytecode
 
+type Program struct {
+	Instructions []Instruction
+}
+
 type Type int
 
 const (
@@ -17,37 +21,49 @@ const (
 	UPTR
 )
 
-type Value interface{}
-
-type U8Literal struct {
-	Value
-	Type
+type Allocation struct {
+	Handle int
 }
 
 type Instruction interface{}
 
-type Declare struct {
+type Allocate struct {
 	Instruction
 	Type
-	Identifier uint
 }
 
 type Store struct {
 	Instruction
 	Type
-	Identifier Type
 }
 
 type Load struct {
 	Instruction
 	Type
-	Identifier uint
+}
+
+type DeclareLocal struct {
+	Instruction
+	Type
+	Handle uint
+}
+
+type StoreLocal struct {
+	Instruction
+	Type
+	Handle uint
+}
+
+type LoadLocal struct {
+	Instruction
+	Type
+	Handle uint
 }
 
 type Push struct {
 	Instruction
 	Type
-	Value
+	Value int
 }
 
 type Pop struct {
@@ -87,12 +103,10 @@ type Exponent struct {
 
 type JumpIfZero struct {
 	Instruction
-	Destination uint
 }
 
 type JumpNotZero struct {
 	Instruction
-	Destination uint
 }
 
 type CmpEqual struct {

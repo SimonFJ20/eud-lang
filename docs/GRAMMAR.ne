@@ -201,6 +201,10 @@ bit_shift_left      ->  bit_shift_left _ "<<" _ bit_shift_right
 bit_shift_right     ->  bit_shift_right _ ">>" _ addition
                     |   addition
 
+addition            ->  subtraction addition$
+
+addition$           ->   
+
 addition            ->  addition _ "+" _ subtraction
                     |   subtraction
 
