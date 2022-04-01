@@ -1,7 +1,8 @@
 package bytecode
 
 type Program struct {
-	Instructions []Instruction
+	Instructions   []Instruction
+	Preallocations []AllocationStruct
 }
 
 type Type int
@@ -21,11 +22,20 @@ const (
 	UPTR
 )
 
-type Allocation struct {
-	Handle int
+type AllocationStruct struct {
+	Handle     int
+	Components []Allocation
+	Pack       bool
 }
 
-type Instruction interface{}
+type Allocation struct {
+	Type
+	Amount uint
+}
+
+type Instruction interface {
+	String() string
+}
 
 type Allocate struct {
 	Instruction
@@ -172,4 +182,92 @@ type Nand struct {
 type Xnor struct {
 	Instruction
 	Type
+}
+
+func (node Allocate) String() string {
+	return "Allocate"
+}
+func (node Store) String() string {
+	return "Store"
+}
+func (node Load) String() string {
+	return "Load"
+}
+func (node DeclareLocal) String() string {
+	return "DeclareLocal"
+}
+func (node StoreLocal) String() string {
+	return "StoreLocal"
+}
+func (node LoadLocal) String() string {
+	return "LoadLocal"
+}
+func (node Push) String() string {
+	return "Push"
+}
+func (node Pop) String() string {
+	return "Pop"
+}
+func (node Add) String() string {
+	return "Add"
+}
+func (node Subtract) String() string {
+	return "Subtract"
+}
+func (node Multiply) String() string {
+	return "Multiply"
+}
+func (node Divide) String() string {
+	return "Divide"
+}
+func (node Modules) String() string {
+	return "Modules"
+}
+func (node Exponent) String() string {
+	return "Exponent"
+}
+func (node JumpIfZero) String() string {
+	return "JumpIfZero"
+}
+func (node JumpNotZero) String() string {
+	return "JumpNotZero"
+}
+func (node CmpEqual) String() string {
+	return "CmpEqual"
+}
+func (node CmpInequal) String() string {
+	return "CmpInequal"
+}
+func (node CmpLT) String() string {
+	return "CmpLT"
+}
+func (node CmpGT) String() string {
+	return "CmpGT"
+}
+func (node CmpLTE) String() string {
+	return "CmpLTE"
+}
+func (node CmpGTE) String() string {
+	return "CmpGTE"
+}
+func (node Not) String() string {
+	return "Not"
+}
+func (node Or) String() string {
+	return "Or"
+}
+func (node And) String() string {
+	return "And"
+}
+func (node Xor) String() string {
+	return "Xor"
+}
+func (node Nor) String() string {
+	return "Nor"
+}
+func (node Nand) String() string {
+	return "Nand"
+}
+func (node Xnor) String() string {
+	return "Xnor"
 }
