@@ -71,695 +71,860 @@ func Run(p Program) Runtime {
 
 func runInstruction(ctx *Runtime, i Instruction) {
 	switch i.InstructionType() {
-	case AddInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a + b },
-			func(a, b uint16) uint16 { return a + b },
-			func(a, b uint32) uint32 { return a + b },
-			func(a, b uint64) uint64 { return a + b },
-			func(a, b int8) int8 { return a + b },
-			func(a, b int16) int16 { return a + b },
-			func(a, b int32) int32 { return a + b },
-			func(a, b int64) int64 { return a + b },
-			func(a, b int8) int8 { return a + b },
-			func(a, b uint64) uint64 { return a + b },
-			func(a, b uintptr) uintptr { return a + b },
-		)
-		return
-	case SubtractInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a - b },
-			func(a, b uint16) uint16 { return a - b },
-			func(a, b uint32) uint32 { return a - b },
-			func(a, b uint64) uint64 { return a - b },
-			func(a, b int8) int8 { return a - b },
-			func(a, b int16) int16 { return a - b },
-			func(a, b int32) int32 { return a - b },
-			func(a, b int64) int64 { return a - b },
-			func(a, b int8) int8 { return a - b },
-			func(a, b uint64) uint64 { return a - b },
-			func(a, b uintptr) uintptr { return a - b },
-		)
-		return
-	case MultiplyInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a * b },
-			func(a, b uint16) uint16 { return a * b },
-			func(a, b uint32) uint32 { return a * b },
-			func(a, b uint64) uint64 { return a * b },
-			func(a, b int8) int8 { return a * b },
-			func(a, b int16) int16 { return a * b },
-			func(a, b int32) int32 { return a * b },
-			func(a, b int64) int64 { return a * b },
-			func(a, b int8) int8 { return a * b },
-			func(a, b uint64) uint64 { return a * b },
-			func(a, b uintptr) uintptr { return a * b },
-		)
-		return
-	case DivideInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a / b },
-			func(a, b uint16) uint16 { return a / b },
-			func(a, b uint32) uint32 { return a / b },
-			func(a, b uint64) uint64 { return a / b },
-			func(a, b int8) int8 { return a / b },
-			func(a, b int16) int16 { return a / b },
-			func(a, b int32) int32 { return a / b },
-			func(a, b int64) int64 { return a / b },
-			func(a, b int8) int8 { return a / b },
-			func(a, b uint64) uint64 { return a / b },
-			func(a, b uintptr) uintptr { return a / b },
-		)
-		return
-	case ModulesInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a % b },
-			func(a, b uint16) uint16 { return a % b },
-			func(a, b uint32) uint32 { return a % b },
-			func(a, b uint64) uint64 { return a % b },
-			func(a, b int8) int8 { return a % b },
-			func(a, b int16) int16 { return a % b },
-			func(a, b int32) int32 { return a % b },
-			func(a, b int64) int64 { return a % b },
-			func(a, b int8) int8 { return a % b },
-			func(a, b uint64) uint64 { return a % b },
-			func(a, b uintptr) uintptr { return a % b },
-		)
-		return
-	case ExponentInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return uint8(math.Pow(float64(a), float64(b))) },
-			func(a, b uint16) uint16 { return uint16(math.Pow(float64(a), float64(b))) },
-			func(a, b uint32) uint32 { return uint32(math.Pow(float64(a), float64(b))) },
-			func(a, b uint64) uint64 { return uint64(math.Pow(float64(a), float64(b))) },
-			func(a, b int8) int8 { return int8(math.Pow(float64(a), float64(b))) },
-			func(a, b int16) int16 { return int16(math.Pow(float64(a), float64(b))) },
-			func(a, b int32) int32 { return int32(math.Pow(float64(a), float64(b))) },
-			func(a, b int64) int64 { return int64(math.Pow(float64(a), float64(b))) },
-			func(a, b int8) int8 { return int8(math.Pow(float64(a), float64(b))) },
-			func(a, b uint64) uint64 { return uint64(math.Pow(float64(a), float64(b))) },
-			func(a, b uintptr) uintptr { return uintptr(math.Pow(float64(a), float64(b))) },
-		)
-		return
-	case CmpEqualInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint16) uint16 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint32) uint32 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int16) int16 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int32) int32 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int64) int64 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uintptr) uintptr {
-				if a == b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-		)
-		return
-	case CmpInequalInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint16) uint16 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint32) uint32 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int16) int16 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int32) int32 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int64) int64 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uintptr) uintptr {
-				if a != b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-		)
-		return
-	case CmpLTInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint16) uint16 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint32) uint32 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int16) int16 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int32) int32 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int64) int64 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uintptr) uintptr {
-				if a < b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-		)
-		return
-	case CmpGTInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint16) uint16 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint32) uint32 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int16) int16 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int32) int32 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int64) int64 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uintptr) uintptr {
-				if a > b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-		)
-		return
-	case CmpLTEInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint16) uint16 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint32) uint32 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int16) int16 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int32) int32 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int64) int64 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uintptr) uintptr {
-				if a <= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-		)
-		return
-	case CmpGTEInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint16) uint16 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint32) uint32 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int16) int16 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int32) int32 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int64) int64 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b int8) int8 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uint64) uint64 {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-			func(a, b uintptr) uintptr {
-				if a >= b {
-					return 1
-				} else {
-					return 0
-				}
-			},
-		)
-		return
-	case OrInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a | b },
-			func(a, b uint16) uint16 { return a | b },
-			func(a, b uint32) uint32 { return a | b },
-			func(a, b uint64) uint64 { return a | b },
-			func(a, b int8) int8 { return a | b },
-			func(a, b int16) int16 { return a | b },
-			func(a, b int32) int32 { return a | b },
-			func(a, b int64) int64 { return a | b },
-			func(a, b int8) int8 { return a | b },
-			func(a, b uint64) uint64 { return a | b },
-			func(a, b uintptr) uintptr { return a | b },
-		)
-		return
-	case AndInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a & b },
-			func(a, b uint16) uint16 { return a & b },
-			func(a, b uint32) uint32 { return a & b },
-			func(a, b uint64) uint64 { return a & b },
-			func(a, b int8) int8 { return a & b },
-			func(a, b int16) int16 { return a & b },
-			func(a, b int32) int32 { return a & b },
-			func(a, b int64) int64 { return a & b },
-			func(a, b int8) int8 { return a & b },
-			func(a, b uint64) uint64 { return a & b },
-			func(a, b uintptr) uintptr { return a & b },
-		)
-		return
-	case XorInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return a ^ b },
-			func(a, b uint16) uint16 { return a ^ b },
-			func(a, b uint32) uint32 { return a ^ b },
-			func(a, b uint64) uint64 { return a ^ b },
-			func(a, b int8) int8 { return a ^ b },
-			func(a, b int16) int16 { return a ^ b },
-			func(a, b int32) int32 { return a ^ b },
-			func(a, b int64) int64 { return a ^ b },
-			func(a, b int8) int8 { return a ^ b },
-			func(a, b uint64) uint64 { return a ^ b },
-			func(a, b uintptr) uintptr { return a ^ b },
-		)
-		return
-	case NorInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return ^(a | b) },
-			func(a, b uint16) uint16 { return ^(a | b) },
-			func(a, b uint32) uint32 { return ^(a | b) },
-			func(a, b uint64) uint64 { return ^(a | b) },
-			func(a, b int8) int8 { return ^(a | b) },
-			func(a, b int16) int16 { return ^(a | b) },
-			func(a, b int32) int32 { return ^(a | b) },
-			func(a, b int64) int64 { return ^(a | b) },
-			func(a, b int8) int8 { return ^(a | b) },
-			func(a, b uint64) uint64 { return ^(a | b) },
-			func(a, b uintptr) uintptr { return ^(a | b) },
-		)
-		return
-	case NandInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return ^(a & b) },
-			func(a, b uint16) uint16 { return ^(a & b) },
-			func(a, b uint32) uint32 { return ^(a & b) },
-			func(a, b uint64) uint64 { return ^(a & b) },
-			func(a, b int8) int8 { return ^(a & b) },
-			func(a, b int16) int16 { return ^(a & b) },
-			func(a, b int32) int32 { return ^(a & b) },
-			func(a, b int64) int64 { return ^(a & b) },
-			func(a, b int8) int8 { return ^(a & b) },
-			func(a, b uint64) uint64 { return ^(a & b) },
-			func(a, b uintptr) uintptr { return ^(a & b) },
-		)
-		return
-	case XnorInstruction:
-		runBinaryOperationInstruction(
-			ctx, i.(Add).Type,
-			func(a, b uint8) uint8 { return ^(a ^ b) },
-			func(a, b uint16) uint16 { return ^(a ^ b) },
-			func(a, b uint32) uint32 { return ^(a ^ b) },
-			func(a, b uint64) uint64 { return ^(a ^ b) },
-			func(a, b int8) int8 { return ^(a ^ b) },
-			func(a, b int16) int16 { return ^(a ^ b) },
-			func(a, b int32) int32 { return ^(a ^ b) },
-			func(a, b int64) int64 { return ^(a ^ b) },
-			func(a, b int8) int8 { return ^(a ^ b) },
-			func(a, b uint64) uint64 { return ^(a ^ b) },
-			func(a, b uintptr) uintptr { return ^(a ^ b) },
-		)
-		return
+	// case AllocateInstruction:
+	// case StoreInstruction:
+	// case LoadInstruction:
+	// case DeclareLocalInstruction:
+	// case StoreLocalInstruction:
+	// case LoadLocalInstruction:
 	case PushInstruction:
 		runPush(ctx, i.(Push))
 		return
+	// case PopInstruction:
+	// case JumpIfZeroInstruction:
+	// case JumpNotZeroInstruction:
+	case NotInstruction:
+		runNot(ctx, i.(Not))
+		return
+	case AddInstruction:
+		runAdd(ctx, i)
+		return
+	case SubtractInstruction:
+		runSubtract(ctx, i)
+		return
+	case MultiplyInstruction:
+		runMultiply(ctx, i)
+		return
+	case DivideInstruction:
+		runDivide(ctx, i)
+		return
+	case ModulusInstruction:
+		runModulus(ctx, i)
+		return
+	case ExponentInstruction:
+		runExponent(ctx, i)
+		return
+	case CmpEqualInstruction:
+		runCmpEqual(ctx, i)
+		return
+	case CmpInequalInstruction:
+		runCmpInequal(ctx, i)
+		return
+	case CmpLTInstruction:
+		runCmpLT(ctx, i)
+		return
+	case CmpGTInstruction:
+		runCmpGT(ctx, i)
+		return
+	case CmpLTEInstruction:
+		runCmpLTE(ctx, i)
+		return
+	case CmpGTEInstruction:
+		runCmpGTE(ctx, i)
+		return
+	case OrInstruction:
+		runOr(ctx, i)
+		return
+	case AndInstruction:
+		runAnd(ctx, i)
+		return
+	case XorInstruction:
+		runXor(ctx, i)
+		return
+	case NorInstruction:
+		runNor(ctx, i)
+		return
+	case NandInstruction:
+		runNand(ctx, i)
+		return
+	case XnorInstruction:
+		runXnor(ctx, i)
+		return
 	default:
 		panic(fmt.Sprintf("instruction '%s' not implemented", i.InstructionType()))
+	}
+}
+
+func runAdd(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a + b },
+		func(a, b uint16) uint16 { return a + b },
+		func(a, b uint32) uint32 { return a + b },
+		func(a, b uint64) uint64 { return a + b },
+		func(a, b int8) int8 { return a + b },
+		func(a, b int16) int16 { return a + b },
+		func(a, b int32) int32 { return a + b },
+		func(a, b int64) int64 { return a + b },
+		func(a, b int8) int8 { return a + b },
+		func(a, b uint64) uint64 { return a + b },
+		func(a, b uintptr) uintptr { return a + b },
+	)
+}
+
+func runSubtract(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a - b },
+		func(a, b uint16) uint16 { return a - b },
+		func(a, b uint32) uint32 { return a - b },
+		func(a, b uint64) uint64 { return a - b },
+		func(a, b int8) int8 { return a - b },
+		func(a, b int16) int16 { return a - b },
+		func(a, b int32) int32 { return a - b },
+		func(a, b int64) int64 { return a - b },
+		func(a, b int8) int8 { return a - b },
+		func(a, b uint64) uint64 { return a - b },
+		func(a, b uintptr) uintptr { return a - b },
+	)
+}
+
+func runMultiply(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a * b },
+		func(a, b uint16) uint16 { return a * b },
+		func(a, b uint32) uint32 { return a * b },
+		func(a, b uint64) uint64 { return a * b },
+		func(a, b int8) int8 { return a * b },
+		func(a, b int16) int16 { return a * b },
+		func(a, b int32) int32 { return a * b },
+		func(a, b int64) int64 { return a * b },
+		func(a, b int8) int8 { return a * b },
+		func(a, b uint64) uint64 { return a * b },
+		func(a, b uintptr) uintptr { return a * b },
+	)
+}
+
+func runDivide(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a / b },
+		func(a, b uint16) uint16 { return a / b },
+		func(a, b uint32) uint32 { return a / b },
+		func(a, b uint64) uint64 { return a / b },
+		func(a, b int8) int8 { return a / b },
+		func(a, b int16) int16 { return a / b },
+		func(a, b int32) int32 { return a / b },
+		func(a, b int64) int64 { return a / b },
+		func(a, b int8) int8 { return a / b },
+		func(a, b uint64) uint64 { return a / b },
+		func(a, b uintptr) uintptr { return a / b },
+	)
+}
+
+func runModulus(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a % b },
+		func(a, b uint16) uint16 { return a % b },
+		func(a, b uint32) uint32 { return a % b },
+		func(a, b uint64) uint64 { return a % b },
+		func(a, b int8) int8 { return a % b },
+		func(a, b int16) int16 { return a % b },
+		func(a, b int32) int32 { return a % b },
+		func(a, b int64) int64 { return a % b },
+		func(a, b int8) int8 { return a % b },
+		func(a, b uint64) uint64 { return a % b },
+		func(a, b uintptr) uintptr { return a % b },
+	)
+}
+
+func runExponent(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return uint8(math.Pow(float64(a), float64(b))) },
+		func(a, b uint16) uint16 { return uint16(math.Pow(float64(a), float64(b))) },
+		func(a, b uint32) uint32 { return uint32(math.Pow(float64(a), float64(b))) },
+		func(a, b uint64) uint64 { return uint64(math.Pow(float64(a), float64(b))) },
+		func(a, b int8) int8 { return int8(math.Pow(float64(a), float64(b))) },
+		func(a, b int16) int16 { return int16(math.Pow(float64(a), float64(b))) },
+		func(a, b int32) int32 { return int32(math.Pow(float64(a), float64(b))) },
+		func(a, b int64) int64 { return int64(math.Pow(float64(a), float64(b))) },
+		func(a, b int8) int8 { return int8(math.Pow(float64(a), float64(b))) },
+		func(a, b uint64) uint64 { return uint64(math.Pow(float64(a), float64(b))) },
+		func(a, b uintptr) uintptr { return uintptr(math.Pow(float64(a), float64(b))) },
+	)
+}
+
+func runCmpEqual(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint16) uint16 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint32) uint32 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int16) int16 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int32) int32 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int64) int64 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uintptr) uintptr {
+			if a == b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+	)
+}
+
+func runCmpInequal(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint16) uint16 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint32) uint32 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int16) int16 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int32) int32 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int64) int64 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uintptr) uintptr {
+			if a != b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+	)
+}
+
+func runCmpLT(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint16) uint16 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint32) uint32 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int16) int16 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int32) int32 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int64) int64 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uintptr) uintptr {
+			if a < b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+	)
+}
+
+func runCmpGT(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint16) uint16 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint32) uint32 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int16) int16 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int32) int32 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int64) int64 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uintptr) uintptr {
+			if a > b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+	)
+}
+
+func runCmpLTE(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint16) uint16 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint32) uint32 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int16) int16 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int32) int32 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int64) int64 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uintptr) uintptr {
+			if a <= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+	)
+}
+
+func runCmpGTE(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint16) uint16 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint32) uint32 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int16) int16 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int32) int32 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int64) int64 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b int8) int8 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uint64) uint64 {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+		func(a, b uintptr) uintptr {
+			if a >= b {
+				return 1
+			} else {
+				return 0
+			}
+		},
+	)
+}
+
+func runOr(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a | b },
+		func(a, b uint16) uint16 { return a | b },
+		func(a, b uint32) uint32 { return a | b },
+		func(a, b uint64) uint64 { return a | b },
+		func(a, b int8) int8 { return a | b },
+		func(a, b int16) int16 { return a | b },
+		func(a, b int32) int32 { return a | b },
+		func(a, b int64) int64 { return a | b },
+		func(a, b int8) int8 { return a | b },
+		func(a, b uint64) uint64 { return a | b },
+		func(a, b uintptr) uintptr { return a | b },
+	)
+}
+
+func runAnd(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a & b },
+		func(a, b uint16) uint16 { return a & b },
+		func(a, b uint32) uint32 { return a & b },
+		func(a, b uint64) uint64 { return a & b },
+		func(a, b int8) int8 { return a & b },
+		func(a, b int16) int16 { return a & b },
+		func(a, b int32) int32 { return a & b },
+		func(a, b int64) int64 { return a & b },
+		func(a, b int8) int8 { return a & b },
+		func(a, b uint64) uint64 { return a & b },
+		func(a, b uintptr) uintptr { return a & b },
+	)
+}
+
+func runXor(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return a ^ b },
+		func(a, b uint16) uint16 { return a ^ b },
+		func(a, b uint32) uint32 { return a ^ b },
+		func(a, b uint64) uint64 { return a ^ b },
+		func(a, b int8) int8 { return a ^ b },
+		func(a, b int16) int16 { return a ^ b },
+		func(a, b int32) int32 { return a ^ b },
+		func(a, b int64) int64 { return a ^ b },
+		func(a, b int8) int8 { return a ^ b },
+		func(a, b uint64) uint64 { return a ^ b },
+		func(a, b uintptr) uintptr { return a ^ b },
+	)
+}
+
+func runNor(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return ^(a | b) },
+		func(a, b uint16) uint16 { return ^(a | b) },
+		func(a, b uint32) uint32 { return ^(a | b) },
+		func(a, b uint64) uint64 { return ^(a | b) },
+		func(a, b int8) int8 { return ^(a | b) },
+		func(a, b int16) int16 { return ^(a | b) },
+		func(a, b int32) int32 { return ^(a | b) },
+		func(a, b int64) int64 { return ^(a | b) },
+		func(a, b int8) int8 { return ^(a | b) },
+		func(a, b uint64) uint64 { return ^(a | b) },
+		func(a, b uintptr) uintptr { return ^(a | b) },
+	)
+}
+
+func runNand(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return ^(a & b) },
+		func(a, b uint16) uint16 { return ^(a & b) },
+		func(a, b uint32) uint32 { return ^(a & b) },
+		func(a, b uint64) uint64 { return ^(a & b) },
+		func(a, b int8) int8 { return ^(a & b) },
+		func(a, b int16) int16 { return ^(a & b) },
+		func(a, b int32) int32 { return ^(a & b) },
+		func(a, b int64) int64 { return ^(a & b) },
+		func(a, b int8) int8 { return ^(a & b) },
+		func(a, b uint64) uint64 { return ^(a & b) },
+		func(a, b uintptr) uintptr { return ^(a & b) },
+	)
+}
+
+func runXnor(ctx *Runtime, i Instruction) {
+	runBinaryOperationInstruction(
+		ctx, i.(Add).Type,
+		func(a, b uint8) uint8 { return ^(a ^ b) },
+		func(a, b uint16) uint16 { return ^(a ^ b) },
+		func(a, b uint32) uint32 { return ^(a ^ b) },
+		func(a, b uint64) uint64 { return ^(a ^ b) },
+		func(a, b int8) int8 { return ^(a ^ b) },
+		func(a, b int16) int16 { return ^(a ^ b) },
+		func(a, b int32) int32 { return ^(a ^ b) },
+		func(a, b int64) int64 { return ^(a ^ b) },
+		func(a, b int8) int8 { return ^(a ^ b) },
+		func(a, b uint64) uint64 { return ^(a ^ b) },
+		func(a, b uintptr) uintptr { return ^(a ^ b) },
+	)
+}
+
+func runPush(ctx *Runtime, i Push) {
+	switch i.Type {
+	case U8:
+		ctx.Push(U8Value{Value: uint8(i.Value)})
+		return
+	case U16:
+		ctx.Push(U16Value{Value: uint16(i.Value)})
+		return
+	case U32:
+		ctx.Push(U32Value{Value: uint32(i.Value)})
+		return
+	case U64:
+		ctx.Push(U64Value{Value: uint64(i.Value)})
+		return
+	case I16:
+		ctx.Push(I16Value{Value: int16(i.Value)})
+		return
+	case I32:
+		ctx.Push(I32Value{Value: int32(i.Value)})
+		return
+	case I64:
+		ctx.Push(I64Value{Value: int64(i.Value)})
+		return
+	case F32:
+		ctx.Push(F32Value{Value: float32(i.Value)})
+		return
+	case F64:
+		ctx.Push(F64Value{Value: float64(i.Value)})
+		return
+	case CHAR:
+		ctx.Push(CharValue{Value: int8(i.Value)})
+		return
+	case USIZE:
+		ctx.Push(UsizeValue{Value: uint64(i.Value)})
+		return
+	case UPTR:
+		ctx.Push(UptrValue{Value: uintptr(i.Value)})
+		return
+	}
+	panic(fmt.Sprintf("Push<%s> not implemented", i.Type))
+}
+
+func runNot(ctx *Runtime, i Not) {
+	a := ctx.Pop()
+	switch i.Type {
+	case U8:
+		ctx.Push(U8Value{Value: ^a.(U8Value).Value})
+		return
+	case U16:
+		ctx.Push(U16Value{Value: ^a.(U16Value).Value})
+		return
+	case U32:
+		ctx.Push(U32Value{Value: ^a.(U32Value).Value})
+		return
+	case U64:
+		ctx.Push(U64Value{Value: ^a.(U64Value).Value})
+		return
+	case I8:
+		ctx.Push(I8Value{Value: ^a.(I8Value).Value})
+		return
+	case I16:
+		ctx.Push(I16Value{Value: ^a.(I16Value).Value})
+		return
+	case I32:
+		ctx.Push(I32Value{Value: ^a.(I32Value).Value})
+		return
+	case I64:
+		ctx.Push(I64Value{Value: ^a.(I64Value).Value})
+		return
+	case CHAR:
+		ctx.Push(CharValue{Value: ^a.(CharValue).Value})
+		return
+	case USIZE:
+		ctx.Push(UsizeValue{Value: ^a.(UsizeValue).Value})
+		return
+	case UPTR:
+		ctx.Push(UptrValue{Value: ^a.(UptrValue).Value})
+		return
 	}
 }
 
@@ -835,46 +1000,4 @@ func runBinaryOperationInstruction(
 		ctx.Push(UptrValue{Value: uptrOp(a, b)})
 		return
 	}
-}
-
-func runPush(ctx *Runtime, i Push) {
-	switch i.Type {
-	case U8:
-		ctx.Push(U8Value{Value: uint8(i.Value)})
-		return
-	case U16:
-		ctx.Push(U16Value{Value: uint16(i.Value)})
-		return
-	case U32:
-		ctx.Push(U32Value{Value: uint32(i.Value)})
-		return
-	case U64:
-		ctx.Push(U64Value{Value: uint64(i.Value)})
-		return
-	case I16:
-		ctx.Push(I16Value{Value: int16(i.Value)})
-		return
-	case I32:
-		ctx.Push(I32Value{Value: int32(i.Value)})
-		return
-	case I64:
-		ctx.Push(I64Value{Value: int64(i.Value)})
-		return
-	case F32:
-		ctx.Push(F32Value{Value: float32(i.Value)})
-		return
-	case F64:
-		ctx.Push(F64Value{Value: float64(i.Value)})
-		return
-	case CHAR:
-		ctx.Push(CharValue{Value: int8(i.Value)})
-		return
-	case USIZE:
-		ctx.Push(UsizeValue{Value: uint64(i.Value)})
-		return
-	case UPTR:
-		ctx.Push(UptrValue{Value: uintptr(i.Value)})
-		return
-	}
-	panic(fmt.Sprintf("Push<%s> not implemented", i.Type))
 }

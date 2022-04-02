@@ -47,21 +47,21 @@ const (
 	LoadLocalInstruction
 	PushInstruction
 	PopInstruction
+	JumpIfZeroInstruction
+	JumpNotZeroInstruction
+	NotInstruction
 	AddInstruction
 	SubtractInstruction
 	MultiplyInstruction
 	DivideInstruction
-	ModulesInstruction
+	ModulusInstruction
 	ExponentInstruction
-	JumpIfZeroInstruction
-	JumpNotZeroInstruction
 	CmpEqualInstruction
 	CmpInequalInstruction
 	CmpLTInstruction
 	CmpGTInstruction
 	CmpLTEInstruction
 	CmpGTEInstruction
-	NotInstruction
 	OrInstruction
 	AndInstruction
 	XorInstruction
@@ -119,6 +119,19 @@ type Pop struct {
 	Type
 }
 
+type JumpIfZero struct {
+	Instruction
+}
+
+type JumpNotZero struct {
+	Instruction
+}
+
+type Not struct {
+	Instruction
+	Type
+}
+
 type Add struct {
 	Instruction
 	Type
@@ -139,7 +152,7 @@ type Divide struct {
 	Type
 }
 
-type Modules struct {
+type Modulus struct {
 	Instruction
 	Type
 }
@@ -147,14 +160,6 @@ type Modules struct {
 type Exponent struct {
 	Instruction
 	Type
-}
-
-type JumpIfZero struct {
-	Instruction
-}
-
-type JumpNotZero struct {
-	Instruction
 }
 
 type CmpEqual struct {
@@ -183,11 +188,6 @@ type CmpLTE struct {
 }
 
 type CmpGTE struct {
-	Instruction
-	Type
-}
-
-type Not struct {
 	Instruction
 	Type
 }
@@ -273,6 +273,12 @@ func (it InstructionType) String() string {
 		return "PushInstruction"
 	case PopInstruction:
 		return "PopInstruction"
+	case JumpIfZeroInstruction:
+		return "JumpIfZeroInstruction"
+	case JumpNotZeroInstruction:
+		return "JumpNotZeroInstruction"
+	case NotInstruction:
+		return "NotInstruction"
 	case AddInstruction:
 		return "AddInstruction"
 	case SubtractInstruction:
@@ -281,14 +287,10 @@ func (it InstructionType) String() string {
 		return "MultiplyInstruction"
 	case DivideInstruction:
 		return "DivideInstruction"
-	case ModulesInstruction:
-		return "ModulesInstruction"
+	case ModulusInstruction:
+		return "ModulusInstruction"
 	case ExponentInstruction:
 		return "ExponentInstruction"
-	case JumpIfZeroInstruction:
-		return "JumpIfZeroInstruction"
-	case JumpNotZeroInstruction:
-		return "JumpNotZeroInstruction"
 	case CmpEqualInstruction:
 		return "CmpEqualInstruction"
 	case CmpInequalInstruction:
@@ -301,8 +303,6 @@ func (it InstructionType) String() string {
 		return "CmpLTEInstruction"
 	case CmpGTEInstruction:
 		return "CmpGTEInstruction"
-	case NotInstruction:
-		return "NotInstruction"
 	case OrInstruction:
 		return "OrInstruction"
 	case AndInstruction:
@@ -328,21 +328,21 @@ func (n StoreLocal) InstructionType() InstructionType   { return StoreLocalInstr
 func (n LoadLocal) InstructionType() InstructionType    { return LoadLocalInstruction }
 func (n Push) InstructionType() InstructionType         { return PushInstruction }
 func (n Pop) InstructionType() InstructionType          { return PopInstruction }
+func (n JumpIfZero) InstructionType() InstructionType   { return JumpIfZeroInstruction }
+func (n JumpNotZero) InstructionType() InstructionType  { return JumpNotZeroInstruction }
+func (n Not) InstructionType() InstructionType          { return NotInstruction }
 func (n Add) InstructionType() InstructionType          { return AddInstruction }
 func (n Subtract) InstructionType() InstructionType     { return SubtractInstruction }
 func (n Multiply) InstructionType() InstructionType     { return MultiplyInstruction }
 func (n Divide) InstructionType() InstructionType       { return DivideInstruction }
-func (n Modules) InstructionType() InstructionType      { return ModulesInstruction }
+func (n Modulus) InstructionType() InstructionType      { return ModulusInstruction }
 func (n Exponent) InstructionType() InstructionType     { return ExponentInstruction }
-func (n JumpIfZero) InstructionType() InstructionType   { return JumpIfZeroInstruction }
-func (n JumpNotZero) InstructionType() InstructionType  { return JumpNotZeroInstruction }
 func (n CmpEqual) InstructionType() InstructionType     { return CmpEqualInstruction }
 func (n CmpInequal) InstructionType() InstructionType   { return CmpInequalInstruction }
 func (n CmpLT) InstructionType() InstructionType        { return CmpLTInstruction }
 func (n CmpGT) InstructionType() InstructionType        { return CmpGTInstruction }
 func (n CmpLTE) InstructionType() InstructionType       { return CmpLTEInstruction }
 func (n CmpGTE) InstructionType() InstructionType       { return CmpGTEInstruction }
-func (n Not) InstructionType() InstructionType          { return NotInstruction }
 func (n Or) InstructionType() InstructionType           { return OrInstruction }
 func (n And) InstructionType() InstructionType          { return AndInstruction }
 func (n Xor) InstructionType() InstructionType          { return XorInstruction }
@@ -358,21 +358,21 @@ func (node StoreLocal) String() string   { return "StoreLocal" }
 func (node LoadLocal) String() string    { return "LoadLocal" }
 func (node Push) String() string         { return fmt.Sprintf("Push<%s> %d", node.Type, node.Value) }
 func (node Pop) String() string          { return fmt.Sprintf("Pop<%s>", node.Type) }
+func (node JumpIfZero) String() string   { return "JumpIfZero" }
+func (node JumpNotZero) String() string  { return "JumpNotZero" }
+func (node Not) String() string          { return fmt.Sprintf("Not<%s>", node.Type) }
 func (node Add) String() string          { return fmt.Sprintf("Add<%s>", node.Type) }
 func (node Subtract) String() string     { return fmt.Sprintf("Subtract<%s>", node.Type) }
 func (node Multiply) String() string     { return fmt.Sprintf("Multiply<%s>", node.Type) }
 func (node Divide) String() string       { return fmt.Sprintf("Divide<%s>", node.Type) }
-func (node Modules) String() string      { return fmt.Sprintf("Modules<%s>", node.Type) }
+func (node Modulus) String() string      { return fmt.Sprintf("Modulus<%s>", node.Type) }
 func (node Exponent) String() string     { return fmt.Sprintf("Exponent<%s>", node.Type) }
-func (node JumpIfZero) String() string   { return "JumpIfZero" }
-func (node JumpNotZero) String() string  { return "JumpNotZero" }
 func (node CmpEqual) String() string     { return fmt.Sprintf("CmpEqual<%s>", node.Type) }
 func (node CmpInequal) String() string   { return fmt.Sprintf("CmpInequal<%s>", node.Type) }
 func (node CmpLT) String() string        { return fmt.Sprintf("CmpLT<%s>", node.Type) }
 func (node CmpGT) String() string        { return fmt.Sprintf("CmpGT<%s>", node.Type) }
 func (node CmpLTE) String() string       { return fmt.Sprintf("CmpLTE<%s>", node.Type) }
 func (node CmpGTE) String() string       { return fmt.Sprintf("CmpGTE<%s>", node.Type) }
-func (node Not) String() string          { return fmt.Sprintf("Not<%s>", node.Type) }
 func (node Or) String() string           { return fmt.Sprintf("Or<%s>", node.Type) }
 func (node And) String() string          { return fmt.Sprintf("And<%s>", node.Type) }
 func (node Xor) String() string          { return fmt.Sprintf("Xor<%s>", node.Type) }
