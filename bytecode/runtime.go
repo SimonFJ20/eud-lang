@@ -69,16 +69,6 @@ func Run(p Program) Runtime {
 	return ctx
 }
 
-func binaryOperation[T any, R RuntimeValue](ctx *Runtime, i Instruction, t Type, op func(T, T, Type) T) {
-	b := ctx.Pop()
-	a := ctx.Pop()
-	if a.Type() != t || b.Type() != t {
-		panic("type mismatch")
-	}
-	r := a.(I32Value).Value + b.(I32Value).Value
-	ctx.Push(I32Value{Value: r})
-}
-
 func runInstruction(ctx *Runtime, i Instruction) {
 	switch i.InstructionType() {
 	case AddInstruction:
