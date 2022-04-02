@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	text := "(3 + 4) * 5 * 5"
+	text := "1 + 2 + 3 + 4"
 
 	fmt.Printf("\033[1;36mInput:\033[0m\n\"%s\"\n", text)
 
@@ -34,12 +34,9 @@ func main() {
 
 	println("\033[1;36mRunning bytecode:\033[0m")
 
-	runtime, err := bytecode.Run(program)
-	if err != nil {
-		fmt.Println(err)
-	}
+	runtime := bytecode.Run(program)
 
-	fmt.Printf("\033[1;36mResult:\033[0m\n%s = %d\n", text, runtime.Stack[0])
+	fmt.Printf("\033[1;36mResult:\033[0m\n%s = %d\n", text, runtime.Stack[0].(bytecode.I32Value).Value)
 
 	// cli.Cli(
 	// panic("not implemented i guess")
