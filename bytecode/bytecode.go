@@ -14,6 +14,7 @@ const (
 	U16
 	U32
 	U64
+	I8
 	I16
 	I32
 	I64
@@ -231,6 +232,8 @@ func (t Type) String() string {
 		return "u32"
 	case U64:
 		return "u64"
+	case I8:
+		return "i8"
 	case I16:
 		return "i16"
 	case I32:
