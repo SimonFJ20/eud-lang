@@ -80,7 +80,9 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	case PushInstruction:
 		runPush(ctx, i.(Push))
 		return
-	// case PopInstruction:
+	case PopInstruction:
+		runPop(ctx, i.(Pop))
+		return
 	// case JumpIfZeroInstruction:
 	// case JumpNotZeroInstruction:
 	case NotInstruction:
@@ -185,6 +187,10 @@ func runPush(ctx *Runtime, i Push) {
 		return
 	}
 	panic(fmt.Sprintf("Push<%s> not implemented", i.Type))
+}
+
+func runPop(ctx *Runtime, i Pop) {
+	ctx.Pop()
 }
 
 func runNot(ctx *Runtime, i Not) {
