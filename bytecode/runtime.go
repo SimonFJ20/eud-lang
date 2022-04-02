@@ -271,7 +271,7 @@ func runAdd(ctx *Runtime, i Instruction) {
 
 func runSubtract(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Subtract).Type,
 		func(a, b uint8) uint8 { return a - b },
 		func(a, b uint16) uint16 { return a - b },
 		func(a, b uint32) uint32 { return a - b },
@@ -288,7 +288,7 @@ func runSubtract(ctx *Runtime, i Instruction) {
 
 func runMultiply(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Multiply).Type,
 		func(a, b uint8) uint8 { return a * b },
 		func(a, b uint16) uint16 { return a * b },
 		func(a, b uint32) uint32 { return a * b },
@@ -305,7 +305,7 @@ func runMultiply(ctx *Runtime, i Instruction) {
 
 func runDivide(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Divide).Type,
 		func(a, b uint8) uint8 { return a / b },
 		func(a, b uint16) uint16 { return a / b },
 		func(a, b uint32) uint32 { return a / b },
@@ -322,7 +322,7 @@ func runDivide(ctx *Runtime, i Instruction) {
 
 func runModulus(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Modulus).Type,
 		func(a, b uint8) uint8 { return a % b },
 		func(a, b uint16) uint16 { return a % b },
 		func(a, b uint32) uint32 { return a % b },
@@ -339,7 +339,7 @@ func runModulus(ctx *Runtime, i Instruction) {
 
 func runExponent(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Exponent).Type,
 		func(a, b uint8) uint8 { return uint8(math.Pow(float64(a), float64(b))) },
 		func(a, b uint16) uint16 { return uint16(math.Pow(float64(a), float64(b))) },
 		func(a, b uint32) uint32 { return uint32(math.Pow(float64(a), float64(b))) },
@@ -356,7 +356,7 @@ func runExponent(ctx *Runtime, i Instruction) {
 
 func runCmpEqual(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(CmpEqual).Type,
 		func(a, b uint8) uint8 {
 			if a == b {
 				return 1
@@ -439,7 +439,7 @@ func runCmpEqual(ctx *Runtime, i Instruction) {
 
 func runCmpInequal(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(CmpInequal).Type,
 		func(a, b uint8) uint8 {
 			if a != b {
 				return 1
@@ -522,7 +522,7 @@ func runCmpInequal(ctx *Runtime, i Instruction) {
 
 func runCmpLT(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(CmpLT).Type,
 		func(a, b uint8) uint8 {
 			if a < b {
 				return 1
@@ -605,7 +605,7 @@ func runCmpLT(ctx *Runtime, i Instruction) {
 
 func runCmpGT(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(CmpGT).Type,
 		func(a, b uint8) uint8 {
 			if a > b {
 				return 1
@@ -688,7 +688,7 @@ func runCmpGT(ctx *Runtime, i Instruction) {
 
 func runCmpLTE(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(CmpLTE).Type,
 		func(a, b uint8) uint8 {
 			if a <= b {
 				return 1
@@ -771,7 +771,7 @@ func runCmpLTE(ctx *Runtime, i Instruction) {
 
 func runCmpGTE(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(CmpGTE).Type,
 		func(a, b uint8) uint8 {
 			if a >= b {
 				return 1
@@ -854,7 +854,7 @@ func runCmpGTE(ctx *Runtime, i Instruction) {
 
 func runOr(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Or).Type,
 		func(a, b uint8) uint8 { return a | b },
 		func(a, b uint16) uint16 { return a | b },
 		func(a, b uint32) uint32 { return a | b },
@@ -871,7 +871,7 @@ func runOr(ctx *Runtime, i Instruction) {
 
 func runAnd(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(And).Type,
 		func(a, b uint8) uint8 { return a & b },
 		func(a, b uint16) uint16 { return a & b },
 		func(a, b uint32) uint32 { return a & b },
@@ -888,7 +888,7 @@ func runAnd(ctx *Runtime, i Instruction) {
 
 func runXor(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Xor).Type,
 		func(a, b uint8) uint8 { return a ^ b },
 		func(a, b uint16) uint16 { return a ^ b },
 		func(a, b uint32) uint32 { return a ^ b },
@@ -905,7 +905,7 @@ func runXor(ctx *Runtime, i Instruction) {
 
 func runNor(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Nor).Type,
 		func(a, b uint8) uint8 { return ^(a | b) },
 		func(a, b uint16) uint16 { return ^(a | b) },
 		func(a, b uint32) uint32 { return ^(a | b) },
@@ -922,7 +922,7 @@ func runNor(ctx *Runtime, i Instruction) {
 
 func runNand(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Nand).Type,
 		func(a, b uint8) uint8 { return ^(a & b) },
 		func(a, b uint16) uint16 { return ^(a & b) },
 		func(a, b uint32) uint32 { return ^(a & b) },
@@ -939,7 +939,7 @@ func runNand(ctx *Runtime, i Instruction) {
 
 func runXnor(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
-		ctx, i.(Add).Type,
+		ctx, i.(Xnor).Type,
 		func(a, b uint8) uint8 { return ^(a ^ b) },
 		func(a, b uint16) uint16 { return ^(a ^ b) },
 		func(a, b uint32) uint32 { return ^(a ^ b) },

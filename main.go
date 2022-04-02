@@ -8,13 +8,19 @@ import (
 
 func main() {
 
-	text := "1 + 2 + 3 + 4"
+	text := "3 + 4) * 5"
 
 	fmt.Printf("\033[1;36mInput:\033[0m\n\"%s\"\n", text)
 
 	println("\033[1;36mTokenizing text:\033[0m")
 
 	tokens := parser.TokenizeString(text)
+
+	current_token := tokens
+	for current_token != nil {
+		println(current_token.Type.String())
+		current_token = current_token.Next
+	}
 
 	println("\033[1;36mParsing tokens:\033[0m")
 
