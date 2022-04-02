@@ -145,6 +145,87 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	}
 }
 
+func runPush(ctx *Runtime, i Push) {
+	switch i.Type {
+	case U8:
+		ctx.Push(U8Value{Value: uint8(i.Value)})
+		return
+	case U16:
+		ctx.Push(U16Value{Value: uint16(i.Value)})
+		return
+	case U32:
+		ctx.Push(U32Value{Value: uint32(i.Value)})
+		return
+	case U64:
+		ctx.Push(U64Value{Value: uint64(i.Value)})
+		return
+	case I16:
+		ctx.Push(I16Value{Value: int16(i.Value)})
+		return
+	case I32:
+		ctx.Push(I32Value{Value: int32(i.Value)})
+		return
+	case I64:
+		ctx.Push(I64Value{Value: int64(i.Value)})
+		return
+	case F32:
+		ctx.Push(F32Value{Value: float32(i.Value)})
+		return
+	case F64:
+		ctx.Push(F64Value{Value: float64(i.Value)})
+		return
+	case CHAR:
+		ctx.Push(CharValue{Value: int8(i.Value)})
+		return
+	case USIZE:
+		ctx.Push(UsizeValue{Value: uint64(i.Value)})
+		return
+	case UPTR:
+		ctx.Push(UptrValue{Value: uintptr(i.Value)})
+		return
+	}
+	panic(fmt.Sprintf("Push<%s> not implemented", i.Type))
+}
+
+func runNot(ctx *Runtime, i Not) {
+	a := ctx.Pop()
+	switch i.Type {
+	case U8:
+		ctx.Push(U8Value{Value: ^a.(U8Value).Value})
+		return
+	case U16:
+		ctx.Push(U16Value{Value: ^a.(U16Value).Value})
+		return
+	case U32:
+		ctx.Push(U32Value{Value: ^a.(U32Value).Value})
+		return
+	case U64:
+		ctx.Push(U64Value{Value: ^a.(U64Value).Value})
+		return
+	case I8:
+		ctx.Push(I8Value{Value: ^a.(I8Value).Value})
+		return
+	case I16:
+		ctx.Push(I16Value{Value: ^a.(I16Value).Value})
+		return
+	case I32:
+		ctx.Push(I32Value{Value: ^a.(I32Value).Value})
+		return
+	case I64:
+		ctx.Push(I64Value{Value: ^a.(I64Value).Value})
+		return
+	case CHAR:
+		ctx.Push(CharValue{Value: ^a.(CharValue).Value})
+		return
+	case USIZE:
+		ctx.Push(UsizeValue{Value: ^a.(UsizeValue).Value})
+		return
+	case UPTR:
+		ctx.Push(UptrValue{Value: ^a.(UptrValue).Value})
+		return
+	}
+}
+
 func runAdd(ctx *Runtime, i Instruction) {
 	runBinaryOperationInstruction(
 		ctx, i.(Add).Type,
@@ -845,87 +926,6 @@ func runXnor(ctx *Runtime, i Instruction) {
 		func(a, b uint64) uint64 { return ^(a ^ b) },
 		func(a, b uintptr) uintptr { return ^(a ^ b) },
 	)
-}
-
-func runPush(ctx *Runtime, i Push) {
-	switch i.Type {
-	case U8:
-		ctx.Push(U8Value{Value: uint8(i.Value)})
-		return
-	case U16:
-		ctx.Push(U16Value{Value: uint16(i.Value)})
-		return
-	case U32:
-		ctx.Push(U32Value{Value: uint32(i.Value)})
-		return
-	case U64:
-		ctx.Push(U64Value{Value: uint64(i.Value)})
-		return
-	case I16:
-		ctx.Push(I16Value{Value: int16(i.Value)})
-		return
-	case I32:
-		ctx.Push(I32Value{Value: int32(i.Value)})
-		return
-	case I64:
-		ctx.Push(I64Value{Value: int64(i.Value)})
-		return
-	case F32:
-		ctx.Push(F32Value{Value: float32(i.Value)})
-		return
-	case F64:
-		ctx.Push(F64Value{Value: float64(i.Value)})
-		return
-	case CHAR:
-		ctx.Push(CharValue{Value: int8(i.Value)})
-		return
-	case USIZE:
-		ctx.Push(UsizeValue{Value: uint64(i.Value)})
-		return
-	case UPTR:
-		ctx.Push(UptrValue{Value: uintptr(i.Value)})
-		return
-	}
-	panic(fmt.Sprintf("Push<%s> not implemented", i.Type))
-}
-
-func runNot(ctx *Runtime, i Not) {
-	a := ctx.Pop()
-	switch i.Type {
-	case U8:
-		ctx.Push(U8Value{Value: ^a.(U8Value).Value})
-		return
-	case U16:
-		ctx.Push(U16Value{Value: ^a.(U16Value).Value})
-		return
-	case U32:
-		ctx.Push(U32Value{Value: ^a.(U32Value).Value})
-		return
-	case U64:
-		ctx.Push(U64Value{Value: ^a.(U64Value).Value})
-		return
-	case I8:
-		ctx.Push(I8Value{Value: ^a.(I8Value).Value})
-		return
-	case I16:
-		ctx.Push(I16Value{Value: ^a.(I16Value).Value})
-		return
-	case I32:
-		ctx.Push(I32Value{Value: ^a.(I32Value).Value})
-		return
-	case I64:
-		ctx.Push(I64Value{Value: ^a.(I64Value).Value})
-		return
-	case CHAR:
-		ctx.Push(CharValue{Value: ^a.(CharValue).Value})
-		return
-	case USIZE:
-		ctx.Push(UsizeValue{Value: ^a.(UsizeValue).Value})
-		return
-	case UPTR:
-		ctx.Push(UptrValue{Value: ^a.(UptrValue).Value})
-		return
-	}
 }
 
 func runBinaryOperationInstruction(
