@@ -83,8 +83,12 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	case PopInstruction:
 		runPop(ctx, i.(Pop))
 		return
-	// case JumpIfZeroInstruction:
-	// case JumpNotZeroInstruction:
+	case JumpIfZeroInstruction:
+		runJumpIfZero(ctx, i.(JumpIfZero))
+		return
+	case JumpNotZeroInstruction:
+		runJumpNotZero(ctx, i.(JumpNotZero))
+		return
 	case NotInstruction:
 		runNot(ctx, i.(Not))
 		return
@@ -144,6 +148,22 @@ func runInstruction(ctx *Runtime, i Instruction) {
 		return
 	default:
 		panic(fmt.Sprintf("instruction '%s' not implemented", i.InstructionType()))
+	}
+}
+
+func runJumpIfZero(ctx *Runtime, i JumpIfZero) {
+	addr := ctx.Pop().(UptrValue).Value
+	condition := ctx.Pop().(U64Value).Value
+	if condition == 0 {
+		ctx.Pc = uint(addr) - 1 // compensate for iterating ctx.Pc++
+	}
+}
+
+func runJumpNotZero(ctx *Runtime, i JumpNotZero) {
+	addr := ctx.Pop().(UptrValue).Value
+	condition := ctx.Pop().(U64Value).Value
+	if condition != 0 {
+		ctx.Pc = uint(addr) - 1 // compensate for iterating ctx.Pc++
 	}
 }
 
