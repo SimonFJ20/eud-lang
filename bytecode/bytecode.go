@@ -358,33 +358,33 @@ func (n Nor) InstructionType() InstructionType          { return NorInstruction 
 func (n Nand) InstructionType() InstructionType         { return NandInstruction }
 func (n Xnor) InstructionType() InstructionType         { return XnorInstruction }
 
-func (node Allocate) String() string     { return "Allocate" }
-func (node Store) String() string        { return "Store" }
-func (node Load) String() string         { return "Load" }
-func (node DeclareLocal) String() string { return "DeclareLocal" }
-func (node StoreLocal) String() string   { return "StoreLocal" }
-func (node LoadLocal) String() string    { return "LoadLocal" }
-func (node Push) String() string         { return fmt.Sprintf("Push<%s> %d", node.Type, node.Value) }
-func (node Pop) String() string          { return fmt.Sprintf("Pop<%s>", node.Type) }
-func (node Jump) String() string         { return "Jump" }
-func (node JumpIfZero) String() string   { return "JumpIfZero" }
-func (node JumpNotZero) String() string  { return "JumpNotZero" }
-func (node Not) String() string          { return fmt.Sprintf("Not<%s>", node.Type) }
-func (node Add) String() string          { return fmt.Sprintf("Add<%s>", node.Type) }
-func (node Subtract) String() string     { return fmt.Sprintf("Subtract<%s>", node.Type) }
-func (node Multiply) String() string     { return fmt.Sprintf("Multiply<%s>", node.Type) }
-func (node Divide) String() string       { return fmt.Sprintf("Divide<%s>", node.Type) }
-func (node Modulus) String() string      { return fmt.Sprintf("Modulus<%s>", node.Type) }
-func (node Exponent) String() string     { return fmt.Sprintf("Exponent<%s>", node.Type) }
-func (node CmpEqual) String() string     { return fmt.Sprintf("CmpEqual<%s>", node.Type) }
-func (node CmpInequal) String() string   { return fmt.Sprintf("CmpInequal<%s>", node.Type) }
-func (node CmpLT) String() string        { return fmt.Sprintf("CmpLT<%s>", node.Type) }
-func (node CmpGT) String() string        { return fmt.Sprintf("CmpGT<%s>", node.Type) }
-func (node CmpLTE) String() string       { return fmt.Sprintf("CmpLTE<%s>", node.Type) }
-func (node CmpGTE) String() string       { return fmt.Sprintf("CmpGTE<%s>", node.Type) }
-func (node Or) String() string           { return fmt.Sprintf("Or<%s>", node.Type) }
-func (node And) String() string          { return fmt.Sprintf("And<%s>", node.Type) }
-func (node Xor) String() string          { return fmt.Sprintf("Xor<%s>", node.Type) }
-func (node Nor) String() string          { return fmt.Sprintf("Nor<%s>", node.Type) }
-func (node Nand) String() string         { return fmt.Sprintf("Nand<%s>", node.Type) }
-func (node Xnor) String() string         { return fmt.Sprintf("Xnor<%s>", node.Type) }
+func (n Allocate) String() string     { return fmt.Sprintf("Allocate<%s>\t", n.Type) }
+func (n Store) String() string        { return fmt.Sprintf("Store<%s>\t", n.Type) }
+func (n Load) String() string         { return fmt.Sprintf("Load<%s>\t", n.Type) }
+func (n DeclareLocal) String() string { return fmt.Sprintf("DeclareLocal<%s> %d", n.Type, n.Handle) }
+func (n StoreLocal) String() string   { return fmt.Sprintf("StoreLocal<%s> %d", n.Type, n.Handle) }
+func (n LoadLocal) String() string    { return fmt.Sprintf("LoadLocal<%s> %d", n.Type, n.Handle) }
+func (n Push) String() string         { return fmt.Sprintf("Push<%s> %d\t", n.Type, n.Value) }
+func (n Pop) String() string          { return fmt.Sprintf("Pop<%s>\t", n.Type) }
+func (n Jump) String() string         { return "Jump\t\t" }
+func (n JumpIfZero) String() string   { return "JumpIfZero\t" }
+func (n JumpNotZero) String() string  { return "JumpNotZero\t" }
+func (n Not) String() string          { return fmt.Sprintf("Not<%s>\t", n.Type) }
+func (n Add) String() string          { return fmt.Sprintf("Add<%s>\t", n.Type) }
+func (n Subtract) String() string     { return fmt.Sprintf("Subtract<%s>\t", n.Type) }
+func (n Multiply) String() string     { return fmt.Sprintf("Multiply<%s>\t", n.Type) }
+func (n Divide) String() string       { return fmt.Sprintf("Divide<%s>\t", n.Type) }
+func (n Modulus) String() string      { return fmt.Sprintf("Modulus<%s>\t", n.Type) }
+func (n Exponent) String() string     { return fmt.Sprintf("Exponent<%s>\t", n.Type) }
+func (n CmpEqual) String() string     { return fmt.Sprintf("CmpEqual<%s>\t", n.Type) }
+func (n CmpInequal) String() string   { return fmt.Sprintf("CmpInequal<%s>\t", n.Type) }
+func (n CmpLT) String() string        { return fmt.Sprintf("CmpLT<%s>\t", n.Type) }
+func (n CmpGT) String() string        { return fmt.Sprintf("CmpGT<%s>\t", n.Type) }
+func (n CmpLTE) String() string       { return fmt.Sprintf("CmpLTE<%s>\t", n.Type) }
+func (n CmpGTE) String() string       { return fmt.Sprintf("CmpGTE<%s>\t", n.Type) }
+func (n Or) String() string           { return fmt.Sprintf("Or<%s>\t", n.Type) }
+func (n And) String() string          { return fmt.Sprintf("And<%s>\t", n.Type) }
+func (n Xor) String() string          { return fmt.Sprintf("Xor<%s>\t", n.Type) }
+func (n Nor) String() string          { return fmt.Sprintf("Nor<%s>\t", n.Type) }
+func (n Nand) String() string         { return fmt.Sprintf("Nand<%s>\t", n.Type) }
+func (n Xnor) String() string         { return fmt.Sprintf("Xnor<%s>\t", n.Type) }

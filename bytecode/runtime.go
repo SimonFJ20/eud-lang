@@ -5,7 +5,10 @@ import (
 	"math"
 )
 
-type RuntimeValue interface{ Type() Type }
+type RuntimeValue interface {
+	Type() Type
+	String() string
+}
 type U8Value struct{ Value uint8 }
 type U16Value struct{ Value uint16 }
 type U32Value struct{ Value uint32 }
@@ -34,12 +37,40 @@ func (v CharValue) Type() Type  { return CHAR }
 func (v UsizeValue) Type() Type { return USIZE }
 func (v UptrValue) Type() Type  { return UPTR }
 
+func (v U8Value) String() string    { return fmt.Sprintf("U8(%d)", v.Value) }
+func (v U16Value) String() string   { return fmt.Sprintf("U16(%d)", v.Value) }
+func (v U32Value) String() string   { return fmt.Sprintf("U32(%d)", v.Value) }
+func (v U64Value) String() string   { return fmt.Sprintf("U64(%d)", v.Value) }
+func (v I8Value) String() string    { return fmt.Sprintf("I8(%d)", v.Value) }
+func (v I16Value) String() string   { return fmt.Sprintf("I16(%d)", v.Value) }
+func (v I32Value) String() string   { return fmt.Sprintf("I32(%d)", v.Value) }
+func (v I64Value) String() string   { return fmt.Sprintf("I64(%d)", v.Value) }
+func (v F32Value) String() string   { return fmt.Sprintf("F32(%f)", v.Value) }
+func (v F64Value) String() string   { return fmt.Sprintf("F64(%f)", v.Value) }
+func (v CharValue) String() string  { return fmt.Sprintf("CHAR(%d)", v.Value) }
+func (v UsizeValue) String() string { return fmt.Sprintf("USIZE(%d)", v.Value) }
+func (v UptrValue) String() string  { return fmt.Sprintf("UPTR(%d)", v.Value) }
+
 type Runtime struct {
 	Stack   []RuntimeValue
 	Locals  map[uint]RuntimeValue
 	Globals map[uintptr]RuntimeValue
 	Pc      uintptr
 	Sp      uint
+}
+
+func (r *Runtime) String() string {
+	stack_string := "["
+	first := true
+	for i := 0; i < int(r.Sp); i++ {
+		if !first {
+			stack_string += ", "
+		}
+		first = false
+		stack_string += r.Stack[i].String()
+	}
+	stack_string += "]"
+	return fmt.Sprintf("PC: %d,\tSP: %d,\tSTACK: %s", r.Pc, r.Sp, stack_string)
 }
 
 func (ctx *Runtime) Push(v RuntimeValue) {
@@ -67,6 +98,7 @@ func Run(p Program) Runtime {
 		Sp:      0,
 	}
 	for ctx.Pc < uintptr(len(p.Instructions)) {
+		fmt.Printf("%s\t%s\n", p.Instructions[ctx.Pc].String(), ctx.String())
 		runInstruction(&ctx, p.Instructions[ctx.Pc])
 		ctx.Pc++
 	}

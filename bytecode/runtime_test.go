@@ -75,7 +75,9 @@ func TestFunction(t *testing.T) {
 			bytecode.Push{Type: bytecode.I32, Value: 3},
 			bytecode.StoreLocal{Type: bytecode.I32, Handle: 1},
 			bytecode.Push{Type: bytecode.UPTR, Value: 0}, // program_counter
-			bytecode.LoadLocal{Type: bytecode.UPTR},
+			bytecode.Load{Type: bytecode.UPTR},
+			bytecode.Push{Type: bytecode.UPTR, Value: 7},
+			bytecode.Add{Type: bytecode.UPTR},
 			bytecode.LoadLocal{Type: bytecode.I32, Handle: 1},
 			bytecode.LoadLocal{Type: bytecode.I32, Handle: 0},
 			bytecode.Push{Type: bytecode.UPTR, Value: 2}, // 2 = sum
@@ -85,7 +87,7 @@ func TestFunction(t *testing.T) {
 		},
 	})
 	result := runtime.Pop().(bytecode.I32Value).Value
-	if result != 5 {
+	if result != 8 {
 		t.Errorf("unexpected result %d", result)
 	}
 }
