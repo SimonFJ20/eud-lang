@@ -57,6 +57,7 @@ type Runtime struct {
 	Globals map[uintptr]RuntimeValue
 	Pc      uintptr
 	Sp      uint
+	Debug   bool
 }
 
 func (r *Runtime) String() string {
@@ -96,9 +97,12 @@ func Run(p Program) Runtime {
 		Globals: make(map[uintptr]RuntimeValue),
 		Pc:      0,
 		Sp:      0,
+		Debug:   false,
 	}
 	for ctx.Pc < uintptr(len(p.Instructions)) {
-		fmt.Printf("%s\t%s\n", p.Instructions[ctx.Pc].String(), ctx.String())
+		if ctx.Debug {
+			fmt.Printf("%s\t%s\n", p.Instructions[ctx.Pc].String(), ctx.String())
+		}
 		runInstruction(&ctx, p.Instructions[ctx.Pc])
 		ctx.Pc++
 	}
