@@ -5,6 +5,7 @@ import "fmt"
 type Program struct {
 	Instructions   []Instruction
 	Preallocations []AllocationStruct
+	RunWithDebug   bool
 }
 
 type Type int

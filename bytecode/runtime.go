@@ -97,7 +97,7 @@ func Run(p Program) Runtime {
 		Globals: make(map[uintptr]RuntimeValue),
 		Pc:      0,
 		Sp:      0,
-		Debug:   false,
+		Debug:   p.RunWithDebug || false,
 	}
 	for ctx.Pc < uintptr(len(p.Instructions)) {
 		if ctx.Debug {
