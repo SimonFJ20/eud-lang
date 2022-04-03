@@ -35,9 +35,10 @@ func (v UsizeValue) Type() Type { return USIZE }
 func (v UptrValue) Type() Type  { return UPTR }
 
 type Runtime struct {
-	Stack []RuntimeValue
-	Pc    uint
-	Sp    uint
+	Stack  []RuntimeValue
+	Locals map[uint]RuntimeValue
+	Pc     uint
+	Sp     uint
 }
 
 func (ctx *Runtime) Push(v RuntimeValue) {
@@ -58,9 +59,10 @@ func (ctx *Runtime) Pop() RuntimeValue {
 
 func Run(p Program) Runtime {
 	ctx := Runtime{
-		Stack: make([]RuntimeValue, 8192),
-		Pc:    0,
-		Sp:    0,
+		Stack:  make([]RuntimeValue, 8192),
+		Locals: make(map[uint]RuntimeValue),
+		Pc:     0,
+		Sp:     0,
 	}
 	for ctx.Pc < uint(len(p.Instructions)) {
 		runInstruction(&ctx, p.Instructions[ctx.Pc])
@@ -74,9 +76,15 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	// case AllocateInstruction:
 	// case StoreInstruction:
 	// case LoadInstruction:
-	// case DeclareLocalInstruction:
-	// case StoreLocalInstruction:
-	// case LoadLocalInstruction:
+	case DeclareLocalInstruction:
+		runDeclareLocal(ctx, i.(DeclareLocal))
+		return
+	case StoreLocalInstruction:
+		runStoreLocal(ctx, i.(StoreLocal))
+		return
+	case LoadLocalInstruction:
+		runLoadLocal(ctx, i.(LoadLocal))
+		return
 	case PushInstruction:
 		runPush(ctx, i.(Push))
 		return
@@ -149,6 +157,41 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	default:
 		panic(fmt.Sprintf("instruction '%s' not implemented", i.InstructionType()))
 	}
+}
+
+func runDeclareLocal(ctx *Runtime, i DeclareLocal) {
+	switch i.Type {
+	case U8:
+		ctx.Locals[i.Handle] = U8Value{}
+	case U16:
+		ctx.Locals[i.Handle] = U16Value{}
+	case U32:
+		ctx.Locals[i.Handle] = U32Value{}
+	case U64:
+		ctx.Locals[i.Handle] = U64Value{}
+	case I8:
+		ctx.Locals[i.Handle] = I8Value{}
+	case I16:
+		ctx.Locals[i.Handle] = I16Value{}
+	case I32:
+		ctx.Locals[i.Handle] = I32Value{}
+	case I64:
+		ctx.Locals[i.Handle] = I64Value{}
+	case CHAR:
+		ctx.Locals[i.Handle] = CharValue{}
+	case USIZE:
+		ctx.Locals[i.Handle] = UsizeValue{}
+	case UPTR:
+		ctx.Locals[i.Handle] = UptrValue{}
+	}
+}
+
+func runStoreLocal(ctx *Runtime, i StoreLocal) {
+	ctx.Locals[i.Handle] = ctx.Pop()
+}
+
+func runLoadLocal(ctx *Runtime, i LoadLocal) {
+	ctx.Push(ctx.Locals[i.Handle])
 }
 
 func runJumpIfZero(ctx *Runtime, i JumpIfZero) {

@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	text := "3 + 4) * 5"
+	text := "(3 + 4) * 5"
 
 	fmt.Printf("\033[1;36mInput:\033[0m\n\"%s\"\n", text)
 
