@@ -35,10 +35,11 @@ func (v UsizeValue) Type() Type { return USIZE }
 func (v UptrValue) Type() Type  { return UPTR }
 
 type Runtime struct {
-	Stack  []RuntimeValue
-	Locals map[uint]RuntimeValue
-	Pc     uint
-	Sp     uint
+	Stack   []RuntimeValue
+	Locals  map[uint]RuntimeValue
+	Globals map[uintptr]RuntimeValue
+	Pc      uintptr
+	Sp      uint
 }
 
 func (ctx *Runtime) Push(v RuntimeValue) {
@@ -59,12 +60,13 @@ func (ctx *Runtime) Pop() RuntimeValue {
 
 func Run(p Program) Runtime {
 	ctx := Runtime{
-		Stack:  make([]RuntimeValue, 8192),
-		Locals: make(map[uint]RuntimeValue),
-		Pc:     0,
-		Sp:     0,
+		Stack:   make([]RuntimeValue, 8192),
+		Locals:  make(map[uint]RuntimeValue),
+		Globals: make(map[uintptr]RuntimeValue),
+		Pc:      0,
+		Sp:      0,
 	}
-	for ctx.Pc < uint(len(p.Instructions)) {
+	for ctx.Pc < uintptr(len(p.Instructions)) {
 		runInstruction(&ctx, p.Instructions[ctx.Pc])
 		ctx.Pc++
 	}
@@ -75,7 +77,9 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	switch i.InstructionType() {
 	// case AllocateInstruction:
 	// case StoreInstruction:
-	// case LoadInstruction:
+	case LoadInstruction:
+		runLoad(ctx, i.(Load))
+		return
 	case DeclareLocalInstruction:
 		runDeclareLocal(ctx, i.(DeclareLocal))
 		return
@@ -90,6 +94,9 @@ func runInstruction(ctx *Runtime, i Instruction) {
 		return
 	case PopInstruction:
 		runPop(ctx, i.(Pop))
+		return
+	case JumpInstruction:
+		runJump(ctx, i.(Jump))
 		return
 	case JumpIfZeroInstruction:
 		runJumpIfZero(ctx, i.(JumpIfZero))
@@ -159,6 +166,16 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	}
 }
 
+func runLoad(ctx *Runtime, i Load) {
+	addr := ctx.Pop().(UptrValue).Value
+	switch addr {
+	case 0:
+		ctx.Push(UptrValue{Value: ctx.Pc})
+	default:
+		ctx.Push(ctx.Globals[addr])
+	}
+}
+
 func runDeclareLocal(ctx *Runtime, i DeclareLocal) {
 	switch i.Type {
 	case U8:
@@ -194,19 +211,51 @@ func runLoadLocal(ctx *Runtime, i LoadLocal) {
 	ctx.Push(ctx.Locals[i.Handle])
 }
 
+func runJump(ctx *Runtime, i Jump) {
+	ctx.Pc = ctx.Pop().(UptrValue).Value - 1 // compensate for iterating ctx.Pc++
+}
+
+func getIntValue(v RuntimeValue) int {
+	switch v.Type() {
+	case U8:
+		return int(v.(U8Value).Value)
+	case U16:
+		return int(v.(U16Value).Value)
+	case U32:
+		return int(v.(U32Value).Value)
+	case U64:
+		return int(v.(U64Value).Value)
+	case I8:
+		return int(v.(I8Value).Value)
+	case I16:
+		return int(v.(I16Value).Value)
+	case I32:
+		return int(v.(I32Value).Value)
+	case I64:
+		return int(v.(I64Value).Value)
+	case CHAR:
+		return int(v.(CharValue).Value)
+	case USIZE:
+		return int(v.(UsizeValue).Value)
+	case UPTR:
+		return int(v.(UptrValue).Value)
+	}
+	panic("unreachable")
+}
+
 func runJumpIfZero(ctx *Runtime, i JumpIfZero) {
 	addr := ctx.Pop().(UptrValue).Value
-	condition := ctx.Pop().(U64Value).Value
+	condition := getIntValue(ctx.Pop())
 	if condition == 0 {
-		ctx.Pc = uint(addr) - 1 // compensate for iterating ctx.Pc++
+		ctx.Pc = addr - 1 // compensate for iterating ctx.Pc++
 	}
 }
 
 func runJumpNotZero(ctx *Runtime, i JumpNotZero) {
 	addr := ctx.Pop().(UptrValue).Value
-	condition := ctx.Pop().(U64Value).Value
+	condition := getIntValue(ctx.Pop())
 	if condition != 0 {
-		ctx.Pc = uint(addr) - 1 // compensate for iterating ctx.Pc++
+		ctx.Pc = addr - 1 // compensate for iterating ctx.Pc++
 	}
 }
 

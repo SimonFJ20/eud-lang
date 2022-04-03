@@ -47,6 +47,7 @@ const (
 	LoadLocalInstruction
 	PushInstruction
 	PopInstruction
+	JumpInstruction
 	JumpIfZeroInstruction
 	JumpNotZeroInstruction
 	NotInstruction
@@ -117,6 +118,10 @@ type Push struct {
 type Pop struct {
 	Instruction
 	Type
+}
+
+type Jump struct {
+	Instruction
 }
 
 type JumpIfZero struct {
@@ -273,6 +278,8 @@ func (it InstructionType) String() string {
 		return "PushInstruction"
 	case PopInstruction:
 		return "PopInstruction"
+	case JumpInstruction:
+		return "JumpInstruction"
 	case JumpIfZeroInstruction:
 		return "JumpIfZeroInstruction"
 	case JumpNotZeroInstruction:
@@ -328,6 +335,7 @@ func (n StoreLocal) InstructionType() InstructionType   { return StoreLocalInstr
 func (n LoadLocal) InstructionType() InstructionType    { return LoadLocalInstruction }
 func (n Push) InstructionType() InstructionType         { return PushInstruction }
 func (n Pop) InstructionType() InstructionType          { return PopInstruction }
+func (n Jump) InstructionType() InstructionType         { return JumpInstruction }
 func (n JumpIfZero) InstructionType() InstructionType   { return JumpIfZeroInstruction }
 func (n JumpNotZero) InstructionType() InstructionType  { return JumpNotZeroInstruction }
 func (n Not) InstructionType() InstructionType          { return NotInstruction }
@@ -358,6 +366,7 @@ func (node StoreLocal) String() string   { return "StoreLocal" }
 func (node LoadLocal) String() string    { return "LoadLocal" }
 func (node Push) String() string         { return fmt.Sprintf("Push<%s> %d", node.Type, node.Value) }
 func (node Pop) String() string          { return fmt.Sprintf("Pop<%s>", node.Type) }
+func (node Jump) String() string         { return "Jump" }
 func (node JumpIfZero) String() string   { return "JumpIfZero" }
 func (node JumpNotZero) String() string  { return "JumpNotZero" }
 func (node Not) String() string          { return fmt.Sprintf("Not<%s>", node.Type) }
