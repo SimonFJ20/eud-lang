@@ -1,7 +1,7 @@
 package bytecode
 
 import (
-	"eud-lang/parser"
+	"eud/parser"
 	"fmt"
 )
 

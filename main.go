@@ -1,8 +1,8 @@
 package main
 
 import (
-	"eud-lang/bytecode"
-	"eud-lang/parser"
+	"eud/bytecode"
+	"eud/parser"
 	"fmt"
 )
 

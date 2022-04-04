@@ -1,7 +1,7 @@
 package bytecode_test
 
 import (
-	"eud-lang/bytecode"
+	"eud/bytecode"
 	"testing"
 )
 

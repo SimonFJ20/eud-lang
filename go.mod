@@ -1,3 +1,3 @@
-module eud-lang
+module eud
 
 go 1.18

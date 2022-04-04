@@ -1,5 +1,5 @@
 
-# eud-lang
+# eud
 
 **Simple programming language and interpreter projekt**
 
