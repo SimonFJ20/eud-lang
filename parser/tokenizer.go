@@ -98,7 +98,7 @@ func tokenizeRune(r rune) *Token {
 			Type:  IntToken,
 			Value: int(r) - 48,
 		}
-	case ' ':
+	case ' ', '\n':
 		return &Token{
 			Type:  InvalidToken,
 			Value: 0,
