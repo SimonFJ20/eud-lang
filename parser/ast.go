@@ -34,6 +34,11 @@ type TypedDeclaration struct {
 
 type Type = Token
 
+type ExpressionStatement struct {
+	BaseStatement
+	Expression BaseExpression
+}
+
 type ExpressionType int
 
 const (
