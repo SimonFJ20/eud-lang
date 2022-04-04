@@ -17,7 +17,8 @@ type BaseStatement interface {
 
 type FuncDefStatement struct {
 	BaseStatement
-	Declared   Token
+	Identifier Token
+	DeclType   Type
 	Parameters []TypedDeclaration
 	Body       []BaseStatement
 }
@@ -28,8 +29,8 @@ type DeclarationStatement struct {
 }
 
 type TypedDeclaration struct {
-	DeclType Type
-	Declared Token
+	DeclType   Type
+	Identifier Token
 }
 
 type Type = Token
@@ -59,6 +60,11 @@ type BaseExpression interface {
 	String() string
 }
 
+type VarAssignExpression struct {
+	Identifier Token
+	Value      BaseExpression
+}
+
 type LeftRightExpression struct {
 	BaseExpression
 	Left  BaseExpression
@@ -85,9 +91,13 @@ type ExpExpression struct {
 	LeftRightExpression
 }
 
-type FuncDefExpression struct {
+type FuncCallExpression struct {
 	Identifier Token
 	Arguments  []BaseExpression
+}
+
+type VarAccessExpression struct {
+	Identifier Token
 }
 
 type IntLiteral struct {
@@ -204,10 +214,35 @@ func (p *Parser) next() {
 	}
 }
 
-func (p *Parser) Parse(t *Token) BaseExpression {
+func (p *Parser) Parse(t *Token) BaseStatement {
 	p.tok = t
-	return p.makeExpression()
+	return ExpressionStatement{Expression: p.makeExpression()}
 }
+
+func (n StatementType) String() string {
+	switch n {
+	case DeclarationStatementType:
+		return "DeclarationStatement"
+	case FuncDefStatementType:
+		return "FuncDefStatement"
+	case ExpressionStatementType:
+		return "ExpressionStatement"
+	default:
+		panic("unexhaustive")
+	}
+}
+
+func (n DeclarationStatement) Type() StatementType { return DeclarationStatementType }
+func (n FuncDefStatement) Type() StatementType     { return FuncDefStatementType }
+func (n ExpressionStatement) Type() StatementType  { return ExpressionStatementType }
+
+func (n DeclarationStatement) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Identifier, n.DeclType)
+}
+func (n FuncDefStatement) String() string {
+	return fmt.Sprintf("%s(%s, %s, [%s], [%s])", n.Type(), n.Identifier, n.DeclType, n.Parameters, n.Body)
+}
+func (n ExpressionStatement) String() string { return fmt.Sprintf("%s(%s)", n.Type(), n.Expression) }
 
 func (n ExpressionType) String() string {
 	switch n {
@@ -230,16 +265,26 @@ func (n ExpressionType) String() string {
 	}
 }
 
-func (n AddExpression) Type() ExpressionType { return AddExpressionType }
-func (n SubExpression) Type() ExpressionType { return SubExpressionType }
-func (n MulExpression) Type() ExpressionType { return MulExpressionType }
-func (n DivExpression) Type() ExpressionType { return DivExpressionType }
-func (n ExpExpression) Type() ExpressionType { return ExpExpressionType }
-func (n IntLiteral) Type() ExpressionType    { return IntExpressionType }
+func (n VarAssignExpression) Type() ExpressionType { return VarAssignExpressionType }
+func (n AddExpression) Type() ExpressionType       { return AddExpressionType }
+func (n SubExpression) Type() ExpressionType       { return SubExpressionType }
+func (n MulExpression) Type() ExpressionType       { return MulExpressionType }
+func (n DivExpression) Type() ExpressionType       { return DivExpressionType }
+func (n ExpExpression) Type() ExpressionType       { return ExpExpressionType }
+func (n FuncCallExpression) Type() ExpressionType  { return FuncCallExpressionType }
+func (n VarAccessExpression) Type() ExpressionType { return VarAccessExpressionType }
+func (n IntLiteral) Type() ExpressionType          { return IntExpressionType }
 
+func (n VarAssignExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Identifier, n.Value)
+}
 func (n AddExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
 func (n SubExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
 func (n MulExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
 func (n DivExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
 func (n ExpExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
-func (n IntLiteral) String() string    { return string(n.Tok.String()) }
+func (n FuncCallExpression) String() string {
+	return fmt.Sprintf("%s(%s, [%s])", n.Type(), n.Identifier, n.Arguments)
+}
+func (n VarAccessExpression) String() string { return fmt.Sprintf("%s(%s)", n.Type(), n.Identifier) }
+func (n IntLiteral) String() string          { return string(n.Tok.String()) }

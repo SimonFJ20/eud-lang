@@ -9,11 +9,11 @@ type Compiler struct {
 	instructions []Instruction
 }
 
-func Compile(ast parser.BaseExpression) (Program, error) {
+func Compile(ast parser.BaseStatement) (Program, error) {
 	ctx := Compiler{
 		instructions: []Instruction{},
 	}
-	err := compileBaseExpression(&ctx, ast)
+	err := compileBaseStatement(&ctx, ast)
 	if err != nil {
 		return Program{}, err
 	}
@@ -22,15 +22,33 @@ func Compile(ast parser.BaseExpression) (Program, error) {
 	}, nil
 }
 
-func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
+func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 	switch node.Type() {
+	case parser.DeclarationStatementType:
+		return compileDeclarationStatement(ctx, node.(parser.DeclarationStatement))
+	case parser.FuncDefStatementType:
+		return compileFuncDefStatement(ctx, node.(parser.FuncDefStatement))
+	case parser.ExpressionStatementType:
+		return compileBaseExpression(ctx, node.(parser.ExpressionStatement).Expression)
 	default:
-		return compileExpression(ctx, node.(parser.BaseExpression))
+		return fmt.Errorf("unknown or unexpected statement type '%s'", node.Type())
 	}
 }
 
-func compileExpression(ctx *Compiler, node parser.BaseExpression) error {
+func compileDeclarationStatement(ctx *Compiler, node parser.DeclarationStatement) error {
+	return fmt.Errorf("not implemented")
+}
+
+func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error {
+	return fmt.Errorf("not implemented")
+}
+
+func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 	switch node.Type() {
+	case parser.InvalidExpressionType:
+		return fmt.Errorf("cannot compile InvalidExpression")
+	case parser.VarAssignExpressionType:
+		return compileVarAssignExpression(ctx, node.(parser.VarAssignExpression))
 	case parser.AddExpressionType:
 		return compileAddExpression(ctx, node.(parser.AddExpression))
 	case parser.SubExpressionType:
@@ -41,20 +59,28 @@ func compileExpression(ctx *Compiler, node parser.BaseExpression) error {
 		return compileDivExpression(ctx, node.(parser.DivExpression))
 	case parser.ExpExpressionType:
 		return compileExpExpression(ctx, node.(parser.ExpExpression))
+	case parser.FuncCallExpressionType:
+		return compileFuncCallExpression(ctx, node.(parser.FuncCallExpression))
+	case parser.VarAccessExpressionType:
+		return compileVarAccessExpression(ctx, node.(parser.VarAccessExpression))
 	case parser.IntExpressionType:
 		return compileIntLiteral(ctx, node.(parser.IntLiteral))
 	default:
-		return fmt.Errorf("unknown or unexpected node type '%s'", node.Type())
+		return fmt.Errorf("unknown or unexpected expression type '%s'", node.Type())
 	}
+}
+
+func compileVarAssignExpression(ctx *Compiler, node parser.VarAssignExpression) error {
+	return fmt.Errorf("not implemented")
 }
 
 func compileAddExpression(ctx *Compiler, node parser.AddExpression) error {
 	var err error = nil
-	err = compileExpression(ctx, node.Left)
+	err = compileBaseExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileExpression(ctx, node.Right)
+	err = compileBaseExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -64,11 +90,11 @@ func compileAddExpression(ctx *Compiler, node parser.AddExpression) error {
 
 func compileSubExpression(ctx *Compiler, node parser.SubExpression) error {
 	var err error = nil
-	err = compileExpression(ctx, node.Left)
+	err = compileBaseExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileExpression(ctx, node.Right)
+	err = compileBaseExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -78,11 +104,11 @@ func compileSubExpression(ctx *Compiler, node parser.SubExpression) error {
 
 func compileMulExpression(ctx *Compiler, node parser.MulExpression) error {
 	var err error = nil
-	err = compileExpression(ctx, node.Left)
+	err = compileBaseExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileExpression(ctx, node.Right)
+	err = compileBaseExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -92,11 +118,11 @@ func compileMulExpression(ctx *Compiler, node parser.MulExpression) error {
 
 func compileDivExpression(ctx *Compiler, node parser.DivExpression) error {
 	var err error = nil
-	err = compileExpression(ctx, node.Left)
+	err = compileBaseExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileExpression(ctx, node.Right)
+	err = compileBaseExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -106,16 +132,24 @@ func compileDivExpression(ctx *Compiler, node parser.DivExpression) error {
 
 func compileExpExpression(ctx *Compiler, node parser.ExpExpression) error {
 	var err error = nil
-	err = compileExpression(ctx, node.Left)
+	err = compileBaseExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileExpression(ctx, node.Right)
+	err = compileBaseExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Exponent{Type: I32})
 	return nil
+}
+
+func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) error {
+	return fmt.Errorf("not implemented")
+}
+
+func compileVarAccessExpression(ctx *Compiler, node parser.VarAccessExpression) error {
+	return fmt.Errorf("not implemented")
 }
 
 func compileIntLiteral(ctx *Compiler, node parser.IntLiteral) error {
