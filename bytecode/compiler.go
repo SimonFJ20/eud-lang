@@ -9,11 +9,11 @@ type Compiler struct {
 	instructions []Instruction
 }
 
-func Compile(ast parser.BaseNode) (Program, error) {
+func Compile(ast parser.BaseExpression) (Program, error) {
 	ctx := Compiler{
 		instructions: []Instruction{},
 	}
-	err := compileBaseNode(&ctx, ast)
+	err := compileBaseExpression(&ctx, ast)
 	if err != nil {
 		return Program{}, err
 	}
@@ -22,33 +22,33 @@ func Compile(ast parser.BaseNode) (Program, error) {
 	}, nil
 }
 
-func compileBaseNode(ctx *Compiler, node parser.BaseNode) error {
+func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 	switch node.Type() {
 	default:
-		return compileExpression(ctx, node.(parser.ExpressionNode))
+		return compileExpression(ctx, node.(parser.BaseExpression))
 	}
 }
 
-func compileExpression(ctx *Compiler, node parser.ExpressionNode) error {
+func compileExpression(ctx *Compiler, node parser.BaseExpression) error {
 	switch node.Type() {
-	case parser.AddNodeType:
-		return compileAddNode(ctx, node.(parser.AddNode))
-	case parser.SubNodeType:
-		return compileSubNode(ctx, node.(parser.SubNode))
-	case parser.MulNodeType:
-		return compileMulNode(ctx, node.(parser.MulNode))
-	case parser.DivNodeType:
-		return compileDivNode(ctx, node.(parser.DivNode))
-	case parser.ExpNodeType:
-		return compileExpNode(ctx, node.(parser.ExpNode))
-	case parser.IntNodeType:
+	case parser.AddExpressionType:
+		return compileAddExpression(ctx, node.(parser.AddExpression))
+	case parser.SubExpressionType:
+		return compileSubExpression(ctx, node.(parser.SubExpression))
+	case parser.MulExpressionType:
+		return compileMulExpression(ctx, node.(parser.MulExpression))
+	case parser.DivExpressionType:
+		return compileDivExpression(ctx, node.(parser.DivExpression))
+	case parser.ExpExpressionType:
+		return compileExpExpression(ctx, node.(parser.ExpExpression))
+	case parser.IntExpressionType:
 		return compileIntLiteral(ctx, node.(parser.IntLiteral))
 	default:
 		return fmt.Errorf("unknown or unexpected node type '%s'", node.Type())
 	}
 }
 
-func compileAddNode(ctx *Compiler, node parser.AddNode) error {
+func compileAddExpression(ctx *Compiler, node parser.AddExpression) error {
 	var err error = nil
 	err = compileExpression(ctx, node.Left)
 	if err != nil {
@@ -62,7 +62,7 @@ func compileAddNode(ctx *Compiler, node parser.AddNode) error {
 	return nil
 }
 
-func compileSubNode(ctx *Compiler, node parser.SubNode) error {
+func compileSubExpression(ctx *Compiler, node parser.SubExpression) error {
 	var err error = nil
 	err = compileExpression(ctx, node.Left)
 	if err != nil {
@@ -76,7 +76,7 @@ func compileSubNode(ctx *Compiler, node parser.SubNode) error {
 	return nil
 }
 
-func compileMulNode(ctx *Compiler, node parser.MulNode) error {
+func compileMulExpression(ctx *Compiler, node parser.MulExpression) error {
 	var err error = nil
 	err = compileExpression(ctx, node.Left)
 	if err != nil {
@@ -90,7 +90,7 @@ func compileMulNode(ctx *Compiler, node parser.MulNode) error {
 	return nil
 }
 
-func compileDivNode(ctx *Compiler, node parser.DivNode) error {
+func compileDivExpression(ctx *Compiler, node parser.DivExpression) error {
 	var err error = nil
 	err = compileExpression(ctx, node.Left)
 	if err != nil {
@@ -104,7 +104,7 @@ func compileDivNode(ctx *Compiler, node parser.DivNode) error {
 	return nil
 }
 
-func compileExpNode(ctx *Compiler, node parser.ExpNode) error {
+func compileExpExpression(ctx *Compiler, node parser.ExpExpression) error {
 	var err error = nil
 	err = compileExpression(ctx, node.Left)
 	if err != nil {
