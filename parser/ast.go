@@ -2,125 +2,132 @@ package parser
 
 import "fmt"
 
-type NodeType int
+type ExpressionType int
 
 const (
-	InvalidNodeType NodeType = iota
-	AddNodeType
-	SubNodeType
-	MulNodeType
-	DivNodeType
-	ExpNodeType
-	IntNodeType
-	LParenNodeType
-	RParenNodeType
+	InvalidExpressionType ExpressionType = iota
+	VarAccessExpressionType
+	VarAssignExpressionType
+	AddExpressionType
+	SubExpressionType
+	MulExpressionType
+	DivExpressionType
+	ExpExpressionType
+	IntExpressionType
+	FuncCallExpressionType
 )
 
-func (n NodeType) String() string {
+type StatementType int
+
+const (
+	DeclarationStatementType StatementType = iota
+	FuncDefStatementType
+	ExpressionStatementType
+)
+
+func (n ExpressionType) String() string {
 	switch n {
-	case AddNodeType:
+	case AddExpressionType:
 		return "add"
-	case SubNodeType:
+	case SubExpressionType:
 		return "sub"
-	case MulNodeType:
+	case MulExpressionType:
 		return "mul"
-	case DivNodeType:
+	case DivExpressionType:
 		return "div"
-	case ExpNodeType:
+	case ExpExpressionType:
 		return "exp"
-	case LParenNodeType:
-		return "l_paren"
-	case RParenNodeType:
-		return "r_paren"
-	case IntNodeType:
+	case IntExpressionType:
 		return "int"
-	case InvalidNodeType:
+	case InvalidExpressionType:
 		return "invalid"
 	default:
 		return "invalid"
 	}
 }
 
-type BaseNode interface {
-	Type() NodeType
+type BaseExpression interface {
+	Type() ExpressionType
 	String() string
 }
-type ExpressionNode interface {
-	BaseNode
-}
-type LeftRightNode struct {
-	ExpressionNode
-	Left  ExpressionNode
-	Right ExpressionNode
+type LeftRightExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
 }
 
-type AddNode struct {
-	LeftRightNode
+type AddExpression struct {
+	LeftRightExpression
 }
 
-func (n AddNode) Type() NodeType {
-	return AddNodeType
+func (n AddExpression) Type() ExpressionType {
+	return AddExpressionType
 }
 
-func (n AddNode) String() string {
+func (n AddExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
 }
 
-type SubNode struct {
-	LeftRightNode
+type SubExpression struct {
+	LeftRightExpression
 }
 
-func (n SubNode) Type() NodeType {
-	return SubNodeType
+func (n SubExpression) Type() ExpressionType {
+	return SubExpressionType
 }
 
-func (n SubNode) String() string {
+func (n SubExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
 }
 
-type MulNode struct {
-	LeftRightNode
+type FuncDefExpression struct {
+	Identifier IdentifierToken
+	Arguments  []Expression
 }
 
-func (n MulNode) Type() NodeType {
-	return MulNodeType
+type MulExpression struct {
+	LeftRightExpression
 }
 
-func (n MulNode) String() string {
+func (n MulExpression) Type() ExpressionType {
+	return MulExpressionType
+}
+
+func (n MulExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
 }
 
-type DivNode struct {
-	LeftRightNode
+type DivExpression struct {
+	LeftRightExpression
 }
 
-func (n DivNode) Type() NodeType {
-	return DivNodeType
+func (n DivExpression) Type() ExpressionType {
+	return DivExpressionType
 }
 
-func (n DivNode) String() string {
+func (n DivExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
 }
 
-type ExpNode struct {
-	LeftRightNode
+type ExpExpression struct {
+	LeftRightExpression
 }
 
-func (n ExpNode) Type() NodeType {
-	return ExpNodeType
+func (n ExpExpression) Type() ExpressionType {
+	return ExpExpressionType
 }
 
-func (n ExpNode) String() string {
+func (n ExpExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right)
 }
 
 type IntLiteral struct {
-	ExpressionNode,
+	BaseExpression,
 	Tok *Token
 }
 
-func (n IntLiteral) Type() NodeType {
-	return IntNodeType
+func (n IntLiteral) Type() ExpressionType {
+	return IntExpressionType
 }
 
 func (n IntLiteral) String() string {
@@ -131,11 +138,11 @@ type Parser struct {
 	tok *Token
 }
 
-func (p *Parser) makeExpression() ExpressionNode {
+func (p *Parser) makeExpression() BaseExpression {
 	return p.makeAddition()
 }
 
-func (p *Parser) makeAddition() ExpressionNode {
+func (p *Parser) makeAddition() BaseExpression {
 	left := p.makeSubtraction()
 	if p.tok == nil {
 		return left
@@ -143,13 +150,13 @@ func (p *Parser) makeAddition() ExpressionNode {
 	if p.tok.Type == AddToken {
 		p.next()
 		right := p.makeAddition()
-		return AddNode{LeftRightNode{Left: left, Right: right}}
+		return AddExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
 		return left
 	}
 }
 
-func (p *Parser) makeSubtraction() ExpressionNode {
+func (p *Parser) makeSubtraction() BaseExpression {
 	left := p.makeMultiplication()
 	if p.tok == nil {
 		return left
@@ -157,13 +164,13 @@ func (p *Parser) makeSubtraction() ExpressionNode {
 	if p.tok.Type == SubToken {
 		p.next()
 		right := p.makeSubtraction()
-		return SubNode{LeftRightNode{Left: left, Right: right}}
+		return SubExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
 		return left
 	}
 }
 
-func (p *Parser) makeMultiplication() ExpressionNode {
+func (p *Parser) makeMultiplication() BaseExpression {
 	left := p.makeDivision()
 	if p.tok == nil {
 		return left
@@ -171,13 +178,13 @@ func (p *Parser) makeMultiplication() ExpressionNode {
 	if p.tok.Type == MulToken {
 		p.next()
 		right := p.makeMultiplication()
-		return MulNode{LeftRightNode{Left: left, Right: right}}
+		return MulExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
 		return left
 	}
 }
 
-func (p *Parser) makeDivision() ExpressionNode {
+func (p *Parser) makeDivision() BaseExpression {
 	left := p.makeExponentation()
 	if p.tok == nil {
 		return left
@@ -185,13 +192,13 @@ func (p *Parser) makeDivision() ExpressionNode {
 	if p.tok.Type == DivToken {
 		p.next()
 		right := p.makeDivision()
-		return DivNode{LeftRightNode{Left: left, Right: right}}
+		return DivExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
 		return left
 	}
 }
 
-func (p *Parser) makeExponentation() ExpressionNode {
+func (p *Parser) makeExponentation() BaseExpression {
 	left := p.makeValue()
 	if p.tok == nil {
 		return left
@@ -199,13 +206,13 @@ func (p *Parser) makeExponentation() ExpressionNode {
 	if p.tok.Type == ExpToken {
 		p.next()
 		right := p.makeExponentation()
-		return ExpNode{LeftRightNode{Left: left, Right: right}}
+		return ExpExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
 		return left
 	}
 }
 
-func (p *Parser) makeValue() ExpressionNode {
+func (p *Parser) makeValue() BaseExpression {
 	token := p.tok
 	p.next()
 	if token.Type == LParenToken {
@@ -236,7 +243,7 @@ func (p *Parser) next() {
 	}
 }
 
-func (p *Parser) Parse(t *Token) ExpressionNode {
+func (p *Parser) Parse(t *Token) BaseExpression {
 	p.tok = t
 	return p.makeExpression()
 }

@@ -14,6 +14,8 @@ const (
 	IntToken
 	LParenToken
 	RParenToken
+	IdentifierToken
+	KeywordToken
 )
 
 func (t TokenType) String() string {

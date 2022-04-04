@@ -1,0 +1,50 @@
+
+program -> statements
+
+statements -> (statement (NEWLINE statement)*)?
+
+statement -> func_def 
+           | declaration_statement 
+           | expression
+
+func_def -> "fn" identifier LParen typed_declarations RParen "{" statements "}"
+
+typed_declarations -> (typed_declaration (, typed_declaration)*)?
+
+declaration_statement -> "let" typed_declaration 
+
+typed_declaration -> identifier ":" type
+
+type -> KeywordToken
+
+expressions -> (expression (, expression)*)?
+
+expression -> assignment
+
+assignment -> sub = sub
+            | sub
+
+sub -> add SubOperatorToken sub
+     | add
+
+add -> div AddOperatorToken add
+     | div
+
+div -> mul DivOperatorToken div
+     | mul
+
+mul -> mod MulOperatorToken mul
+     | mod
+
+mod -> exponentation ModOperatorToken modulus
+     | exponentation
+
+exponentation -> func_call ExpOperatorToken exponentation
+               | func_call
+
+func_call -> value LParen expressions RParen
+           | value
+
+value -> IntToken
+       | identifier
+       | LParen expression RParen
