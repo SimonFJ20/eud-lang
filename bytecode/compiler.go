@@ -44,6 +44,8 @@ type Compiler struct {
 	instructions []Instruction
 	varId        uint
 	symtable     SymbolTable
+	globals      map[string]uintptr
+	lastType     Type
 }
 
 func (ctx *Compiler) nextVarId() uint {
@@ -59,6 +61,7 @@ func Compile(ast []parser.BaseStatement) (Program, error) {
 			parent:  nil,
 			symbols: map[string]Symbol{},
 		},
+		globals: make(map[string]uintptr),
 	}
 	err := compileStatements(&ctx, ast)
 	if err != nil {
@@ -70,11 +73,22 @@ func Compile(ast []parser.BaseStatement) (Program, error) {
 }
 
 func compileStatements(ctx *Compiler, nodes []parser.BaseStatement) error {
+	scope_ctx := Compiler{
+		instructions: ctx.instructions,
+		varId:        ctx.varId,
+		symtable: SymbolTable{
+			parent:  &ctx.symtable,
+			symbols: map[string]Symbol{},
+		},
+		globals: ctx.globals,
+	}
 	for i := range nodes {
-		if err := compileBaseStatement(ctx, nodes[i]); err != nil {
+		if err := compileBaseStatement(&scope_ctx, nodes[i]); err != nil {
 			return err
 		}
 	}
+	ctx.instructions = scope_ctx.instructions
+	ctx.varId = scope_ctx.varId
 	return nil
 }
 
@@ -84,6 +98,8 @@ func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 		return compileDeclarationStatement(ctx, node.(parser.DeclarationStatement))
 	case parser.FuncDefStatementType:
 		return compileFuncDefStatement(ctx, node.(parser.FuncDefStatement))
+	case parser.ReturnStatementType:
+		return compileReturnStatement(ctx, node.(parser.ReturnStatement))
 	case parser.ExpressionStatementType:
 		return compileExpressionStatement(ctx, node)
 
@@ -103,7 +119,7 @@ func compileExpressionStatement(ctx *Compiler, node parser.BaseStatement) error 
 	//  But because of the stack value implementation we can just pop with any type.
 	//  Notice. This hack also assumes funccalls and assignments always return a value,
 	//  which isn't hard to enforce.
-	ctx.instructions = append(ctx.instructions, Pop{Type: UPTR})
+	ctx.instructions = append(ctx.instructions, Pop{Type: ctx.lastType})
 
 	return err
 }
@@ -120,7 +136,37 @@ func compileDeclarationStatement(ctx *Compiler, node parser.DeclarationStatement
 }
 
 func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error {
-	return fmt.Errorf("not implemented")
+	start := len(ctx.instructions)
+	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	ctx.instructions = append(ctx.instructions, Jump{})
+	ctx.globals[node.Identifier.StringValue] = uintptr(start + 2)
+	for i := range node.Parameters {
+		t, err := compileType(ctx, node.Parameters[i].DeclType)
+		if err != nil {
+			return err
+		}
+		handle := ctx.nextVarId()
+		ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
+		ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Handle: handle})
+		ctx.symtable.Set(node.Parameters[i].Identifier.StringValue, Symbol{Type: t, Handle: handle})
+	}
+	if err := compileStatements(ctx, node.Body); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: 0})
+	ctx.instructions = append(ctx.instructions, Return{Type: UPTR})
+	ctx.instructions[start] = Push{Type: UPTR, Value: len(ctx.instructions) - start}
+	return nil
+}
+
+func compileReturnStatement(ctx *Compiler, node parser.ReturnStatement) error {
+	if err := compileBaseExpression(ctx, node.Value); err != nil {
+		return err
+	}
+
+	// HACK, type is hardcoded, should be inferred
+	ctx.instructions = append(ctx.instructions, Return{Type: I32})
+	return nil
 }
 
 func compileType(ctx *Compiler, t parser.Token) (Type, error) {
@@ -191,6 +237,7 @@ func compileVarAssignExpression(ctx *Compiler, node parser.VarAssignExpression) 
 	}
 	ctx.instructions = append(ctx.instructions, StoreLocal{Type: symbol.Type, Handle: symbol.Handle})
 	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Handle: symbol.Handle})
+	ctx.lastType = symbol.Type
 	return nil
 }
 
@@ -262,27 +309,32 @@ func compileExpExpression(ctx *Compiler, node parser.ExpExpression) error {
 }
 
 func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) error {
-	// for i := range node.Arguments {
-	// 	if err := compileBaseExpression(ctx, node.Arguments[i]); err != nil {
-	// 		return err
-	// 	}
-	// }
-	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
-	// ctx.instructions = append(ctx.instructions, Load{Type: UPTR})
-	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 7})
-	// ctx.instructions = append(ctx.instructions, Add{Type: UPTR})
-	// if err := compileBaseExpression(ctx, node.Identifier); err != nil {
-	// 	return err
-	// }
-	return fmt.Errorf("not implemented")
+	for i := range node.Arguments {
+		if err := compileBaseExpression(ctx, node.Arguments[i]); err != nil {
+			return err
+		}
+	}
+	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: len(node.Arguments)})
+	if err := compileBaseExpression(ctx, node.Identifier); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, Call{Type: UPTR}) // type is omittable
+	return nil
 }
 
 func compileVarAccessExpression(ctx *Compiler, node parser.VarAccessExpression) error {
+	for i := range ctx.globals {
+		if i == node.Identifier.StringValue {
+			ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: int(ctx.globals[i])})
+			return nil
+		}
+	}
 	symbol, err := ctx.symtable.Get(node.Identifier.StringValue)
 	if err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Handle: symbol.Handle})
+	ctx.lastType = symbol.Type
 	return nil
 }
 
