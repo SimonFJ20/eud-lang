@@ -137,6 +137,7 @@ type JumpNotZero struct {
 
 type Call struct {
 	Instruction
+	Type
 }
 
 type Return struct {
@@ -387,7 +388,7 @@ func (n Pop) String() string          { return fmt.Sprintf("Pop<%s>\t", n.Type) 
 func (n Jump) String() string         { return "Jump\t\t" }
 func (n JumpIfZero) String() string   { return "JumpIfZero\t" }
 func (n JumpNotZero) String() string  { return "JumpNotZero\t" }
-func (n Call) String() string         { return "Call\t\t" }
+func (n Call) String() string         { return fmt.Sprintf("Call<%s>\t", n.Type) }
 func (n Return) String() string       { return fmt.Sprintf("Return<%s>\t", n.Type) }
 func (n Not) String() string          { return fmt.Sprintf("Not<%s>\t", n.Type) }
 func (n Add) String() string          { return fmt.Sprintf("Add<%s>\t", n.Type) }

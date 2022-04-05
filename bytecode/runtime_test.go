@@ -5,7 +5,48 @@ import (
 	"testing"
 )
 
-func TestFunction(t *testing.T) {
+func TestSubroutine(t *testing.T) {
+	/*
+		func sum(a: i32, b: i32): i32
+			let sum: i32 = a + b
+			return sum
+		end
+		let x: i32 = 5
+		let y: i32 = 3
+		let s: i32 = sum(x, y)
+
+			Push uptr start
+			Jump
+		sum:
+			Add i32
+			Return i32
+		start:
+			Push i32 5
+			Push i32 3
+			Push usize 2
+			Push uptr sum
+			Call
+	*/
+	runtime := bytecode.Run(bytecode.Program{
+		Instructions: []bytecode.Instruction{
+			bytecode.Push{Type: bytecode.UPTR, Value: 4}, // 4 = start
+			bytecode.Jump{},
+			bytecode.Add{Type: bytecode.I32},
+			bytecode.Return{Type: bytecode.I32},
+			bytecode.Push{Type: bytecode.I32, Value: 5},
+			bytecode.Push{Type: bytecode.I32, Value: 3},
+			bytecode.Push{Type: bytecode.USIZE, Value: 2},
+			bytecode.Push{Type: bytecode.UPTR, Value: 2}, // 2 = sum
+			bytecode.Call{},
+		},
+		RunWithDebug: true})
+	result := runtime.Pop().(bytecode.I32Value).Value
+	if result != 8 {
+		t.Errorf("unexpected result %d", result)
+	}
+}
+
+func TestJumpFunction(t *testing.T) {
 	/*
 		func sum(a: i32, b: i32): i32
 			let sum: i32 = a + b

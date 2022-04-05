@@ -302,11 +302,24 @@ func runJumpNotZero(ctx *Runtime, i JumpNotZero) {
 }
 
 func runCall(ctx *Runtime, i Call) {
-	panic("not implemented")
+	addr := ctx.Pop().(UptrValue).Value
+	argc := ctx.Pop().(UsizeValue).Value
+	argv := []RuntimeValue{}
+	for i := 0; i < int(argc); i++ {
+		argv = append(argv, ctx.Pop())
+	}
+	ctx.Push(UptrValue{Value: ctx.Pc + 1})
+	for i := range argv {
+		ctx.Push(argv[i])
+	}
+	ctx.Pc = addr - 1
 }
 
 func runReturn(ctx *Runtime, i Return) {
-	panic("not implemented")
+	value := ctx.Pop()
+	addr := ctx.Pop().(UptrValue).Value
+	ctx.Push(value)
+	ctx.Pc = addr - 1
 }
 
 func runPush(ctx *Runtime, i Push) {

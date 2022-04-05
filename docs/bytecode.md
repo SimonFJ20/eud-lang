@@ -188,9 +188,12 @@ A highlevel stack implementation,
 a fancy type checker and/or fancy book keeping and
 perfect input (matching argument types).
 
+The type is for typecheckers to save time, although not implemented yet.
+
 ```go
 type Call struct {
 	Instruction
+	Type
 }
 ```
 
