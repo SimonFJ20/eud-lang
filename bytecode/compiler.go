@@ -109,12 +109,12 @@ func compileExpressionStatement(ctx *Compiler, node parser.BaseStatement) error 
 }
 
 func compileDeclarationStatement(ctx *Compiler, node parser.DeclarationStatement) error {
-	t, err := comileType(ctx, node.DeclType)
+	t, err := compileType(ctx, node.DeclType)
 	if err != nil {
 		return err
 	}
 	handle := ctx.nextVarId()
-	ctx.symtable.Set(node.Identifier.Text, Symbol{Type: t, Handle: handle})
+	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Handle: handle})
 	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
 	return nil
 }
@@ -123,8 +123,8 @@ func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error 
 	return fmt.Errorf("not implemented")
 }
 
-func comileType(ctx *Compiler, t parser.Token) (Type, error) {
-	switch t.Text {
+func compileType(ctx *Compiler, t parser.Token) (Type, error) {
+	switch t.StringValue {
 	case "u8":
 		return U8, nil
 	case "u16":
@@ -152,7 +152,7 @@ func comileType(ctx *Compiler, t parser.Token) (Type, error) {
 	case "uptr":
 		return UPTR, nil
 	default:
-		return -1, fmt.Errorf("unknown type '%s'", t.Text)
+		return -1, fmt.Errorf("unknown type '%s'", t.StringValue)
 	}
 }
 
@@ -185,7 +185,7 @@ func compileVarAssignExpression(ctx *Compiler, node parser.VarAssignExpression) 
 	if err := compileBaseExpression(ctx, node.Value); err != nil {
 		return err
 	}
-	symbol, err := ctx.symtable.Get(node.Identifier.Text)
+	symbol, err := ctx.symtable.Get(node.Identifier.StringValue)
 	if err != nil {
 		return err
 	}
@@ -278,7 +278,7 @@ func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) er
 }
 
 func compileVarAccessExpression(ctx *Compiler, node parser.VarAccessExpression) error {
-	symbol, err := ctx.symtable.Get(node.Identifier.Text)
+	symbol, err := ctx.symtable.Get(node.Identifier.StringValue)
 	if err != nil {
 		return err
 	}
@@ -287,6 +287,6 @@ func compileVarAccessExpression(ctx *Compiler, node parser.VarAccessExpression) 
 }
 
 func compileIntLiteral(ctx *Compiler, node parser.IntLiteral) error {
-	ctx.instructions = append(ctx.instructions, Push{Type: I32, Value: node.Tok.Value})
+	ctx.instructions = append(ctx.instructions, Push{Type: I32, Value: node.Tok.IntValue})
 	return nil
 }
