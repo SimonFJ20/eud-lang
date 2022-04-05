@@ -5,21 +5,77 @@ import (
 	"fmt"
 )
 
-type Compiler struct {
-	instructions []Instruction
+type Symbol struct {
+	Type   Type
+	Handle uint
 }
 
-func Compile(ast parser.BaseStatement) (Program, error) {
+type SymbolTable struct {
+	parent  *SymbolTable
+	symbols map[string]Symbol
+}
+
+func (s *SymbolTable) Set(name string, symbol Symbol) {
+	s.symbols[name] = symbol
+}
+
+func (s *SymbolTable) Get(name string) (Symbol, error) {
+	for i := range s.symbols {
+		if i == name {
+			return s.symbols[i], nil
+		}
+	}
+	if s.parent != nil {
+		return s.parent.Get(name)
+	}
+	return Symbol{}, fmt.Errorf("symbol \"%s\" undeclared", name)
+}
+
+func (s *SymbolTable) DefinedLocally(name string) bool {
+	for i := range s.symbols {
+		if i == name {
+			return true
+		}
+	}
+	return false
+}
+
+type Compiler struct {
+	instructions []Instruction
+	varId        uint
+	symtable     SymbolTable
+}
+
+func (ctx *Compiler) nextVarId() uint {
+	ctx.varId++
+	return ctx.varId - 1
+}
+
+func Compile(ast []parser.BaseStatement) (Program, error) {
 	ctx := Compiler{
 		instructions: []Instruction{},
+		varId:        0,
+		symtable: SymbolTable{
+			parent:  nil,
+			symbols: map[string]Symbol{},
+		},
 	}
-	err := compileBaseStatement(&ctx, ast)
+	err := compileStatements(&ctx, ast)
 	if err != nil {
 		return Program{}, err
 	}
 	return Program{
 		Instructions: ctx.instructions,
 	}, nil
+}
+
+func compileStatements(ctx *Compiler, nodes []parser.BaseStatement) error {
+	for i := range nodes {
+		if err := compileBaseStatement(ctx, nodes[i]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
@@ -29,24 +85,79 @@ func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 	case parser.FuncDefStatementType:
 		return compileFuncDefStatement(ctx, node.(parser.FuncDefStatement))
 	case parser.ExpressionStatementType:
-		return compileBaseExpression(ctx, node.(parser.ExpressionStatement).Expression)
+		return compileExpressionStatement(ctx, node)
+
 	default:
 		return fmt.Errorf("unknown or unexpected statement type '%s'", node.Type())
 	}
 }
 
+func compileExpressionStatement(ctx *Compiler, node parser.BaseStatement) error {
+	err := compileBaseExpression(ctx, node.(parser.ExpressionStatement).Expression)
+
+	// HACK
+	//  After an expression we can be fairly certain to have a value on top of the stack.
+	// 	after the expression the value is garbage, and needs to be cleaned up.
+	//  It would be smart to know the type of this value at compile time,
+	//  but that would require a fancy typechecker, which we don't have.
+	//  But because of the stack value implementation we can just pop with any type.
+	//  Notice. This hack also assumes funccalls and assignments always return a value,
+	//  which isn't hard to enforce.
+	ctx.instructions = append(ctx.instructions, Pop{Type: UPTR})
+
+	return err
+}
+
 func compileDeclarationStatement(ctx *Compiler, node parser.DeclarationStatement) error {
-	return fmt.Errorf("not implemented")
+	t, err := comileType(ctx, node.DeclType)
+	if err != nil {
+		return err
+	}
+	handle := ctx.nextVarId()
+	ctx.symtable.Set(node.Identifier.Text, Symbol{Type: t, Handle: handle})
+	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
+	return nil
 }
 
 func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error {
 	return fmt.Errorf("not implemented")
 }
 
+func comileType(ctx *Compiler, t parser.Token) (Type, error) {
+	switch t.Text {
+	case "u8":
+		return U8, nil
+	case "u16":
+		return U16, nil
+	case "u32":
+		return U32, nil
+	case "u64":
+		return U64, nil
+	case "i8":
+		return I8, nil
+	case "i16":
+		return I16, nil
+	case "i32":
+		return I32, nil
+	case "i64":
+		return I64, nil
+	case "f32":
+		return F32, nil
+	case "f64":
+		return F64, nil
+	case "char":
+		return CHAR, nil
+	case "usize":
+		return USIZE, nil
+	case "uptr":
+		return UPTR, nil
+	default:
+		return -1, fmt.Errorf("unknown type '%s'", t.Text)
+	}
+}
+
 func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 	switch node.Type() {
-	case parser.InvalidExpressionType:
-		return fmt.Errorf("cannot compile InvalidExpression")
 	case parser.VarAssignExpressionType:
 		return compileVarAssignExpression(ctx, node.(parser.VarAssignExpression))
 	case parser.AddExpressionType:
@@ -71,17 +182,23 @@ func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 }
 
 func compileVarAssignExpression(ctx *Compiler, node parser.VarAssignExpression) error {
-	return fmt.Errorf("not implemented")
-}
-
-func compileAddExpression(ctx *Compiler, node parser.AddExpression) error {
-	var err error = nil
-	err = compileBaseExpression(ctx, node.Left)
+	if err := compileBaseExpression(ctx, node.Value); err != nil {
+		return err
+	}
+	symbol, err := ctx.symtable.Get(node.Identifier.Text)
 	if err != nil {
 		return err
 	}
-	err = compileBaseExpression(ctx, node.Right)
-	if err != nil {
+	ctx.instructions = append(ctx.instructions, StoreLocal{Type: symbol.Type, Handle: symbol.Handle})
+	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Handle: symbol.Handle})
+	return nil
+}
+
+func compileAddExpression(ctx *Compiler, node parser.AddExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
+		return err
+	}
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Add{Type: I32})
@@ -145,11 +262,28 @@ func compileExpExpression(ctx *Compiler, node parser.ExpExpression) error {
 }
 
 func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) error {
+	// for i := range node.Arguments {
+	// 	if err := compileBaseExpression(ctx, node.Arguments[i]); err != nil {
+	// 		return err
+	// 	}
+	// }
+	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	// ctx.instructions = append(ctx.instructions, Load{Type: UPTR})
+	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 7})
+	// ctx.instructions = append(ctx.instructions, Add{Type: UPTR})
+	// if err := compileBaseExpression(ctx, node.Identifier); err != nil {
+	// 	return err
+	// }
 	return fmt.Errorf("not implemented")
 }
 
 func compileVarAccessExpression(ctx *Compiler, node parser.VarAccessExpression) error {
-	return fmt.Errorf("not implemented")
+	symbol, err := ctx.symtable.Get(node.Identifier.Text)
+	if err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Handle: symbol.Handle})
+	return nil
 }
 
 func compileIntLiteral(ctx *Compiler, node parser.IntLiteral) error {

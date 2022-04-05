@@ -92,7 +92,7 @@ type ExpExpression struct {
 }
 
 type FuncCallExpression struct {
-	Identifier Token
+	Identifier BaseExpression
 	Arguments  []BaseExpression
 }
 

@@ -55,6 +55,7 @@ func (t Token) String() string {
 type Token struct {
 	Type  TokenType
 	Value int
+	Text  string
 	Next  *Token
 }
 
