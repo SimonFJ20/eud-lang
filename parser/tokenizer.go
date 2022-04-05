@@ -14,6 +14,7 @@ const (
 	IntToken
 	LParenToken
 	RParenToken
+	RuneToken
 	IdentifierToken
 	KeywordToken
 )
@@ -46,65 +47,71 @@ func (t TokenType) String() string {
 func (t Token) String() string {
 	switch t.Type {
 	case IntToken:
-		return fmt.Sprintf("%s{%d}", t.Type, t.Value)
+		return fmt.Sprintf("%s{%d}", t.Type, t.IntValue)
+	case RuneToken:
+		return fmt.Sprintf("%s{%d}", t.Type, t.RuneValue)
 	default:
 		return fmt.Sprint(t.Type)
 	}
 }
 
 type Token struct {
-	Type  TokenType
-	Value int
-	Text  string
-	Next  *Token
+	Type TokenType
+	Next *Token
+
+	// union type
+	IntValue    int
+	StringValue string
+	RuneValue   rune
 }
 
 func tokenizeRune(r rune) *Token {
 	switch r {
 	case '+':
 		return &Token{
-			Type:  AddToken,
-			Value: 0,
+			Type: AddToken,
 		}
 	case '-':
 		return &Token{
-			Type:  SubToken,
-			Value: 0,
+			Type: SubToken,
 		}
 	case '*':
 		return &Token{
-			Type:  MulToken,
-			Value: 0,
+			Type: MulToken,
 		}
 	case '^':
 		return &Token{
-			Type:  ExpToken,
-			Value: 0,
+			Type: ExpToken,
 		}
 	case '/':
 		return &Token{
-			Type:  DivToken,
-			Value: 0,
+			Type: DivToken,
 		}
 	case '(':
 		return &Token{
-			Type:  LParenToken,
-			Value: 0,
+			Type: LParenToken,
 		}
 	case ')':
 		return &Token{
-			Type:  RParenToken,
-			Value: 0,
+			Type: RParenToken,
 		}
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return &Token{
-			Type:  IntToken,
-			Value: int(r) - 48,
+			Type:     IntToken,
+			IntValue: int(r) - 48,
 		}
 	case ' ', '\n':
 		return &Token{
-			Type:  InvalidToken,
-			Value: 0,
+			Type: InvalidToken,
+		}
+	case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+		'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z':
+
+		return &Token{
+			Type:      RuneToken,
+			RuneValue: r,
 		}
 	default:
 		panic(fmt.Sprintf("invalid character %c", r))
