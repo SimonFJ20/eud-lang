@@ -11,21 +11,21 @@ func TestVariables(t *testing.T) {
 		parser.DeclarationStatement{
 			TypedDeclaration: parser.TypedDeclaration{
 				DeclType: parser.Token{
-					Type: parser.KeywordToken, Value: 0, Text: "i32", Next: nil,
+					Type: parser.KeywordToken, StringValue: "i32", Next: nil,
 				},
 				Identifier: parser.Token{
-					Type: parser.IdentifierToken, Value: 0, Text: "a", Next: nil,
+					Type: parser.IdentifierToken, StringValue: "a", Next: nil,
 				},
 			},
 		},
 		parser.ExpressionStatement{
 			Expression: parser.VarAssignExpression{
 				Identifier: parser.Token{
-					Type: parser.IdentifierToken, Value: 0, Text: "a", Next: nil,
+					Type: parser.IdentifierToken, StringValue: "a", Next: nil,
 				},
 				Value: parser.IntLiteral{
 					Tok: &parser.Token{
-						Type: parser.IntToken, Value: 60, Text: "60", Next: nil,
+						Type: parser.IntToken, IntValue: 60, StringValue: "60", Next: nil,
 					},
 				},
 			},
@@ -33,18 +33,18 @@ func TestVariables(t *testing.T) {
 		parser.ExpressionStatement{
 			Expression: parser.VarAssignExpression{
 				Identifier: parser.Token{
-					Type: parser.IdentifierToken, Value: 0, Text: "a", Next: nil,
+					Type: parser.IdentifierToken, StringValue: "a", Next: nil,
 				},
 				Value: parser.AddExpression{
 					LeftRightExpression: parser.LeftRightExpression{
 						Left: parser.VarAccessExpression{
 							Identifier: parser.Token{
-								Type: parser.IdentifierToken, Value: 0, Text: "a", Next: nil,
+								Type: parser.IdentifierToken, StringValue: "a", Next: nil,
 							},
 						},
 						Right: parser.IntLiteral{
 							Tok: &parser.Token{
-								Type: parser.IntToken, Value: 5, Text: "5", Next: nil,
+								Type: parser.IntToken, IntValue: 5, StringValue: "5", Next: nil,
 							},
 						},
 					},
@@ -73,19 +73,19 @@ func TestMath(t *testing.T) {
 						LeftRightExpression: parser.LeftRightExpression{
 							Left: parser.IntLiteral{
 								Tok: &parser.Token{
-									Type: parser.IntToken, Value: 3, Text: "3", Next: nil,
+									Type: parser.IntToken, IntValue: 3, StringValue: "3", Next: nil,
 								},
 							},
 							Right: parser.IntLiteral{
 								Tok: &parser.Token{
-									Type: parser.IntToken, Value: 4, Text: "4", Next: nil,
+									Type: parser.IntToken, IntValue: 4, StringValue: "4", Next: nil,
 								},
 							},
 						},
 					},
 					Right: parser.IntLiteral{
 						Tok: &parser.Token{
-							Type: parser.IntToken, Value: 5, Text: "5", Next: nil,
+							Type: parser.IntToken, IntValue: 5, StringValue: "5", Next: nil,
 						},
 					},
 				},
