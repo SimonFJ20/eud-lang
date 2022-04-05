@@ -153,8 +153,12 @@ func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error 
 	if err := compileStatements(ctx, node.Body); err != nil {
 		return err
 	}
+	t, err := compileType(ctx, node.DeclType)
+	if err != nil {
+		return err
+	}
 	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: 0})
-	ctx.instructions = append(ctx.instructions, Return{Type: UPTR})
+	ctx.instructions = append(ctx.instructions, Return{Type: t})
 	ctx.instructions[start] = Push{Type: UPTR, Value: len(ctx.instructions) - start}
 	return nil
 }
