@@ -51,6 +51,8 @@ const (
 	JumpInstruction
 	JumpIfZeroInstruction
 	JumpNotZeroInstruction
+	CallInstruction
+	ReturnInstruction
 	NotInstruction
 	AddInstruction
 	SubtractInstruction
@@ -130,6 +132,14 @@ type JumpIfZero struct {
 }
 
 type JumpNotZero struct {
+	Instruction
+}
+
+type Call struct {
+	Instruction
+}
+
+type Return struct {
 	Instruction
 }
 
@@ -285,6 +295,10 @@ func (it InstructionType) String() string {
 		return "JumpIfZeroInstruction"
 	case JumpNotZeroInstruction:
 		return "JumpNotZeroInstruction"
+	case CallInstruction:
+		return "CallInstruction"
+	case ReturnInstruction:
+		return "ReturnInstruction"
 	case NotInstruction:
 		return "NotInstruction"
 	case AddInstruction:
@@ -339,6 +353,8 @@ func (n Pop) InstructionType() InstructionType          { return PopInstruction 
 func (n Jump) InstructionType() InstructionType         { return JumpInstruction }
 func (n JumpIfZero) InstructionType() InstructionType   { return JumpIfZeroInstruction }
 func (n JumpNotZero) InstructionType() InstructionType  { return JumpNotZeroInstruction }
+func (n Call) InstructionType() InstructionType         { return CallInstruction }
+func (n Return) InstructionType() InstructionType       { return ReturnInstruction }
 func (n Not) InstructionType() InstructionType          { return NotInstruction }
 func (n Add) InstructionType() InstructionType          { return AddInstruction }
 func (n Subtract) InstructionType() InstructionType     { return SubtractInstruction }
@@ -370,6 +386,8 @@ func (n Pop) String() string          { return fmt.Sprintf("Pop<%s>\t", n.Type) 
 func (n Jump) String() string         { return "Jump\t\t" }
 func (n JumpIfZero) String() string   { return "JumpIfZero\t" }
 func (n JumpNotZero) String() string  { return "JumpNotZero\t" }
+func (n Call) String() string         { return "Call\t" }
+func (n Return) String() string       { return "Return\t" }
 func (n Not) String() string          { return fmt.Sprintf("Not<%s>\t", n.Type) }
 func (n Add) String() string          { return fmt.Sprintf("Add<%s>\t", n.Type) }
 func (n Subtract) String() string     { return fmt.Sprintf("Subtract<%s>\t", n.Type) }

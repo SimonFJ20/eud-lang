@@ -140,6 +140,12 @@ func runInstruction(ctx *Runtime, i Instruction) {
 	case JumpNotZeroInstruction:
 		runJumpNotZero(ctx, i.(JumpNotZero))
 		return
+	case CallInstruction:
+		runCall(ctx, i.(Call))
+		return
+	case ReturnInstruction:
+		runReturn(ctx, i.(Return))
+		return
 	case NotInstruction:
 		runNot(ctx, i.(Not))
 		return
@@ -293,6 +299,14 @@ func runJumpNotZero(ctx *Runtime, i JumpNotZero) {
 	if condition != 0 {
 		ctx.Pc = addr - 1 // compensate for iterating ctx.Pc++
 	}
+}
+
+func runCall(ctx *Runtime, i Call) {
+	panic("not implemented")
+}
+
+func runReturn(ctx *Runtime, i Return) {
+	panic("not implemented")
 }
 
 func runPush(ctx *Runtime, i Push) {
