@@ -7,6 +7,7 @@ type StatementType int
 const (
 	DeclarationStatementType StatementType = iota
 	FuncDefStatementType
+	ReturnStatementType
 	ExpressionStatementType
 )
 
@@ -21,6 +22,11 @@ type FuncDefStatement struct {
 	DeclType   Type
 	Parameters []TypedDeclaration
 	Body       []BaseStatement
+}
+
+type ReturnStatement struct {
+	BaseStatement
+	Value BaseExpression
 }
 
 type DeclarationStatement struct {
@@ -234,6 +240,7 @@ func (n StatementType) String() string {
 
 func (n DeclarationStatement) Type() StatementType { return DeclarationStatementType }
 func (n FuncDefStatement) Type() StatementType     { return FuncDefStatementType }
+func (n ReturnStatement) Type() StatementType      { return ReturnStatementType }
 func (n ExpressionStatement) Type() StatementType  { return ExpressionStatementType }
 
 func (n DeclarationStatement) String() string {
@@ -241,6 +248,9 @@ func (n DeclarationStatement) String() string {
 }
 func (n FuncDefStatement) String() string {
 	return fmt.Sprintf("%s(%s, %s, [%s], [%s])", n.Type(), n.Identifier, n.DeclType, n.Parameters, n.Body)
+}
+func (n ReturnStatement) String() string {
+	return fmt.Sprintf("%s(%s)", n.Type(), n.Value)
 }
 func (n ExpressionStatement) String() string { return fmt.Sprintf("%s(%s)", n.Type(), n.Expression) }
 
