@@ -20,6 +20,7 @@ const (
 	WordToken
 	IdentifierToken
 	KeywordToken
+	EOFToken
 )
 
 func (t TokenType) String() string {
@@ -52,6 +53,8 @@ func (t TokenType) String() string {
 		return "identifier"
 	case KeywordToken:
 		return "keyword"
+	case EOFToken:
+		return "eof"
 	case InvalidToken:
 		return "invalid"
 	default:
@@ -222,9 +225,12 @@ func filterInvalidTokens(tokens *[]*Token) {
 
 func TokenizeString(s string) *Token {
 	runes := []rune(s)
-	tokens := make([]*Token, len(runes))
+	tokens := make([]*Token, len(runes) + 1)
 	for i := 0; i < len(runes); i++ {
 		tokens[i] = tokenizeRune(runes[i])
+	}
+	tokens[len(runes)] = &Token {
+		Type: EOFToken,
 	}
 	combineTokens(tokens)
 	linkTokens(tokens)

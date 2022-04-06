@@ -125,7 +125,7 @@ func (n StatementType) String() string {
 	case ExpressionStatementType:
 		return "ExpressionStatement"
 	default:
-		panic("unexhaustive")
+		panic("unexhaustive statementtype")
 	}
 }
 
@@ -163,8 +163,14 @@ func (n ExpressionType) String() string {
 		return "int"
 	case InvalidExpressionType:
 		return "invalid"
+	case VarAccessExpressionType:
+		return "var_access"
+	case VarAssignExpressionType:
+		return "var_assign"
+	case FuncCallExpressionType:
+		return "func_call"
 	default:
-		panic("unexhaustive")
+		panic("unexhaustive expressiontype")
 	}
 }
 

@@ -4,7 +4,10 @@ import "fmt"
 
 func (p *Parser) makeStatement() []BaseStatement {
 	statements := []BaseStatement{}
-	statements = append(statements, p.makeDeclaration())
+	for p.tok.Type != EOFToken {
+		statements = append(statements, p.makeDeclaration())
+		p.next()
+	}
 	return statements
 }
 
@@ -70,7 +73,6 @@ func (p *Parser) makeAssignment() BaseExpression {
 }
 
 func (p *Parser) makeAddition() BaseExpression {
-	fmt.Println("add")
 	left := p.makeSubtraction()
 	if p.tok == nil {
 		return left
@@ -150,7 +152,9 @@ func (p *Parser) makeValue() BaseExpression {
 			Tok: token,
 		}
 	} else if token.Type == IdentifierToken {
-		panic("not implemented")
+		return VarAccessExpression{
+			Identifier: *token,
+		}
 	} else {
 		return p.makeExpression()
 	}
