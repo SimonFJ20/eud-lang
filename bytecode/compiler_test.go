@@ -101,7 +101,7 @@ func TestFunctions(t *testing.T) {
 	program.Instructions = append(program.Instructions, bytecode.LoadLocal{Type: bytecode.I32, Handle: 2})
 	runtime := bytecode.Run(program)
 	result := runtime.Stack[0].(bytecode.I32Value).Value
-	if result != 7 {
+	if result != 8 {
 		t.Errorf("unexpected result %d", result)
 	}
 }
