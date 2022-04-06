@@ -12,6 +12,7 @@ const (
 	DivToken
 	ExpToken
 	IntToken
+	ColonToken
 	EqualsToken
 	LParenToken
 	RParenToken
@@ -44,7 +45,9 @@ func (t TokenType) String() string {
 	case WordToken:
 		return "word"
 	case EqualsToken:
-		return "="
+		return "equal"
+	case ColonToken:
+		return "colon"
 	case IdentifierToken:
 		return "identifier"
 	case KeywordToken:
@@ -61,7 +64,7 @@ func (t Token) String() string {
 	case IntToken:
 		return fmt.Sprintf("%s{%d}", t.Type, t.IntValue)
 	case RuneToken:
-		return fmt.Sprintf("%s{%d|%c}", t.Type, t.RuneValue)
+		return fmt.Sprintf("%s{%d|%c}", t.Type, t.RuneValue, t.RuneValue)
 	case WordToken:
 		return fmt.Sprintf("%s{%s}", t.Type, t.StringValue)
 	case IdentifierToken:
@@ -117,12 +120,16 @@ func tokenizeRune(r rune) *Token {
 		return &Token{
 			Type: EqualsToken,
 		}
+	case ':':
+		return &Token{
+			Type: ColonToken,
+		}
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return &Token{
 			Type:     IntToken,
 			IntValue: int(r) - 48,
 		}
-	case ' ', '\n':
+	case ' ', '\n', '\r', '\t':
 		return &Token{
 			Type: InvalidToken,
 		}
@@ -136,7 +143,7 @@ func tokenizeRune(r rune) *Token {
 			RuneValue: r,
 		}
 	default:
-		panic(fmt.Sprintf("invalid character %c", r))
+		panic(fmt.Sprintf("invalid character {%d|%c}", r, r))
 	}
 }
 
@@ -173,6 +180,10 @@ func combineTokens(tokens []*Token) {
 			tokens[i].StringValue = previousToken.StringValue + string(tokens[i].RuneValue)
 			tokens[i].Type = WordToken
 			previousToken.Type = InvalidToken
+		} else if tokens[i].Type == IntToken && previousToken.Type == WordToken {
+			tokens[i].StringValue = previousToken.StringValue + string(tokens[i].IntValue+48)
+			tokens[i].Type = WordToken
+			previousToken.Type = InvalidToken
 		}
 
 		previousToken = tokens[i]
@@ -198,17 +209,15 @@ func wordTokensToIdentifierOrKeywordTokens(tokens []*Token) {
 	}
 }
 
-func filterInvalidTokens(tokens []*Token) {
+func filterInvalidTokens(tokens *[]*Token) {
 	n := 0
-	for i := 0; i < len(tokens); i++ {
-		if tokens[i].Type != InvalidToken {
-			tokens[n] = tokens[i]
+	for i := 0; i < len(*tokens); i++ {
+		if (*tokens)[i].Type != InvalidToken {
+			(*tokens)[n] = (*tokens)[i]
 			n++
 		}
 	}
-	for i := n; i < len(tokens); i++ {
-		tokens[i] = nil
-	}
+	*tokens = (*tokens)[:n]
 }
 
 func TokenizeString(s string) *Token {
@@ -220,7 +229,7 @@ func TokenizeString(s string) *Token {
 	combineTokens(tokens)
 	linkTokens(tokens)
 	wordTokensToIdentifierOrKeywordTokens(tokens)
-	filterInvalidTokens(tokens)
+	filterInvalidTokens(&tokens)
 	for _, str := range tokens {
 		fmt.Printf("%s\n", str)
 	}
