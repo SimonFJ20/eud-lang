@@ -15,6 +15,7 @@ const (
 	LParenToken
 	RParenToken
 	RuneToken
+	WordToken
 	IdentifierToken
 	KeywordToken
 )
@@ -37,6 +38,14 @@ func (t TokenType) String() string {
 		return "r_paren"
 	case IntToken:
 		return "int"
+	case RuneToken:
+		return "rune"
+	case WordToken:
+		return "word"
+	case IdentifierToken:
+		return "identifier"
+	case KeywordToken:
+		return "keyword"
 	case InvalidToken:
 		return "invalid"
 	default:
@@ -49,7 +58,13 @@ func (t Token) String() string {
 	case IntToken:
 		return fmt.Sprintf("%s{%d}", t.Type, t.IntValue)
 	case RuneToken:
-		return fmt.Sprintf("%s{%d}", t.Type, t.RuneValue)
+		return fmt.Sprintf("%s{%d|%c}", t.Type, t.RuneValue)
+	case WordToken:
+		return fmt.Sprintf("%s{%s}", t.Type, t.StringValue)
+	case IdentifierToken:
+		return fmt.Sprintf("%s{%s}", t.Type, t.StringValue)
+	case KeywordToken:
+		return fmt.Sprintf("%s{%s}", t.Type, t.StringValue)
 	default:
 		return fmt.Sprint(t.Type)
 	}
@@ -118,13 +133,12 @@ func tokenizeRune(r rune) *Token {
 	}
 }
 
-func TokenizeString(s string) *Token {
-	runes := []rune(s)
-	firstToken := tokenizeRune(runes[0])
+func linkTokens(tokens []*Token) {
+	firstToken := tokens[0]
 	prevToken := firstToken
 
-	for i := 1; i < len(runes); i++ {
-		t := tokenizeRune(runes[i])
+	for i := 1; i < len(tokens); i++ {
+		t := tokens[i]
 		if prevToken.Type == InvalidToken {
 			firstToken = t
 			prevToken = t
@@ -134,6 +148,61 @@ func TokenizeString(s string) *Token {
 			prevToken = t
 		}
 	}
+}
 
-	return firstToken
+func combineTokens(tokens []*Token) {
+	previousToken := tokens[0]
+	for i := 1; i < len(tokens); i++ {
+		if previousToken.Type == RuneToken {
+			previousToken.StringValue = string(previousToken.RuneValue)
+			previousToken.Type = WordToken
+		}
+		if previousToken.Type == tokens[i].Type {
+			if tokens[i].Type == IntToken {
+				tokens[i].IntValue += previousToken.IntValue * 10
+				previousToken.Type = InvalidToken
+			}
+		} else if tokens[i].Type == RuneToken && previousToken.Type == WordToken {
+			tokens[i].StringValue = previousToken.StringValue + string(tokens[i].RuneValue)
+			tokens[i].Type = WordToken
+			previousToken.Type = InvalidToken
+		}
+
+		previousToken = tokens[i]
+	}
+}
+
+func wordTokenToIdentifierOrKeywordToken(token *Token) {
+	keywords := listOfKeywords()
+	for i := 0; i < len(keywords); i++ {
+		if token.StringValue == keywords[i] {
+			token.Type = KeywordToken
+			return
+		}
+	}
+	token.Type = IdentifierToken
+}
+
+func wordTokensToIdentifierOrKeywordTokens(tokens []*Token) {
+	for i := 0; i < len(tokens); i++ {
+		if tokens[i].Type == WordToken {
+			wordTokenToIdentifierOrKeywordToken(tokens[i])
+		}
+	}
+}
+
+func TokenizeString(s string) *Token {
+	runes := []rune(s)
+	tokens := make([]*Token, len(runes))
+	for i := 0; i < len(runes); i++ {
+		tokens[i] = tokenizeRune(runes[i])
+	}
+	combineTokens(tokens)
+	linkTokens(tokens)
+	wordTokensToIdentifierOrKeywordTokens(tokens)
+	for _, str := range tokens {
+		fmt.Printf("%s\n", str)
+	}
+
+	return tokens[0]
 }
