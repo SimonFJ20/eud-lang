@@ -1,5 +1,4 @@
 from enum import Enum, auto
-from re import T
 import sys
 from typing import List, Optional
 
@@ -42,6 +41,8 @@ class TT(Enum):
     INT = auto()
     LPAREN = auto()
     RPAREN = auto()
+    LBRACKET = auto()
+    RBRACKET = auto()
     LBRACE = auto()
     RBRACE = auto()
     ADD_OP = auto()
@@ -50,8 +51,9 @@ class TT(Enum):
     DIV_OP = auto()
     MOD_OP = auto()
     EXP_OP = auto()
-    TYPE_OP = auto()
     ASGN_OP = auto()
+    COLON = auto()
+    COMMA = auto()
 
 class Token:
     def __init__(self, type: TT, value: str, fp: Position) -> None:
@@ -111,9 +113,15 @@ class Lexer:
                 tokens.append(Token(TT.RPAREN, self.c, self.fp.copy()))
                 self.next()
             elif self.c == '[':
-                tokens.append(Token(TT.LBRACE, self.c, self.fp.copy()))
+                tokens.append(Token(TT.LBRACKET, self.c, self.fp.copy()))
                 self.next()
             elif self.c == ']':
+                tokens.append(Token(TT.RBRACKET, self.c, self.fp.copy()))
+                self.next()
+            elif self.c == '{':
+                tokens.append(Token(TT.LBRACE, self.c, self.fp.copy()))
+                self.next()
+            elif self.c == '}':
                 tokens.append(Token(TT.RBRACE, self.c, self.fp.copy()))
                 self.next()
             elif self.c == '+':
@@ -130,11 +138,14 @@ class Lexer:
             elif self.c == '%':
                 tokens.append(Token(TT.MOD_OP, self.c, self.fp.copy()))
                 self.next()
-            elif self.c == ':':
-                tokens.append(Token(TT.TYPE_OP, self.c, self.fp.copy()))
-                self.next()
             elif self.c == '=':
                 tokens.append(Token(TT.ASGN_OP, self.c, self.fp.copy()))
+                self.next()
+            elif self.c == ':':
+                tokens.append(Token(TT.COLON, self.c, self.fp.copy()))
+                self.next()
+            elif self.c == ',':
+                tokens.append(Token(TT.COMMA, self.c, self.fp.copy()))
                 self.next()
             else:
                 raise fail(f"unexpected character '{self.c}'", self.fp.copy())
@@ -201,6 +212,27 @@ class Type(Node):
 
     def __repr__(self) -> str: return super().__repr__() + f'({self.token.value})'
 
+class TypedDecl(Node):
+    def __init__(self, target: Token, type: Type) -> None:
+        super().__init__(target.fp)
+        self.target = target
+        self.type = type
+
+    def __repr__(self) -> str: return super().__repr__() + f'({self.target.value}, {self.type})'
+
+class FuncDef(Statement):
+    def __init__(self, target: Token, type: Type, params: List[TypedDecl], body: List[Statement], fp: Position) -> None:
+        super().__init__(fp)
+        self.target = target
+        self.params = params
+        self.type = type
+        self.body = body
+    
+    def __repr__(self) -> str:
+        paramstr = ','.join(map(lambda x:x.__repr__(), self.params))
+        bodystr = ','.join(map(lambda x:x.__repr__(), self.body))
+        return super().__repr__() + f'({self.target.value}, {self.type}, [{paramstr}], [{bodystr}])'
+
 class VarDecl(Statement):
     def __init__(self, target: Token, type: Type, fp: Position) -> None:
         super().__init__(fp)
@@ -249,13 +281,22 @@ class Exp(BinaryOperation):
     def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
         super().__init__(left, right, fp)
 
+class FuncCall(Expression):
+    def __init__(self, target: Expression, args: List[Expression]) -> None:
+        super().__init__(target.fp)
+        self.target = target
+        self.args = args
+    
+    def __repr__(self) -> str:
+        argstr = ','.join(map(lambda x:x.__repr__(), self.args))
+        return super().__repr__() + f'({self.target}, [{argstr}])'
+
 class Int(Expression):
     def __init__(self, token: Token) -> None:
         super().__init__(token.fp)
         self.token = token
     
     def __repr__(self) -> str: return f'{super().__repr__()}({self.token.value})'
-
 
 class Var(Expression):
     def __init__(self, token: Token) -> None:
@@ -286,10 +327,60 @@ class Parser:
         return statements
 
     def make_statement(self) -> Statement:
-        if self.t.value == 'let':
+        if self.t.value == 'func':
+            return self.make_func_def()
+        elif self.t.value == 'let':
             return self.make_declaration_statement()
         else:
             return self.make_expression()
+
+    def make_func_def(self) -> FuncDef:
+        fp = self.t.fp
+        self.next()
+        if self.t.type != TT.IDENTIFIER:
+            fail(f'expected identifier, got {self.t}', self.t.fp)
+        target = self.t
+        self.next()
+        if self.t.type != TT.LPAREN:
+            fail(f'expected \'(\', got {self.t}', self.t.fp)
+        self.next()
+        params: List[TypedDecl] = []
+        while not self.done and self.t.type != TT.RPAREN:
+            params.append(self.make_typed_declaration())
+            if self.t.type == TT.RPAREN:
+                break
+            elif self.t.type == TT.COMMA:
+                self.next()
+            else:
+              fail(f'expected \',\', got {self.t}', self.t.fp)
+        if self.t.type != TT.RPAREN:
+            fail(f'expected \')\', got {self.t}', self.t.fp)
+        self.next()
+        if self.t.type != TT.COLON:
+            fail(f'expected \':\', got {self.t}', self.t.fp)
+        self.next()
+        if self.t.value not in ['u8', 'u16', 'u32', 'u64', 'i8', 'i16', 'i32', 'i64', 'char', 'usize', 'uptr']:
+            fail(f'expected keyword, got {self.t}', self.t.fp)
+        type = self.make_type()
+        if self.t.type != TT.LBRACE:
+            fail("expected '{'" + f', got {self.t}', self.t.fp)
+        self.next()
+        body = self.make_statements()
+        if self.t.type != TT.RBRACE:
+            fail("expected '}'" + f', got {self.t}', self.t.fp)
+        self.next()
+        return FuncDef(target, type, params, body, fp)
+
+    def make_typed_declaration(self) -> TypedDecl:
+        target = self.t
+        self.next()
+        if self.t.type != TT.COLON:
+            fail(f'expected \':\', got {self.t}', self.t.fp)
+        self.next()
+        if self.t.value not in ['u8', 'u16', 'u32', 'u64', 'i8', 'i16', 'i32', 'i64', 'char', 'usize', 'uptr']:
+            fail(f'expected keyword, got {self.t}', self.t.fp)
+        type = self.make_type()
+        return TypedDecl(target, type)
 
     def make_declaration_statement(self) -> VarDecl:
         fp = self.t.fp
@@ -298,7 +389,7 @@ class Parser:
             fail(f'expected identifier, got {self.t}', self.t.fp)
         target = self.t
         self.next()
-        if self.t.type != TT.TYPE_OP:
+        if self.t.type != TT.COLON:
             fail(f"expected ':', got {self.t}", self.t.fp)
         self.next()
         type = self.make_type()
@@ -372,13 +463,33 @@ class Parser:
             return left
 
     def make_exponentation(self) -> Expression:
-        left = self.make_value()
+        left = self.make_func_call()
         if self.t.type == TT.EXP_OP:
             self.next()
             right = self.make_exponentation()
             return Exp(left, right, left.fp)
         else:
             return left
+
+    def make_func_call(self) -> Expression:
+        target = self.make_value()
+        if self.t.type == TT.LPAREN:
+            self.next()
+            args: List[Expression] = []
+            while not self.done and self.t.type != TT.RPAREN:
+                args.append(self.make_expression())
+                if self.t.type == TT.RPAREN:
+                    break
+                elif self.t.type == TT.COMMA:
+                    self.next()
+                else:
+                    fail(f'expected \',\', got {self.t}', self.t.fp)
+            if self.t.type != TT.RPAREN:
+                fail(f'expected \')\', got {self.t}', self.t.fp)
+            self.next()
+            return FuncCall(target, args)
+        else:
+            return target
 
     def make_value(self) -> Expression:
         token = self.t
