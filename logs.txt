@@ -17,11 +17,3 @@ mul
 div
 exp
 add
-returned int 4
-assignment
-add
-sub
-mul
-div
-exp
-returned int 4

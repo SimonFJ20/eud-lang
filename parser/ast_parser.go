@@ -4,9 +4,7 @@ import "fmt"
 
 func (p *Parser) makeStatement() []BaseStatement {
 	statements := []BaseStatement{}
-	for p.tok != nil {
-		statements = append(statements, p.makeDeclaration())
-	}
+	statements = append(statements, p.makeDeclaration())
 	return statements
 }
 
@@ -54,7 +52,6 @@ func (p *Parser) makeExpression() BaseExpression {
 }
 
 func (p *Parser) makeAssignment() BaseExpression {
-	fmt.Println("assignment")
 	id := p.tok
 	left := p.makeAddition()
 	if p.tok == nil {
@@ -79,9 +76,7 @@ func (p *Parser) makeAddition() BaseExpression {
 		return left
 	}
 	if p.tok.Type == AddToken {
-		p.next()
 		right := p.makeAddition()
-		fmt.Println("returned addition")
 		return AddExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
 		return left
@@ -89,14 +84,11 @@ func (p *Parser) makeAddition() BaseExpression {
 }
 
 func (p *Parser) makeSubtraction() BaseExpression {
-	fmt.Println("sub")
 	left := p.makeMultiplication()
 	if p.tok == nil {
 		return left
 	}
 	if p.tok.Type == SubToken {
-		p.next()
-		fmt.Println("returned sub")
 		right := p.makeSubtraction()
 		return SubExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
@@ -105,14 +97,11 @@ func (p *Parser) makeSubtraction() BaseExpression {
 }
 
 func (p *Parser) makeMultiplication() BaseExpression {
-	fmt.Println("mul")
 	left := p.makeDivision()
 	if p.tok == nil {
 		return left
 	}
 	if p.tok.Type == MulToken {
-		p.next()
-		fmt.Println("returned mul")
 		right := p.makeMultiplication()
 		return MulExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
@@ -121,14 +110,11 @@ func (p *Parser) makeMultiplication() BaseExpression {
 }
 
 func (p *Parser) makeDivision() BaseExpression {
-	fmt.Println("div")
 	left := p.makeExponentation()
 	if p.tok == nil {
 		return left
 	}
 	if p.tok.Type == DivToken {
-		p.next()
-		fmt.Println("returned div")
 		right := p.makeDivision()
 		return DivExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
@@ -137,15 +123,12 @@ func (p *Parser) makeDivision() BaseExpression {
 }
 
 func (p *Parser) makeExponentation() BaseExpression {
-	fmt.Println("exp")
 	left := p.makeValue()
 	if p.tok == nil {
 		return left
 	}
 	if p.tok.Type == ExpToken {
-		p.next()
 		right := p.makeExponentation()
-		fmt.Println("returned exp")
 		return ExpExpression{LeftRightExpression{Left: left, Right: right}}
 	} else {
 		return left
@@ -157,22 +140,17 @@ func (p *Parser) makeValue() BaseExpression {
 	p.next()
 	if token.Type == LParenToken {
 		expr := p.makeExpression()
-		fmt.Printf("%+v\n", expr)
 		if p.tok.Type != RParenToken {
-			panic("unexpected: tokenType != RParen")
+			panic(fmt.Sprintf("unexpected tokenType, wanted r_paren, got %s", p.tok))
 		}
 		p.next()
 		return expr
-	} else if p.tok.Type == IntToken {
-		fmt.Println("returned int", p.tok.IntValue)
-		return IntLiteral{
-			Tok: p.tok,
-		}
-	} else if token.Type == IdentifierToken {
-		fmt.Println("returned id")
+	} else if token.Type == IntToken {
 		return IntLiteral{
 			Tok: token,
 		}
+	} else if token.Type == IdentifierToken {
+		panic("not implemented")
 	} else {
 		return p.makeExpression()
 	}
@@ -182,7 +160,6 @@ func (p *Parser) next() {
 	if p.tok.Next == nil {
 		// finished parsing
 	} else {
-		fmt.Printf("%s\n", p.tok)
 		p.tok = p.tok.Next
 	}
 }

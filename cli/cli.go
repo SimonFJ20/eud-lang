@@ -49,12 +49,6 @@ func Cli() {
 
 		tokens := parser.TokenizeString(text)
 
-		current_token := tokens
-		for current_token != nil {
-			println(current_token.Type.String())
-			current_token = current_token.Next
-		}
-
 		println("\033[1;36mParsing tokens:\033[0m")
 
 		p := parser.Parser{}
