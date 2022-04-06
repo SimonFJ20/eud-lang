@@ -12,6 +12,7 @@ const (
 	DivToken
 	ExpToken
 	IntToken
+	EqualsToken
 	LParenToken
 	RParenToken
 	RuneToken
@@ -42,6 +43,8 @@ func (t TokenType) String() string {
 		return "rune"
 	case WordToken:
 		return "word"
+	case EqualsToken:
+		return "="
 	case IdentifierToken:
 		return "identifier"
 	case KeywordToken:
@@ -109,6 +112,10 @@ func tokenizeRune(r rune) *Token {
 	case ')':
 		return &Token{
 			Type: RParenToken,
+		}
+	case '=':
+		return &Token{
+			Type: EqualsToken,
 		}
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return &Token{
@@ -191,6 +198,19 @@ func wordTokensToIdentifierOrKeywordTokens(tokens []*Token) {
 	}
 }
 
+func filterInvalidTokens(tokens []*Token) {
+	n := 0
+	for i := 0; i < len(tokens); i++ {
+		if tokens[i].Type != InvalidToken {
+			tokens[n] = tokens[i]
+			n++
+		}
+	}
+	for i := n; i < len(tokens); i++ {
+		tokens[i] = nil
+	}
+}
+
 func TokenizeString(s string) *Token {
 	runes := []rune(s)
 	tokens := make([]*Token, len(runes))
@@ -200,6 +220,7 @@ func TokenizeString(s string) *Token {
 	combineTokens(tokens)
 	linkTokens(tokens)
 	wordTokensToIdentifierOrKeywordTokens(tokens)
+	filterInvalidTokens(tokens)
 	for _, str := range tokens {
 		fmt.Printf("%s\n", str)
 	}
