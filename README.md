@@ -16,4 +16,5 @@
 - [Removing left-recursion - GeeksforGeeks](https://www.geeksforgeeks.org/removing-direct-and-indirect-left-recursion-in-a-grammar/)
 - [Recursive descent parser - GeeksforGeeks](https://www.geeksforgeeks.org/recursive-descent-parser/)
 - [Chomsky normal form grammar - Wikipedia](https://en.wikipedia.org/wiki/Chomsky_normal_form)
+- [Use of the return keyword - Kevlin Henney](https://youtu.be/SFv8Wm2HdNM?t=1669)
 
