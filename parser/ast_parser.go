@@ -4,17 +4,58 @@ import "fmt"
 
 func (p *Parser) makeStatement() []BaseStatement {
 	statements := []BaseStatement{}
-	for p.tok.Type != EOFToken {
-		statements = append(statements, p.makeDeclaration())
+	for p.tok.Type != EOFToken && p.tok.Type != RBraceToken {
+		statements = append(statements, p.makeFunction())
 		p.next()
 	}
 	return statements
 }
 
-func (p *Parser) makeDeclaration() BaseStatement {
-	if p.tok == nil {
-		panic("let token is nil")
+func (p *Parser) makeFunction() BaseStatement {
+	if p.tok.Type == KeywordToken && p.tok.StringValue == "fn" {
+		p.next()
+		id := p.tok
+		p.next()
+		if p.tok.Type != LParenToken {
+			panic(fmt.Sprintf("expected l_paren, got %s", p.tok.Type))
+		}
+		p.next()
+		params := p.makeTypedDeclaration()
+		p.next()
+		if p.tok.Type != RParenToken {
+			panic(fmt.Sprintf("expected r_paren, got %s", p.tok.Type))
+		}
+		p.next()
+		if p.tok.Type != ColonToken {
+			panic(fmt.Sprintf("expected colon, got %s", p.tok.Type))
+		}
+		p.next()
+		if p.tok.Type != KeywordToken {
+			panic("unrecognized type")
+		}
+		returnType := p.tok
+		p.next()
+		if p.tok.Type != LBraceToken {
+			panic(fmt.Sprintf("expected l_brace, got %s", p.tok.Type))
+		}
+		p.next()
+		body := p.makeStatement()
+		if p.tok.Type != RBraceToken {
+			panic(fmt.Sprintf("expected r_brace, got %s", p.tok.Type))
+		}
+
+		return FuncDefStatement {
+			Identifier: *id,
+			DeclType: *returnType,
+			Parameters: []TypedDeclaration{params},
+			Body: body,
+		}
+	} else {
+		return p.makeDeclaration()
 	}
+}
+
+func (p *Parser) makeDeclaration() BaseStatement {
 	if p.tok.Type == KeywordToken && p.tok.StringValue == "let" {
 		p.next()
 		decl := p.makeTypedDeclaration()
@@ -27,9 +68,6 @@ func (p *Parser) makeDeclaration() BaseStatement {
 }
 
 func (p *Parser) makeTypedDeclaration() TypedDeclaration {
-	if p.tok == nil {
-		panic("identifier token is nil")
-	}
 	if p.tok.Type == IdentifierToken {
 		idToken := p.tok
 		p.next()
@@ -57,9 +95,6 @@ func (p *Parser) makeExpression() BaseExpression {
 func (p *Parser) makeAssignment() BaseExpression {
 	id := p.tok
 	left := p.makeAddition()
-	if p.tok == nil {
-		return left
-	}
 	if p.tok.Type == AssignmentToken {
 		p.next()
 		value := p.makeAddition()
@@ -74,9 +109,6 @@ func (p *Parser) makeAssignment() BaseExpression {
 
 func (p *Parser) makeAddition() BaseExpression {
 	left := p.makeSubtraction()
-	if p.tok == nil {
-		return left
-	}
 	if p.tok.Type == AddToken {
 		right := p.makeAddition()
 		return AddExpression{LeftRightExpression{Left: left, Right: right}}
@@ -87,9 +119,6 @@ func (p *Parser) makeAddition() BaseExpression {
 
 func (p *Parser) makeSubtraction() BaseExpression {
 	left := p.makeMultiplication()
-	if p.tok == nil {
-		return left
-	}
 	if p.tok.Type == SubToken {
 		right := p.makeSubtraction()
 		return SubExpression{LeftRightExpression{Left: left, Right: right}}
@@ -100,9 +129,6 @@ func (p *Parser) makeSubtraction() BaseExpression {
 
 func (p *Parser) makeMultiplication() BaseExpression {
 	left := p.makeDivision()
-	if p.tok == nil {
-		return left
-	}
 	if p.tok.Type == MulToken {
 		right := p.makeMultiplication()
 		return MulExpression{LeftRightExpression{Left: left, Right: right}}
@@ -113,9 +139,6 @@ func (p *Parser) makeMultiplication() BaseExpression {
 
 func (p *Parser) makeDivision() BaseExpression {
 	left := p.makeExponentation()
-	if p.tok == nil {
-		return left
-	}
 	if p.tok.Type == DivToken {
 		right := p.makeDivision()
 		return DivExpression{LeftRightExpression{Left: left, Right: right}}
@@ -126,9 +149,6 @@ func (p *Parser) makeDivision() BaseExpression {
 
 func (p *Parser) makeExponentation() BaseExpression {
 	left := p.makeValue()
-	if p.tok == nil {
-		return left
-	}
 	if p.tok.Type == ExpToken {
 		right := p.makeExponentation()
 		return ExpExpression{LeftRightExpression{Left: left, Right: right}}
@@ -163,6 +183,7 @@ func (p *Parser) makeValue() BaseExpression {
 func (p *Parser) next() {
 	if p.tok.Next == nil {
 		// finished parsing
+		fmt.Printf("%s\n",p.tok.Next.Type)
 	} else {
 		p.tok = p.tok.Next
 	}

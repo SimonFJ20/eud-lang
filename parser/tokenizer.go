@@ -14,8 +14,11 @@ const (
 	IntToken
 	ColonToken
 	AssignmentToken
+	ParameterSeperatorToken
 	LParenToken
 	RParenToken
+	LBraceToken
+	RBraceToken
 	RuneToken
 	WordToken
 	IdentifierToken
@@ -25,40 +28,26 @@ const (
 
 func (t TokenType) String() string {
 	switch t {
-	case AddToken:
-		return "add"
-	case SubToken:
-		return "sub"
-	case MulToken:
-		return "mul"
-	case DivToken:
-		return "div"
-	case ExpToken:
-		return "exp"
-	case LParenToken:
-		return "l_paren"
-	case RParenToken:
-		return "r_paren"
-	case IntToken:
-		return "int"
-	case RuneToken:
-		return "rune"
-	case WordToken:
-		return "word"
-	case AssignmentToken:
-		return "assign"
-	case ColonToken:
-		return "colon"
-	case IdentifierToken:
-		return "identifier"
-	case KeywordToken:
-		return "keyword"
-	case EOFToken:
-		return "eof"
-	case InvalidToken:
-		return "invalid"
-	default:
-		return "invalid"
+	case AddToken:return "add"
+	case SubToken:return "sub"
+	case MulToken:return "mul"
+	case DivToken:return "div"
+	case ExpToken:return "exp"
+	case LParenToken:return "l_paren"
+	case RParenToken:return "r_paren"
+	case LBraceToken:return "l_brace"
+	case RBraceToken:return "r_brace"
+	case IntToken:return "int"
+	case RuneToken:return "rune"
+	case ParameterSeperatorToken:return "param_sep"
+	case WordToken:return "word"
+	case AssignmentToken:return "assign"
+	case ColonToken:return "colon"
+	case IdentifierToken:return "identifier"
+	case KeywordToken:return "keyword"
+	case EOFToken:return "eof"
+	case InvalidToken:return "invalid"
+	default:return "invalid"
 	}
 }
 
@@ -67,7 +56,7 @@ func (t Token) String() string {
 	case IntToken:
 		return fmt.Sprintf("%s{%d}", t.Type, t.IntValue)
 	case RuneToken:
-		return fmt.Sprintf("%s{%d|%c}", t.Type, t.RuneValue, t.RuneValue)
+		return fmt.Sprintf("%s{%d|'%c'}", t.Type, t.RuneValue, t.RuneValue)
 	case WordToken:
 		return fmt.Sprintf("%s{%s}", t.Type, t.StringValue)
 	case IdentifierToken:
@@ -119,9 +108,21 @@ func tokenizeRune(r rune) *Token {
 		return &Token{
 			Type: RParenToken,
 		}
+	case '{':
+		return &Token{
+			Type: LBraceToken,
+		}
+	case '}':
+		return &Token{
+			Type: RBraceToken,
+		}
 	case '=':
 		return &Token{
 			Type: AssignmentToken,
+		}
+	case ',':
+		return &Token{
+			Type: ParameterSeperatorToken,
 		}
 	case ':':
 		return &Token{
@@ -139,7 +140,8 @@ func tokenizeRune(r rune) *Token {
 	case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
 		'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z':
+		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
+		'_':
 
 		return &Token{
 			Type:      RuneToken,

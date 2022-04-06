@@ -7,7 +7,7 @@ statement -> func_def
            | declaration_statement 
            | expression
 
-func_def -> "fn" identifier LParen typed_declarations RParen "{" statements "}"
+func_def -> "fn" identifier "(" typed_declarations ")" ":" type "{" statements "}"
 
 typed_declarations -> (typed_declaration (, typed_declaration)*)?
 

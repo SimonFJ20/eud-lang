@@ -1,5 +1,5 @@
 
-func sum(a: i32, b: i32): i32 {
+fn sum(a: i32, b: i32): i32 {
     a + b
 }
 
@@ -8,5 +8,3 @@ x = 4
 
 let y: i32
 y = 6
-
-sum(x, y)
