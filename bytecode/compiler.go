@@ -93,7 +93,7 @@ func compileStatements(ctx *Compiler, nodes []parser.BaseStatement) error {
 }
 
 func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
-	switch node.Type() {
+	switch node.StatementType() {
 	case parser.DeclarationStatementType:
 		return compileDeclarationStatement(ctx, node.(parser.DeclarationStatement))
 	case parser.FuncDefStatementType:
@@ -104,7 +104,7 @@ func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 		return compileExpressionStatement(ctx, node)
 
 	default:
-		return fmt.Errorf("unknown or unexpected statement type '%s'", node.Type())
+		return fmt.Errorf("unknown or unexpected statement type '%s'", node.StatementType())
 	}
 }
 
@@ -207,7 +207,7 @@ func compileType(ctx *Compiler, t parser.Token) (Type, error) {
 }
 
 func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
-	switch node.Type() {
+	switch node.ExpressionType() {
 	case parser.VarAssignExpressionType:
 		return compileVarAssignExpression(ctx, node.(parser.VarAssignExpression))
 	case parser.AddExpressionType:
@@ -227,7 +227,7 @@ func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 	case parser.IntExpressionType:
 		return compileIntLiteral(ctx, node.(parser.IntLiteral))
 	default:
-		return fmt.Errorf("unknown or unexpected expression type '%s'", node.Type())
+		return fmt.Errorf("unknown or unexpected expression type '%s'", node.ExpressionType())
 	}
 }
 
