@@ -13,7 +13,7 @@ const (
 	ExpToken
 	IntToken
 	ColonToken
-	EqualsToken
+	AssignmentToken
 	LParenToken
 	RParenToken
 	RuneToken
@@ -44,8 +44,8 @@ func (t TokenType) String() string {
 		return "rune"
 	case WordToken:
 		return "word"
-	case EqualsToken:
-		return "equal"
+	case AssignmentToken:
+		return "assign"
 	case ColonToken:
 		return "colon"
 	case IdentifierToken:
@@ -118,7 +118,7 @@ func tokenizeRune(r rune) *Token {
 		}
 	case '=':
 		return &Token{
-			Type: EqualsToken,
+			Type: AssignmentToken,
 		}
 	case ':':
 		return &Token{

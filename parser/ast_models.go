@@ -24,42 +24,6 @@ type FuncDefStatement struct {
 	Body       []BaseStatement
 }
 
-type ReturnStatement struct {
-	BaseStatement
-	Value BaseExpression
-}
-
-type DeclarationStatement struct {
-	BaseStatement
-	TypedDeclaration
-}
-
-type TypedDeclaration struct {
-	DeclType   Type
-	Identifier Token
-}
-
-type Type = Token
-
-type ExpressionStatement struct {
-	BaseStatement
-	Expression BaseExpression
-}
-
-type ExpressionType int
-
-const (
-	InvalidExpressionType ExpressionType = iota
-	VarAccessExpressionType
-	VarAssignExpressionType
-	AddExpressionType
-	SubExpressionType
-	MulExpressionType
-	DivExpressionType
-	ExpExpressionType
-	IntExpressionType
-	FuncCallExpressionType
-)
 
 type BaseExpression interface {
 	ExpressionType() ExpressionType
@@ -115,115 +79,42 @@ type Parser struct {
 	tok *Token
 }
 
-func (p *Parser) makeExpression() BaseExpression {
-	return p.makeAddition()
+type ReturnStatement struct {
+	BaseStatement
+	Value BaseExpression
 }
 
-func (p *Parser) makeAddition() BaseExpression {
-	left := p.makeSubtraction()
-	if p.tok == nil {
-		return left
-	}
-	if p.tok.Type == AddToken {
-		p.next()
-		right := p.makeAddition()
-		return AddExpression{LeftRightExpression{Left: left, Right: right}}
-	} else {
-		return left
-	}
+type DeclarationStatement struct {
+	BaseStatement
+	TypedDeclaration
 }
 
-func (p *Parser) makeSubtraction() BaseExpression {
-	left := p.makeMultiplication()
-	if p.tok == nil {
-		return left
-	}
-	if p.tok.Type == SubToken {
-		p.next()
-		right := p.makeSubtraction()
-		return SubExpression{LeftRightExpression{Left: left, Right: right}}
-	} else {
-		return left
-	}
+type TypedDeclaration struct {
+	DeclType   Type
+	Identifier Token
 }
 
-func (p *Parser) makeMultiplication() BaseExpression {
-	left := p.makeDivision()
-	if p.tok == nil {
-		return left
-	}
-	if p.tok.Type == MulToken {
-		p.next()
-		right := p.makeMultiplication()
-		return MulExpression{LeftRightExpression{Left: left, Right: right}}
-	} else {
-		return left
-	}
+type Type = Token
+
+type ExpressionStatement struct {
+	BaseStatement
+	Expression BaseExpression
 }
 
-func (p *Parser) makeDivision() BaseExpression {
-	left := p.makeExponentation()
-	if p.tok == nil {
-		return left
-	}
-	if p.tok.Type == DivToken {
-		p.next()
-		right := p.makeDivision()
-		return DivExpression{LeftRightExpression{Left: left, Right: right}}
-	} else {
-		return left
-	}
-}
+type ExpressionType int
 
-func (p *Parser) makeExponentation() BaseExpression {
-	left := p.makeValue()
-	if p.tok == nil {
-		return left
-	}
-	if p.tok.Type == ExpToken {
-		p.next()
-		right := p.makeExponentation()
-		return ExpExpression{LeftRightExpression{Left: left, Right: right}}
-	} else {
-		return left
-	}
-}
-
-func (p *Parser) makeValue() BaseExpression {
-	token := p.tok
-	p.next()
-	if token.Type == LParenToken {
-		expr := p.makeExpression()
-		if p.tok.Type != RParenToken {
-			panic("unexpected: tokenType != RParen")
-		}
-		p.next()
-		return expr
-	} else if p.tok.Type == IntToken {
-		return IntLiteral{
-			Tok: p.tok,
-		}
-	} else if token.Type == IntToken {
-		return IntLiteral{
-			Tok: token,
-		}
-	} else {
-		return p.makeExpression()
-	}
-}
-
-func (p *Parser) next() {
-	if p.tok.Next == nil {
-		// finished parsing
-	} else {
-		p.tok = p.tok.Next
-	}
-}
-
-func (p *Parser) Parse(t *Token) BaseStatement {
-	p.tok = t
-	return ExpressionStatement{Expression: p.makeExpression()}
-}
+const (
+	InvalidExpressionType ExpressionType = iota
+	VarAccessExpressionType
+	VarAssignExpressionType
+	AddExpressionType
+	SubExpressionType
+	MulExpressionType
+	DivExpressionType
+	ExpExpressionType
+	IntExpressionType
+	FuncCallExpressionType
+)
 
 func (n StatementType) String() string {
 	switch n {
@@ -291,20 +182,9 @@ func (n VarAssignExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Value)
 }
 
-/*
-func (n AddExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
-func (n SubExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
-func (n MulExpression) String() string { return fmt.Sprintf("%s(%s, %s)", n.Type(), n.Left, n.Right) }
-*/
 func (n LeftRightExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
 }
-
-/*
-func (n ExpExpression) String() string {
-	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
-}
-*/
 func (n FuncCallExpression) String() string {
 	return fmt.Sprintf("%s(%s, [%s])", n.ExpressionType(), n.Identifier, n.Arguments)
 }

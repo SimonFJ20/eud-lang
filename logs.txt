@@ -1,0 +1,27 @@
+[1;36mInput:[0m
+"3 + 4"
+int{3}
+add
+int{4}
+assignment
+add
+sub
+mul
+div
+exp
+int{3}
+assignment
+add
+sub
+mul
+div
+exp
+add
+returned int 4
+assignment
+add
+sub
+mul
+div
+exp
+returned int 4
