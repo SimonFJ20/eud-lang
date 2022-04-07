@@ -73,22 +73,17 @@ func Compile(ast []parser.BaseStatement) (Program, error) {
 }
 
 func compileStatements(ctx *Compiler, nodes []parser.BaseStatement) error {
-	scope_ctx := Compiler{
-		instructions: ctx.instructions,
-		varId:        ctx.varId,
-		symtable: SymbolTable{
-			parent:  &ctx.symtable,
-			symbols: map[string]Symbol{},
-		},
-		globals: ctx.globals,
+	symtable := ctx.symtable
+	ctx.symtable = SymbolTable{
+		parent:  &symtable,
+		symbols: map[string]Symbol{},
 	}
 	for i := range nodes {
-		if err := compileBaseStatement(&scope_ctx, nodes[i]); err != nil {
+		if err := compileBaseStatement(ctx, nodes[i]); err != nil {
 			return err
 		}
 	}
-	ctx.instructions = scope_ctx.instructions
-	ctx.varId = scope_ctx.varId
+	ctx.symtable = symtable
 	return nil
 }
 
@@ -161,6 +156,7 @@ func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error 
 	}
 	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: 0})
 	ctx.instructions = append(ctx.instructions, Return{Type: t})
+	fmt.Printf("bruhrbuhrubhr     %d\n", len(ctx.instructions)-start)
 	ctx.instructions[start] = Push{Type: UPTR, Value: len(ctx.instructions) - start}
 	return nil
 }
