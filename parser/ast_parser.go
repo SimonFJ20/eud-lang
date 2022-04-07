@@ -47,6 +47,7 @@ func (p *Parser) makeFunction() BaseStatement {
 		if p.tok.Type != RBraceToken {
 			panic(fmt.Sprintf("expected r_brace, got %s", p.tok.Type))
 		}
+		p.next()
 
 		return FuncDefStatement{
 			Identifier: *id,
