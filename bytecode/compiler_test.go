@@ -13,7 +13,7 @@ func TestFunctions(t *testing.T) {
 			Identifier: parser.Token{
 				Type: parser.IdentifierToken, StringValue: "sum", Next: nil,
 			},
-			DeclType: parser.Token{
+			ReturnType: parser.Token{
 				Type: parser.KeywordToken, StringValue: "i32", Next: nil,
 			},
 			Parameters: []parser.TypedDeclaration{

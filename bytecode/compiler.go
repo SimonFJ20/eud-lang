@@ -155,7 +155,7 @@ func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error 
 	if err := compileStatements(ctx, node.Body); err != nil {
 		return err
 	}
-	t, err := compileType(ctx, node.DeclType)
+	t, err := compileType(ctx, node.ReturnType)
 	if err != nil {
 		return err
 	}

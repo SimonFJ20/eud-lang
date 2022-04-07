@@ -44,11 +44,11 @@ func (p *Parser) makeFunction() BaseStatement {
 			panic(fmt.Sprintf("expected r_brace, got %s", p.tok.Type))
 		}
 
-		return FuncDefStatement {
+		return FuncDefStatement{
 			Identifier: *id,
-			DeclType: *returnType,
+			ReturnType: *returnType,
 			Parameters: []TypedDeclaration{params},
-			Body: body,
+			Body:       body,
 		}
 	} else {
 		return p.makeDeclaration()
@@ -59,7 +59,7 @@ func (p *Parser) makeDeclaration() BaseStatement {
 	if p.tok.Type == KeywordToken && p.tok.StringValue == "let" {
 		p.next()
 		decl := p.makeTypedDeclaration()
-		return DeclarationStatement {
+		return DeclarationStatement{
 			TypedDeclaration: decl,
 		}
 	} else {
@@ -78,8 +78,8 @@ func (p *Parser) makeTypedDeclaration() TypedDeclaration {
 		if p.tok.Type != KeywordToken {
 			panic("unrecognized type")
 		}
-		idType := p.tok 
-		return TypedDeclaration {
+		idType := p.tok
+		return TypedDeclaration{
 			DeclType:   *idType,
 			Identifier: *idToken,
 		}
@@ -100,7 +100,7 @@ func (p *Parser) makeAssignment() BaseExpression {
 		value := p.makeAddition()
 		return VarAssignExpression{
 			Identifier: *id,
-			Value:     value,
+			Value:      value,
 		}
 	} else {
 		return left
@@ -183,7 +183,7 @@ func (p *Parser) makeValue() BaseExpression {
 func (p *Parser) next() {
 	if p.tok.Next == nil {
 		// finished parsing
-		fmt.Printf("%s\n",p.tok.Next.Type)
+		fmt.Printf("%s\n", p.tok.Next.Type)
 	} else {
 		p.tok = p.tok.Next
 	}

@@ -19,11 +19,10 @@ type BaseStatement interface {
 type FuncDefStatement struct {
 	BaseStatement
 	Identifier Token
-	DeclType   Type
+	ReturnType Type
 	Parameters []TypedDeclaration
 	Body       []BaseStatement
 }
-
 
 type BaseExpression interface {
 	ExpressionType() ExpressionType
@@ -138,7 +137,7 @@ func (n DeclarationStatement) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.StatementType(), n.Identifier, n.DeclType)
 }
 func (n FuncDefStatement) String() string {
-	return fmt.Sprintf("%s(%s, %s, [%s], [%s])", n.StatementType(), n.Identifier, n.DeclType, n.Parameters, n.Body)
+	return fmt.Sprintf("%s(%s, %s, [%s], [%s])", n.StatementType(), n.Identifier, n.ReturnType, n.Parameters, n.Body)
 }
 func (n ReturnStatement) String() string {
 	return fmt.Sprintf("%s(%s)", n.StatementType(), n.Value)
