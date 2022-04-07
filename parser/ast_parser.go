@@ -4,10 +4,14 @@ import "fmt"
 
 func (p *Parser) makeStatement() []BaseStatement {
 	statements := []BaseStatement{}
-	for p.tok.Type != EOFToken && p.tok.Type != RBraceToken {
+	for p.tok.Type != EOFToken {
 		statements = append(statements, p.makeFunction())
+		if p.tok.Type == RBraceToken {
+			break
+		}
 		p.next()
 	}
+	fmt.Printf("%s\n", p.tok.Type)
 	return statements
 }
 
@@ -183,7 +187,6 @@ func (p *Parser) makeValue() BaseExpression {
 func (p *Parser) next() {
 	if p.tok.Next == nil {
 		// finished parsing
-		fmt.Printf("%s\n", p.tok.Next.Type)
 	} else {
 		p.tok = p.tok.Next
 	}
