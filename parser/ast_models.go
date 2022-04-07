@@ -142,7 +142,7 @@ func (n DeclarationStatement) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.StatementType(), n.Identifier, n.DeclType)
 }
 func (n FuncDefStatement) String() string {
-	return fmt.Sprintf("%s(%s, %s, [%s], [%s])", n.StatementType(), n.Identifier, n.ReturnType, n.Parameters, n.Body)
+	return fmt.Sprintf("%s(%s, %s, %s, %s)", n.StatementType(), n.Identifier, n.ReturnType, n.Parameters, n.Body)
 }
 func (n ReturnStatement) String() string {
 	return fmt.Sprintf("%s(%s)", n.StatementType(), n.Value)
@@ -260,7 +260,7 @@ func (n LeftRightExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
 }
 func (n FuncCallExpression) String() string {
-	return fmt.Sprintf("%s(%s, [%s])", n.ExpressionType(), n.Identifier, n.Arguments)
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Arguments)
 }
 func (n VarAccessExpression) String() string {
 	return fmt.Sprintf("%s(%s)", n.ExpressionType(), n.Identifier)

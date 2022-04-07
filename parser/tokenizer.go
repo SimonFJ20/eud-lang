@@ -28,26 +28,46 @@ const (
 
 func (t TokenType) String() string {
 	switch t {
-	case AddToken:return "add"
-	case SubToken:return "sub"
-	case MulToken:return "mul"
-	case DivToken:return "div"
-	case ExpToken:return "exp"
-	case LParenToken:return "l_paren"
-	case RParenToken:return "r_paren"
-	case LBraceToken:return "l_brace"
-	case RBraceToken:return "r_brace"
-	case IntToken:return "int"
-	case RuneToken:return "rune"
-	case ParameterSeperatorToken:return "param_sep"
-	case WordToken:return "word"
-	case AssignmentToken:return "assign"
-	case ColonToken:return "colon"
-	case IdentifierToken:return "identifier"
-	case KeywordToken:return "keyword"
-	case EOFToken:return "eof"
-	case InvalidToken:return "invalid"
-	default:return "invalid"
+	case AddToken:
+		return "add"
+	case SubToken:
+		return "sub"
+	case MulToken:
+		return "mul"
+	case DivToken:
+		return "div"
+	case ExpToken:
+		return "exp"
+	case LParenToken:
+		return "l_paren"
+	case RParenToken:
+		return "r_paren"
+	case LBraceToken:
+		return "l_brace"
+	case RBraceToken:
+		return "r_brace"
+	case IntToken:
+		return "int"
+	case RuneToken:
+		return "rune"
+	case ParameterSeperatorToken:
+		return "param_sep"
+	case WordToken:
+		return "word"
+	case AssignmentToken:
+		return "assign"
+	case ColonToken:
+		return "colon"
+	case IdentifierToken:
+		return "identifier"
+	case KeywordToken:
+		return "keyword"
+	case EOFToken:
+		return "eof"
+	case InvalidToken:
+		return "invalid"
+	default:
+		return "invalid"
 	}
 }
 
@@ -71,6 +91,7 @@ func (t Token) String() string {
 type Token struct {
 	Type TokenType
 	Next *Token
+	Prev *Token
 
 	// union type
 	IntValue    int
@@ -140,7 +161,7 @@ func tokenizeRune(r rune) *Token {
 	case 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
 		'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
+		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 		'_':
 
 		return &Token{
@@ -164,6 +185,7 @@ func linkTokens(tokens []*Token) {
 		}
 		if t.Type != InvalidToken {
 			prevToken.Next = t
+			t.Prev = prevToken
 			prevToken = t
 		}
 	}
@@ -227,11 +249,11 @@ func filterInvalidTokens(tokens *[]*Token) {
 
 func TokenizeString(s string) *Token {
 	runes := []rune(s)
-	tokens := make([]*Token, len(runes) + 1)
+	tokens := make([]*Token, len(runes)+1)
 	for i := 0; i < len(runes); i++ {
 		tokens[i] = tokenizeRune(runes[i])
 	}
-	tokens[len(runes)] = &Token {
+	tokens[len(runes)] = &Token{
 		Type: EOFToken,
 	}
 	combineTokens(tokens)

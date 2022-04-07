@@ -200,6 +200,14 @@ func (p *Parser) next() {
 	}
 }
 
+func (p *Parser) prev() {
+	if p.tok.Prev == nil {
+		// unable
+	} else {
+		p.tok = p.tok.Prev
+	}
+}
+
 func (p *Parser) Parse(t *Token) []BaseStatement {
 	p.tok = t
 	return p.makeStatement()
