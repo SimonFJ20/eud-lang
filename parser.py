@@ -31,6 +31,9 @@ class Position:
     def __repr__(self) -> str:
         return f'{self.filename}:{self.row}:{self.col}:'
 
+    def to_json(self) -> str:
+        return f'{{"type":"Position","row":{self.row},"col":{self.col},"filename":"{self.filename}"}}'
+
 def fail(msg: str, pos: Optional[Position]):
     print(f'FAILED: {msg}')
     if pos: print(f'    at {pos}')
@@ -57,15 +60,41 @@ class TT(Enum):
     COLON = auto()
     COMMA = auto()
 
+def tokentype_to_string(t: TT) -> str:
+    if t == TT.EOF:             return 'EOF'
+    elif t == TT.IDENTIFIER:    return 'IDENTIFIER'
+    elif t == TT.KEYWORD:       return 'KEYWORD'
+    elif t == TT.INT:           return 'INT'
+    elif t == TT.LPAREN:        return 'LPAREN'
+    elif t == TT.RPAREN:        return 'RPAREN'
+    elif t == TT.LBRACKET:      return 'LBRACKET'
+    elif t == TT.RBRACKET:      return 'RBRACKET'
+    elif t == TT.LBRACE:        return 'LBRACE'
+    elif t == TT.RBRACE:        return 'RBRACE'
+    elif t == TT.ADD_OP:        return 'ADD_OP'
+    elif t == TT.SUB_OP:        return 'SUB_OP'
+    elif t == TT.MUL_OP:        return 'MUL_OP'
+    elif t == TT.DIV_OP:        return 'DIV_OP'
+    elif t == TT.MOD_OP:        return 'MOD_OP'
+    elif t == TT.EXP_OP:        return 'EXP_OP'
+    elif t == TT.ASGN_OP:       return 'ASGN_OP'
+    elif t == TT.COLON:         return 'COLON'
+    elif t == TT.COMMA:         return 'COMMA'
+    else: raise Exception('unexhaustive')
+
 class Token:
     def __init__(self, type: TT, value: str, fp: Position) -> None:
         self.type = type
         self.value = value
         self.fp = fp
-        self.first_on_line = False
 
     def __repr__(self) -> str:
         return f"[{str(self.type)[3:]}:'{self.value}']"
+
+    def to_json(self) -> str:
+        tstr = tokentype_to_string(self.type)
+        fpstr = self.fp.to_json()
+        return f'{{"type": "Token","tokenType":"{tstr}","value":"{self.value}","fp":{fpstr}}}'
 
 KEYWORDS: List[str] = [
     'if',
@@ -73,9 +102,8 @@ KEYWORDS: List[str] = [
     'for',
     'while',
     'break',
-    'fn',
+    'func',
     'return',
-    'end',
     'let',
     'u8',
     'u16',
@@ -197,7 +225,13 @@ class Node:
     def __init__(self, fp: Position) -> None:
         self.fp = fp
     
+    def typestr(self) -> str:
+        return f'{type(self).__name__}Node'
+
     def __repr__(self) -> str: return f'{type(self).__name__}'
+
+    def to_json(self) -> str:
+        raise NotImplemented
 
 class Statement(Node):
     def __init__(self, fp: Position) -> None:
@@ -214,6 +248,9 @@ class Type(Node):
 
     def __repr__(self) -> str: return super().__repr__() + f'({self.token.value})'
 
+    def to_json(self) -> str:
+        return f'{{"type":"{self.typestr()}","token":{self.token.to_json()},"fp":{self.fp.to_json()}}}'
+
 class TypedDecl(Node):
     def __init__(self, target: Token, type: Type) -> None:
         super().__init__(target.fp)
@@ -221,6 +258,9 @@ class TypedDecl(Node):
         self.type = type
 
     def __repr__(self) -> str: return super().__repr__() + f'({self.target.value}, {self.type})'
+
+    def to_json(self) -> str:
+        return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"valueType":{self.type.to_json()},"fp":{self.fp.to_json()}}}'
 
 class FuncDef(Statement):
     def __init__(self, target: Token, type: Type, params: List[TypedDecl], body: List[Statement], fp: Position) -> None:
@@ -235,6 +275,13 @@ class FuncDef(Statement):
         bodystr = ','.join(map(lambda x:x.__repr__(), self.body))
         return super().__repr__() + f'({self.target.value}, {self.type}, [{paramstr}], [{bodystr}])'
 
+    def to_json(self) -> str:
+        tstr = self.target.to_json()
+        vtstr = self.type.to_json()
+        paramstr = ','.join(map(lambda x:x.to_json(), self.params))
+        bodystr = ','.join(map(lambda x:x.to_json(), self.body))
+        return f'{{"type":"{self.typestr()}","target":{tstr},"valueType":{vtstr},"params":[{paramstr}],"body":[{bodystr}],"fp":{self.fp.to_json()}}}'
+
 class VarDecl(Statement):
     def __init__(self, target: Token, type: Type, fp: Position) -> None:
         super().__init__(fp)
@@ -242,6 +289,9 @@ class VarDecl(Statement):
         self.type = type
     
     def __repr__(self) -> str: return super().__repr__() + f'({self.target.value}, {self.type})'
+
+    def to_json(self) -> str:
+        return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"valueType":{self.type.to_json()},"fp":{self.fp.to_json()}}}'
 
 class Assign(Expression):
     def __init__(self, target: Token, value: Expression, fp: Position) -> None:
@@ -251,6 +301,9 @@ class Assign(Expression):
 
     def __repr__(self) -> str: return super().__repr__() + f'({self.target.value}, {self.value})'
 
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"value":{self.value.to_json()},"fp":{self.fp.to_json()}}}'
+
 class BinaryOperation(Expression):
     def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
         super().__init__(fp)
@@ -258,6 +311,9 @@ class BinaryOperation(Expression):
         self.right = right
 
     def __repr__(self) -> str: return super().__repr__() + f'({self.left}, {self.right})'
+
+    def to_json(self) -> str:
+        return f'{{"type":"{self.typestr()}","left":{self.left.to_json()},"right":{self.right.to_json()},"fp":{self.fp.to_json()}}}'
 
 class Add(BinaryOperation):
     def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
@@ -293,6 +349,10 @@ class FuncCall(Expression):
         argstr = ','.join(map(lambda x:x.__repr__(), self.args))
         return super().__repr__() + f'({self.target}, [{argstr}])'
 
+    def to_json(self):
+        argstr = ','.join(map(lambda x:x.to_json(), self.args))
+        return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"args":[{argstr}],"fp":{self.fp.to_json()}}}'
+
 class Int(Expression):
     def __init__(self, token: Token) -> None:
         super().__init__(token.fp)
@@ -300,12 +360,18 @@ class Int(Expression):
     
     def __repr__(self) -> str: return f'{super().__repr__()}({self.token.value})'
 
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","token":{self.token.to_json()},"fp":{self.fp.to_json()}}}'
+
 class Var(Expression):
     def __init__(self, token: Token) -> None:
         super().__init__(token.fp)
         self.token = token
     
     def __repr__(self) -> str: return f'{super().__repr__()}({self.token.value})'
+
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","token":{self.token.to_json()},"fp":{self.fp.to_json()}}}'
 
 class Parser:
     def parse(self, tokens: List[Token]) -> List[Statement]:
@@ -526,9 +592,16 @@ def main():
         print('python3 parser.py <file>')
     filename = sys.argv[1]
     tokens = Lexer().tokenize(File(filename))
-    for i in tokens: print(i)
+    # for i in tokens: print(i)
     ast = Parser().parse(tokens)
-    for i in ast: print(i)
+    # for i in ast: print(i.to_json())
+    # print('{"type":"AST","body":[' + ','.join([i.to_json() for i in ast]) + ']}')
+    res = '[' + ','.join([i.to_json() for i in ast]) + ']'
+    if '-ofile' in sys.argv:
+        with open('ast.temp.json', 'w') as f:
+            f.write(res)
+    else:
+        print(res)
 
 if __name__ == '__main__':
     main()

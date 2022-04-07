@@ -1,8 +1,8 @@
 
-fn add_six(a: i32): i32 {
+func add_six(a: i32): i32 {
     let y: i32
     y = 2
-    a + 9
+    a + 94
 }
 
 let x: i32

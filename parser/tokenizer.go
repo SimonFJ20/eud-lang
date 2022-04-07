@@ -208,7 +208,7 @@ func combineTokens(tokens []*Token) {
 			tokens[i].Type = WordToken
 			previousToken.Type = InvalidToken
 		} else if tokens[i].Type == IntToken && previousToken.Type == WordToken {
-			tokens[i].StringValue = previousToken.StringValue + string(tokens[i].IntValue+48)
+			tokens[i].StringValue = previousToken.StringValue + fmt.Sprintf("%c", tokens[i].IntValue+48)
 			tokens[i].Type = WordToken
 			previousToken.Type = InvalidToken
 		}

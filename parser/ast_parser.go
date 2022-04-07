@@ -118,7 +118,7 @@ func (p *Parser) makeAddition() BaseExpression {
 	left := p.makeSubtraction()
 	if p.tok.Type == AddToken {
 		right := p.makeAddition()
-		return AddExpression{LeftRightExpression{Left: left, Right: right}}
+		return AddExpression{Left: left, Right: right}
 	} else {
 		return left
 	}
@@ -129,7 +129,7 @@ func (p *Parser) makeSubtraction() BaseExpression {
 	left := p.makeMultiplication()
 	if p.tok.Type == SubToken {
 		right := p.makeSubtraction()
-		return SubExpression{LeftRightExpression{Left: left, Right: right}}
+		return SubExpression{Left: left, Right: right}
 	} else {
 		return left
 	}
@@ -140,7 +140,7 @@ func (p *Parser) makeMultiplication() BaseExpression {
 	left := p.makeDivision()
 	if p.tok.Type == MulToken {
 		right := p.makeMultiplication()
-		return MulExpression{LeftRightExpression{Left: left, Right: right}}
+		return MulExpression{Left: left, Right: right}
 	} else {
 		return left
 	}
@@ -151,7 +151,7 @@ func (p *Parser) makeDivision() BaseExpression {
 	left := p.makeExponentation()
 	if p.tok.Type == DivToken {
 		right := p.makeDivision()
-		return DivExpression{LeftRightExpression{Left: left, Right: right}}
+		return DivExpression{Left: left, Right: right}
 	} else {
 		return left
 	}
@@ -162,7 +162,7 @@ func (p *Parser) makeExponentation() BaseExpression {
 	left := p.makeValue()
 	if p.tok.Type == ExpToken {
 		right := p.makeExponentation()
-		return ExpExpression{LeftRightExpression{Left: left, Right: right}}
+		return ExpExpression{Left: left, Right: right}
 	} else {
 		return left
 	}

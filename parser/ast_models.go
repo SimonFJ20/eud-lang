@@ -39,30 +39,40 @@ type VarAssignExpression struct {
 	Value      BaseExpression
 }
 
-type LeftRightExpression struct {
+// type LeftRightExpression struct {
+// 	BaseExpression
+// 	Left  BaseExpression
+// 	Right BaseExpression
+// }
+
+type AddExpression struct {
 	BaseExpression
 	Left  BaseExpression
 	Right BaseExpression
 }
 
-type AddExpression struct {
-	LeftRightExpression
-}
-
 type SubExpression struct {
-	LeftRightExpression
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
 }
 
 type MulExpression struct {
-	LeftRightExpression
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
 }
 
 type DivExpression struct {
-	LeftRightExpression
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
 }
 
 type ExpExpression struct {
-	LeftRightExpression
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
 }
 
 type FuncCallExpression struct {
@@ -152,7 +162,7 @@ func (n ExpressionStatement) String() string {
 }
 
 func nstr(nesting int) string {
-	return strings.Repeat("|   ", nesting)
+	return strings.Repeat("    ", nesting)
 }
 
 func (n DeclarationStatement) StringNested(nesting int) string {
@@ -210,7 +220,8 @@ func (n ExpressionStatement) StringNested(nesting int) string {
 		"%s%s(\n%s\n%s)",
 		nstr(nesting),
 		n.StatementType(),
-		n.Expression.StringNested(nesting+1),
+		// n.Expression.StringNested(nesting+1),
+		fmt.Sprintf("%s<would segfault if printed>", nstr(nesting+1)),
 		nstr(nesting),
 	)
 }
@@ -256,9 +267,9 @@ func (n VarAssignExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Value)
 }
 
-func (n LeftRightExpression) String() string {
-	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
-}
+// func (n LeftRightExpression) String() string {
+// 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+// }
 func (n FuncCallExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Arguments)
 }
@@ -277,14 +288,16 @@ func (n VarAssignExpression) StringNested(nesting int) string {
 	)
 }
 
-func (n LeftRightExpression) StringNested(nesting int) string {
-	return fmt.Sprintf(
-		"%s%s(%s, %s)",
-		nstr(nesting),
-		n.ExpressionType(),
-		n.Left, n.Right,
-	)
-}
+// func (n LeftRightExpression) StringNested(nesting int) string {
+// 	return fmt.Sprintf(
+// 		"%s%s(%s, %s)",
+// 		nstr(nesting),
+// 		n.ExpressionType(),
+// 		n.Left,
+// 		n.Right,
+// 	)
+// }
+
 func (n FuncCallExpression) StringNested(nesting int) string {
 	return fmt.Sprintf(
 		"%s%s(%s, [%s])",

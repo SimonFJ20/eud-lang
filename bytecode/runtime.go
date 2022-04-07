@@ -114,7 +114,7 @@ func Run(p Program) Runtime {
 	}
 	for ctx.Pc < uintptr(len(p.Instructions)) {
 		if ctx.Debug {
-			fmt.Printf("%s\t%s\n", p.Instructions[ctx.Pc].String(), ctx.String())
+			fmt.Printf("  %s\t%s\n", p.Instructions[ctx.Pc].String(), ctx.String())
 		}
 		runInstruction(&ctx, p.Instructions[ctx.Pc])
 		ctx.Pc++
