@@ -11,7 +11,7 @@ func (p *Parser) makeStatement() []BaseStatement {
 		}
 		p.next()
 	}
-	fmt.Printf("%s\n", p.tok.Type)
+	fmt.Printf("%s\n", p.tok)
 	return statements
 }
 
@@ -94,14 +94,15 @@ func (p *Parser) makeTypedDeclaration() TypedDeclaration {
 }
 
 func (p *Parser) makeExpression() BaseExpression {
+	fmt.Printf("expr, %s\n", p.tok)
 	return p.makeAssignment()
 }
 
 func (p *Parser) makeAssignment() BaseExpression {
+	fmt.Printf("assign, %s\n", p.tok)
 	id := p.tok
 	left := p.makeAddition()
 	if p.tok.Type == AssignmentToken {
-		p.next()
 		value := p.makeAddition()
 		return VarAssignExpression{
 			Identifier: *id,
@@ -113,6 +114,7 @@ func (p *Parser) makeAssignment() BaseExpression {
 }
 
 func (p *Parser) makeAddition() BaseExpression {
+	fmt.Printf("add, %s\n", p.tok)
 	left := p.makeSubtraction()
 	if p.tok.Type == AddToken {
 		right := p.makeAddition()
@@ -123,6 +125,7 @@ func (p *Parser) makeAddition() BaseExpression {
 }
 
 func (p *Parser) makeSubtraction() BaseExpression {
+	fmt.Printf("sub, %s\n", p.tok)
 	left := p.makeMultiplication()
 	if p.tok.Type == SubToken {
 		right := p.makeSubtraction()
@@ -133,6 +136,7 @@ func (p *Parser) makeSubtraction() BaseExpression {
 }
 
 func (p *Parser) makeMultiplication() BaseExpression {
+	fmt.Printf("mul, %s\n", p.tok)
 	left := p.makeDivision()
 	if p.tok.Type == MulToken {
 		right := p.makeMultiplication()
@@ -143,6 +147,7 @@ func (p *Parser) makeMultiplication() BaseExpression {
 }
 
 func (p *Parser) makeDivision() BaseExpression {
+	fmt.Printf("div, %s\n", p.tok)
 	left := p.makeExponentation()
 	if p.tok.Type == DivToken {
 		right := p.makeDivision()
@@ -153,6 +158,7 @@ func (p *Parser) makeDivision() BaseExpression {
 }
 
 func (p *Parser) makeExponentation() BaseExpression {
+	fmt.Printf("exp, %s\n", p.tok)
 	left := p.makeValue()
 	if p.tok.Type == ExpToken {
 		right := p.makeExponentation()
@@ -163,6 +169,7 @@ func (p *Parser) makeExponentation() BaseExpression {
 }
 
 func (p *Parser) makeValue() BaseExpression {
+	fmt.Printf("val, %s\n", p.tok)
 	token := p.tok
 	p.next()
 	if token.Type == LParenToken {
