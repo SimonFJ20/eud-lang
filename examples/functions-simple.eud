@@ -2,6 +2,7 @@
 fn add_six(a: i32): i32 {
     let y: i32
     y = 2
+    a + 9
 }
 
 let x: i32
