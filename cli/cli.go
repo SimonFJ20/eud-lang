@@ -81,6 +81,14 @@ func Cli() {
 		program.RunWithDebug = true
 		runtime := bytecode.Run(program)
 
-		fmt.Printf("\033[1;36mResult:\033[0m\n%s = %s\n", text, runtime.Stack[0])
+		last_useful_index := 0
+		for i := len(runtime.Stack) - 1; i >= 0; i-- {
+			if runtime.Stack[i] != nil {
+				last_useful_index = i + 1
+				break
+			}
+		}
+
+		fmt.Printf("\033[1;36mResult:\033[0m\n%s\nStack: %s\n", text, runtime.Stack[:last_useful_index])
 	}
 }
