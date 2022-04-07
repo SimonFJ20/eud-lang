@@ -2,6 +2,8 @@ from enum import Enum, auto
 import sys
 from typing import List, Optional
 
+# clear && mypy parser.py && python3 parser.py examples/math.eud
+
 class File:
     def __init__(self, filename: str) -> None:
         self.filename = filename
