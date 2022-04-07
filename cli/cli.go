@@ -59,7 +59,12 @@ func Cli() {
 
 		println("\033[1;36mCompiling AST:\033[0m")
 
-		program, _ := bytecode.Compile(ast)
+		program, err := bytecode.Compile(ast)
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		for i := range program.Instructions {
 			fmt.Println(program.Instructions[i].String())
