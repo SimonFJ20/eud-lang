@@ -70,6 +70,6 @@ func Cli() {
 		program.RunWithDebug = true
 		runtime := bytecode.Run(program)
 
-		fmt.Printf("\033[1;36mResult:\033[0m\n%s = %d\n", text, runtime.Stack[0].(bytecode.I32Value).Value)
+		fmt.Printf("\033[1;36mResult:\033[0m\n%s = %d\n", text, runtime.Stack[0])
 	}
 }
