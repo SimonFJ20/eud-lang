@@ -41,6 +41,7 @@ type InstructionType int
 
 const (
 	AllocateInstruction InstructionType = iota
+	DeallocateInstruction
 	StoreInstruction
 	LoadInstruction
 	DeclareLocalInstruction
@@ -72,6 +73,7 @@ const (
 	NorInstruction
 	NandInstruction
 	XnorInstruction
+	SyscallInstruction
 )
 
 type Instruction interface {
@@ -80,6 +82,11 @@ type Instruction interface {
 }
 
 type Allocate struct {
+	Instruction
+	Type
+}
+
+type Deallocate struct {
 	Instruction
 	Type
 }
@@ -240,6 +247,10 @@ type Xnor struct {
 	Type
 }
 
+type Syscall struct {
+	Instruction
+}
+
 func (t Type) String() string {
 	switch t {
 	case U8:
@@ -277,6 +288,8 @@ func (it InstructionType) String() string {
 	switch it {
 	case AllocateInstruction:
 		return "AllocateInstruction"
+	case DeallocateInstruction:
+		return "DeallocateInstruction"
 	case StoreInstruction:
 		return "StoreInstruction"
 	case LoadInstruction:
@@ -339,12 +352,15 @@ func (it InstructionType) String() string {
 		return "NandInstruction"
 	case XnorInstruction:
 		return "XnorInstruction"
+	case SyscallInstruction:
+		return "SyscallInstruction"
 	default:
 		panic("unknown")
 	}
 }
 
 func (n Allocate) InstructionType() InstructionType     { return AllocateInstruction }
+func (n Deallocate) InstructionType() InstructionType   { return DeallocateInstruction }
 func (n Store) InstructionType() InstructionType        { return StoreInstruction }
 func (n Load) InstructionType() InstructionType         { return LoadInstruction }
 func (n DeclareLocal) InstructionType() InstructionType { return DeclareLocalInstruction }
@@ -376,8 +392,10 @@ func (n Xor) InstructionType() InstructionType          { return XorInstruction 
 func (n Nor) InstructionType() InstructionType          { return NorInstruction }
 func (n Nand) InstructionType() InstructionType         { return NandInstruction }
 func (n Xnor) InstructionType() InstructionType         { return XnorInstruction }
+func (n Syscall) InstructionType() InstructionType      { return SyscallInstruction }
 
 func (n Allocate) String() string     { return fmt.Sprintf("Allocate<%s>\t", n.Type) }
+func (n Deallocate) String() string   { return fmt.Sprintf("Deallocate<%s>\t", n.Type) }
 func (n Store) String() string        { return fmt.Sprintf("Store<%s>\t", n.Type) }
 func (n Load) String() string         { return fmt.Sprintf("Load<%s>\t", n.Type) }
 func (n DeclareLocal) String() string { return fmt.Sprintf("DeclareLocal<%s> %d", n.Type, n.Handle) }
@@ -409,3 +427,4 @@ func (n Xor) String() string          { return fmt.Sprintf("Xor<%s>\t", n.Type) 
 func (n Nor) String() string          { return fmt.Sprintf("Nor<%s>\t", n.Type) }
 func (n Nand) String() string         { return fmt.Sprintf("Nand<%s>\t", n.Type) }
 func (n Xnor) String() string         { return fmt.Sprintf("Xnor<%s>\t", n.Type) }
+func (n Syscall) String() string      { return "Syscall\t" }

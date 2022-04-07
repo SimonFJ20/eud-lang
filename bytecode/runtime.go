@@ -3,12 +3,14 @@ package bytecode
 import (
 	"fmt"
 	"math"
+	"os"
 )
 
 type RuntimeValue interface {
 	Type() Type
 	String() string
 }
+
 type U8Value struct{ Value uint8 }
 type U16Value struct{ Value uint16 }
 type U32Value struct{ Value uint32 }
@@ -51,12 +53,20 @@ func (v CharValue) String() string  { return fmt.Sprintf("CHAR(%d)", v.Value) }
 func (v UsizeValue) String() string { return fmt.Sprintf("USIZE(%d)", v.Value) }
 func (v UptrValue) String() string  { return fmt.Sprintf("UPTR(%d)", v.Value) }
 
+type AllocationEntry struct {
+	From uintptr
+	To   uintptr
+}
+
 type Runtime struct {
 	Stack   []RuntimeValue
 	Locals  map[uint]RuntimeValue
 	Globals map[uintptr]RuntimeValue
 	Pc      uintptr
 	Sp      uint
+	Heap    []RuntimeValue
+	Allocs  []AllocationEntry
+	Files   []os.File
 	Debug   bool
 }
 
@@ -97,6 +107,9 @@ func Run(p Program) Runtime {
 		Globals: make(map[uintptr]RuntimeValue),
 		Pc:      0,
 		Sp:      0,
+		Heap:    make([]RuntimeValue, 8192),
+		Allocs:  []AllocationEntry{},
+		Files:   []os.File{},
 		Debug:   p.RunWithDebug || false,
 	}
 	for ctx.Pc < uintptr(len(p.Instructions)) {
@@ -111,111 +124,168 @@ func Run(p Program) Runtime {
 
 func runInstruction(ctx *Runtime, i Instruction) {
 	switch i.InstructionType() {
-	// case AllocateInstruction:
-	// case StoreInstruction:
+	case AllocateInstruction:
+		runAllocate(ctx, i.(Allocate))
+	case DeallocateInstruction:
+		runDeallocate(ctx, i.(Deallocate))
+	case StoreInstruction:
+		runStore(ctx, i.(Store))
 	case LoadInstruction:
 		runLoad(ctx, i.(Load))
-		return
 	case DeclareLocalInstruction:
 		runDeclareLocal(ctx, i.(DeclareLocal))
-		return
 	case StoreLocalInstruction:
 		runStoreLocal(ctx, i.(StoreLocal))
-		return
 	case LoadLocalInstruction:
 		runLoadLocal(ctx, i.(LoadLocal))
-		return
 	case PushInstruction:
 		runPush(ctx, i.(Push))
-		return
 	case PopInstruction:
 		runPop(ctx, i.(Pop))
-		return
 	case JumpInstruction:
 		runJump(ctx, i.(Jump))
-		return
 	case JumpIfZeroInstruction:
 		runJumpIfZero(ctx, i.(JumpIfZero))
-		return
 	case JumpNotZeroInstruction:
 		runJumpNotZero(ctx, i.(JumpNotZero))
-		return
 	case CallInstruction:
 		runCall(ctx, i.(Call))
-		return
 	case ReturnInstruction:
 		runReturn(ctx, i.(Return))
-		return
 	case NotInstruction:
 		runNot(ctx, i.(Not))
-		return
 	case AddInstruction:
 		runAdd(ctx, i)
-		return
 	case SubtractInstruction:
 		runSubtract(ctx, i)
-		return
 	case MultiplyInstruction:
 		runMultiply(ctx, i)
-		return
 	case DivideInstruction:
 		runDivide(ctx, i)
-		return
 	case ModulusInstruction:
 		runModulus(ctx, i)
-		return
 	case ExponentInstruction:
 		runExponent(ctx, i)
-		return
 	case CmpEqualInstruction:
 		runCmpEqual(ctx, i)
-		return
 	case CmpInequalInstruction:
 		runCmpInequal(ctx, i)
-		return
 	case CmpLTInstruction:
 		runCmpLT(ctx, i)
-		return
 	case CmpGTInstruction:
 		runCmpGT(ctx, i)
-		return
 	case CmpLTEInstruction:
 		runCmpLTE(ctx, i)
-		return
 	case CmpGTEInstruction:
 		runCmpGTE(ctx, i)
-		return
 	case OrInstruction:
 		runOr(ctx, i)
-		return
 	case AndInstruction:
 		runAnd(ctx, i)
-		return
 	case XorInstruction:
 		runXor(ctx, i)
-		return
 	case NorInstruction:
 		runNor(ctx, i)
-		return
 	case NandInstruction:
 		runNand(ctx, i)
-		return
 	case XnorInstruction:
 		runXnor(ctx, i)
-		return
+	case SyscallInstruction:
+		runSyscall(ctx, i.(Syscall))
 	default:
 		panic(fmt.Sprintf("instruction '%s' not implemented", i.InstructionType()))
 	}
 }
 
+func runAllocate(ctx *Runtime, i Allocate) {
+	amount := ctx.Pop().(UsizeValue).Value
+	size := amount * byteSizeOfType(i.Type)
+	var addr uintptr
+	if len(ctx.Allocs) > 0 {
+		addr = ctx.Allocs[len(ctx.Allocs)-1].To + 1
+	} else {
+		addr = 0
+	}
+	ctx.Allocs = append(ctx.Allocs, AllocationEntry{
+		From: addr,
+		To:   addr + uintptr(size),
+	})
+	ctx.Push(UptrValue{Value: addr})
+}
+
+func byteSizeOfType(t Type) uint64 {
+	// runtime/platform/target dependent
+	switch t {
+	case U8:
+		return 8
+	case U16:
+		return 16
+	case U32:
+		return 32
+	case U64:
+		return 64
+	case I8:
+		return 8
+	case I16:
+		return 16
+	case I32:
+		return 32
+	case I64:
+		return 64
+	case F32:
+		return 32
+	case F64:
+		return 64
+	case CHAR:
+		return 8
+	case USIZE:
+		return 64
+	case UPTR:
+		return 64
+	default:
+		panic("unexhaustive")
+	}
+}
+
+func runDeallocate(ctx *Runtime, i Deallocate) {
+	addr := ctx.Pop().(UptrValue).Value
+	for i := range ctx.Allocs {
+		if ctx.Allocs[i].From >= addr && ctx.Allocs[i].To <= addr {
+			ctx.Allocs = append(ctx.Allocs[:i], ctx.Allocs[i+1:]...)
+			break
+		}
+	}
+}
+
+func runStore(ctx *Runtime, i Store) {
+	addr := ctx.Pop().(UptrValue).Value
+	allocated := false
+	for i := range ctx.Allocs {
+		if addr >= ctx.Allocs[i].From && addr <= ctx.Allocs[i].To {
+			allocated = true
+			break
+		}
+	}
+	if !allocated {
+		print("Segmentation fault")
+		os.Exit(1)
+	}
+	ctx.Heap[addr] = ctx.Pop()
+}
 func runLoad(ctx *Runtime, i Load) {
 	addr := ctx.Pop().(UptrValue).Value
-	switch addr {
-	case 0:
-		ctx.Push(UptrValue{Value: ctx.Pc})
-	default:
-		ctx.Push(ctx.Globals[addr])
+	allocated := false
+	for i := range ctx.Allocs {
+		if addr >= ctx.Allocs[i].From && addr <= ctx.Allocs[i].To {
+			allocated = true
+			break
+		}
 	}
+	if !allocated {
+		print("Segmentation fault")
+		os.Exit(1)
+	}
+	ctx.Push(ctx.Heap[addr])
 }
 
 func runDeclareLocal(ctx *Runtime, i DeclareLocal) {
@@ -326,42 +396,31 @@ func runPush(ctx *Runtime, i Push) {
 	switch i.Type {
 	case U8:
 		ctx.Push(U8Value{Value: uint8(i.Value)})
-		return
 	case U16:
 		ctx.Push(U16Value{Value: uint16(i.Value)})
-		return
 	case U32:
 		ctx.Push(U32Value{Value: uint32(i.Value)})
-		return
 	case U64:
 		ctx.Push(U64Value{Value: uint64(i.Value)})
-		return
 	case I16:
 		ctx.Push(I16Value{Value: int16(i.Value)})
-		return
 	case I32:
 		ctx.Push(I32Value{Value: int32(i.Value)})
-		return
 	case I64:
 		ctx.Push(I64Value{Value: int64(i.Value)})
-		return
 	case F32:
 		ctx.Push(F32Value{Value: float32(i.Value)})
-		return
 	case F64:
 		ctx.Push(F64Value{Value: float64(i.Value)})
-		return
 	case CHAR:
 		ctx.Push(CharValue{Value: int8(i.Value)})
-		return
 	case USIZE:
 		ctx.Push(UsizeValue{Value: uint64(i.Value)})
-		return
 	case UPTR:
 		ctx.Push(UptrValue{Value: uintptr(i.Value)})
-		return
+	default:
+		panic(fmt.Sprintf("Push<%s> not implemented", i.Type))
 	}
-	panic(fmt.Sprintf("Push<%s> not implemented", i.Type))
 }
 
 func runPop(ctx *Runtime, i Pop) {
@@ -373,37 +432,26 @@ func runNot(ctx *Runtime, i Not) {
 	switch i.Type {
 	case U8:
 		ctx.Push(U8Value{Value: ^a.(U8Value).Value})
-		return
 	case U16:
 		ctx.Push(U16Value{Value: ^a.(U16Value).Value})
-		return
 	case U32:
 		ctx.Push(U32Value{Value: ^a.(U32Value).Value})
-		return
 	case U64:
 		ctx.Push(U64Value{Value: ^a.(U64Value).Value})
-		return
 	case I8:
 		ctx.Push(I8Value{Value: ^a.(I8Value).Value})
-		return
 	case I16:
 		ctx.Push(I16Value{Value: ^a.(I16Value).Value})
-		return
 	case I32:
 		ctx.Push(I32Value{Value: ^a.(I32Value).Value})
-		return
 	case I64:
 		ctx.Push(I64Value{Value: ^a.(I64Value).Value})
-		return
 	case CHAR:
 		ctx.Push(CharValue{Value: ^a.(CharValue).Value})
-		return
 	case USIZE:
 		ctx.Push(UsizeValue{Value: ^a.(UsizeValue).Value})
-		return
 	case UPTR:
 		ctx.Push(UptrValue{Value: ^a.(UptrValue).Value})
-		return
 	}
 }
 
@@ -1129,22 +1177,18 @@ func runBinaryOperationInstruction(
 		b := ctx.Pop().(U8Value).Value
 		a := ctx.Pop().(U8Value).Value
 		ctx.Push(U8Value{Value: u8Op(a, b)})
-		return
 	case U16:
 		b := ctx.Pop().(U16Value).Value
 		a := ctx.Pop().(U16Value).Value
 		ctx.Push(U16Value{Value: u16Op(a, b)})
-		return
 	case U32:
 		b := ctx.Pop().(U32Value).Value
 		a := ctx.Pop().(U32Value).Value
 		ctx.Push(U32Value{Value: u32Op(a, b)})
-		return
 	case U64:
 		b := ctx.Pop().(U64Value).Value
 		a := ctx.Pop().(U64Value).Value
 		ctx.Push(U64Value{Value: u64Op(a, b)})
-		return
 	case I8:
 		b := ctx.Pop().(I8Value).Value
 		a := ctx.Pop().(I8Value).Value
@@ -1154,31 +1198,35 @@ func runBinaryOperationInstruction(
 		b := ctx.Pop().(I16Value).Value
 		a := ctx.Pop().(I16Value).Value
 		ctx.Push(I16Value{Value: i16Op(a, b)})
-		return
 	case I32:
 		b := ctx.Pop().(I32Value).Value
 		a := ctx.Pop().(I32Value).Value
 		ctx.Push(I32Value{Value: i32Op(a, b)})
-		return
 	case I64:
 		b := ctx.Pop().(I64Value).Value
 		a := ctx.Pop().(I64Value).Value
 		ctx.Push(I64Value{Value: i64Op(a, b)})
-		return
 	case CHAR:
 		b := ctx.Pop().(CharValue).Value
 		a := ctx.Pop().(CharValue).Value
 		ctx.Push(CharValue{Value: charOp(a, b)})
-		return
 	case USIZE:
 		b := ctx.Pop().(UsizeValue).Value
 		a := ctx.Pop().(UsizeValue).Value
 		ctx.Push(UsizeValue{Value: usizeOp(a, b)})
-		return
 	case UPTR:
 		b := ctx.Pop().(UptrValue).Value
 		a := ctx.Pop().(UptrValue).Value
 		ctx.Push(UptrValue{Value: uptrOp(a, b)})
-		return
+	}
+}
+
+func runSyscall(ctx *Runtime, i Syscall) {
+	id := ctx.Pop().(UsizeValue).Value
+	switch id {
+	case 1000:
+		ctx.Push(UptrValue{Value: ctx.Pc})
+	default:
+		panic(fmt.Sprintf("no syscall with id %d", id))
 	}
 }

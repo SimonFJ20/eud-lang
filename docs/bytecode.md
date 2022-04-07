@@ -30,6 +30,21 @@ type Allocate struct {
 }
 ```
 
+### Deallocate
+
+Deallocate allocated memory.
+
+Operand | Type | Description
+---|---|---
+1st | `uptr` | Target address
+
+```go
+type Allocate struct {
+	Instruction
+	Type
+}
+```
+
 ### Store
 
 Move a value of type to somewhere in absolute memory.
@@ -264,4 +279,24 @@ type Nor = BinaryOperation
 type Nand = BinaryOperation
 type Xnor = BinaryOperation
 ```
+
+### Syscall
+
+Operand | Type | Description
+---|---|---
+1st | `usize` | Call selector
+... | unknown | Arguments to syscall
+
+```go
+type Syscall struct {
+	Instruction
+}
+```
+
+## Syscall table
+
+Id | Name | Description
+---|---|---
+`1000` | Stack pointer | Push value of stack pointer
+
 

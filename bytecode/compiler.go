@@ -109,7 +109,9 @@ func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 }
 
 func compileExpressionStatement(ctx *Compiler, node parser.BaseStatement) error {
-	err := compileBaseExpression(ctx, node.(parser.ExpressionStatement).Expression)
+	if err := compileBaseExpression(ctx, node.(parser.ExpressionStatement).Expression); err != nil {
+		return err
+	}
 
 	// HACK
 	//  After an expression we can be fairly certain to have a value on top of the stack.
@@ -121,7 +123,7 @@ func compileExpressionStatement(ctx *Compiler, node parser.BaseStatement) error 
 	//  which isn't hard to enforce.
 	ctx.instructions = append(ctx.instructions, Pop{Type: ctx.lastType})
 
-	return err
+	return nil
 }
 
 func compileDeclarationStatement(ctx *Compiler, node parser.DeclarationStatement) error {
@@ -257,13 +259,10 @@ func compileAddExpression(ctx *Compiler, node parser.AddExpression) error {
 }
 
 func compileSubExpression(ctx *Compiler, node parser.SubExpression) error {
-	var err error = nil
-	err = compileBaseExpression(ctx, node.Left)
-	if err != nil {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	err = compileBaseExpression(ctx, node.Right)
-	if err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Subtract{Type: I32})
@@ -271,13 +270,10 @@ func compileSubExpression(ctx *Compiler, node parser.SubExpression) error {
 }
 
 func compileMulExpression(ctx *Compiler, node parser.MulExpression) error {
-	var err error = nil
-	err = compileBaseExpression(ctx, node.Left)
-	if err != nil {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	err = compileBaseExpression(ctx, node.Right)
-	if err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Multiply{Type: I32})
@@ -285,13 +281,10 @@ func compileMulExpression(ctx *Compiler, node parser.MulExpression) error {
 }
 
 func compileDivExpression(ctx *Compiler, node parser.DivExpression) error {
-	var err error = nil
-	err = compileBaseExpression(ctx, node.Left)
-	if err != nil {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	err = compileBaseExpression(ctx, node.Right)
-	if err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Divide{Type: I32})

@@ -5,6 +5,30 @@ import (
 	"testing"
 )
 
+func TestHeap(t *testing.T) {
+	runtime := bytecode.Run(bytecode.Program{
+		Instructions: []bytecode.Instruction{
+			bytecode.DeclareLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.Push{Type: bytecode.I32, Value: 5},
+			bytecode.Push{Type: bytecode.USIZE, Value: 1},
+			bytecode.Allocate{Type: bytecode.I32},
+			bytecode.StoreLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.LoadLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.Store{Type: bytecode.I32},
+			bytecode.Push{Type: bytecode.I32, Value: 3},
+			bytecode.LoadLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.Load{Type: bytecode.I32},
+			bytecode.Add{Type: bytecode.I32},
+			bytecode.LoadLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.Deallocate{Type: bytecode.I32},
+		},
+		RunWithDebug: true})
+	result := runtime.Pop().(bytecode.I32Value).Value
+	if result != 8 {
+		t.Errorf("unexpected result %d", result)
+	}
+}
+
 func TestSubroutine(t *testing.T) {
 	/*
 		func sum(a: i32, b: i32): i32
@@ -115,8 +139,8 @@ func TestJumpFunction(t *testing.T) {
 			bytecode.StoreLocal{Type: bytecode.I32, Handle: 0},
 			bytecode.Push{Type: bytecode.I32, Value: 3},
 			bytecode.StoreLocal{Type: bytecode.I32, Handle: 1},
-			bytecode.Push{Type: bytecode.UPTR, Value: 0}, // program_counter
-			bytecode.Load{Type: bytecode.UPTR},
+			bytecode.Push{Type: bytecode.USIZE, Value: 1000}, // program_counter
+			bytecode.Syscall{},
 			bytecode.Push{Type: bytecode.UPTR, Value: 7},
 			bytecode.Add{Type: bytecode.UPTR},
 			bytecode.LoadLocal{Type: bytecode.I32, Handle: 1},
