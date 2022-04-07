@@ -1,6 +1,9 @@
 package parser
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type StatementType int
 
@@ -14,6 +17,7 @@ const (
 type BaseStatement interface {
 	StatementType() StatementType
 	String() string
+	StringNested(nesting int) string
 }
 
 type FuncDefStatement struct {
@@ -27,6 +31,7 @@ type FuncDefStatement struct {
 type BaseExpression interface {
 	ExpressionType() ExpressionType
 	String() string
+	StringNested(nesting int) string
 }
 
 type VarAssignExpression struct {
@@ -146,6 +151,70 @@ func (n ExpressionStatement) String() string {
 	return fmt.Sprintf("%s(%s)", n.StatementType(), n.Expression)
 }
 
+func nstr(nesting int) string {
+	return strings.Repeat("|   ", nesting)
+}
+
+func (n DeclarationStatement) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(\n%s%s,\n%s%s\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		nstr(nesting+1),
+		n.Identifier,
+		nstr(nesting+1),
+		n.DeclType,
+		nstr(nesting),
+	)
+}
+
+func (n FuncDefStatement) StringNested(nesting int) string {
+	body_str := ""
+	first := true
+	for i := range n.Body {
+		if first {
+			body_str += n.Body[i].StringNested(nesting + 2)
+			first = false
+		} else {
+			body_str += ",\n" + n.Body[i].StringNested(nesting+2)
+		}
+	}
+	return fmt.Sprintf(
+		"%s%s(\n%s%s,\n%s%s,\n%s%s,\n%s[\n%s\n%s]\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		nstr(nesting+1),
+		n.Identifier,
+		nstr(nesting+1),
+		n.ReturnType,
+		nstr(nesting+1),
+		n.Parameters,
+		nstr(nesting+1),
+		body_str,
+		nstr(nesting+1),
+		nstr(nesting),
+	)
+}
+func (n ReturnStatement) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(\n%s%s\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		nstr(nesting+1),
+		n.Value.StringNested(nesting+1),
+		nstr(nesting),
+	)
+}
+func (n ExpressionStatement) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(\n%s\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		n.Expression.StringNested(nesting+1),
+		nstr(nesting),
+	)
+}
+
 func (n ExpressionType) String() string {
 	switch n {
 	case AddExpressionType:
@@ -197,3 +266,46 @@ func (n VarAccessExpression) String() string {
 	return fmt.Sprintf("%s(%s)", n.ExpressionType(), n.Identifier)
 }
 func (n IntLiteral) String() string { return string(n.Tok.String()) }
+
+func (n VarAssignExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Identifier,
+		n.Value,
+	)
+}
+
+func (n LeftRightExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left, n.Right,
+	)
+}
+func (n FuncCallExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, [%s])",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Identifier,
+		n.Arguments,
+	)
+}
+func (n VarAccessExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Identifier,
+	)
+}
+func (n IntLiteral) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s",
+		nstr(nesting),
+		n.Tok.String(),
+	)
+}

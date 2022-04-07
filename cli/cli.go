@@ -55,6 +55,12 @@ func Cli() {
 
 		ast := p.Parse(tokens)
 
+		// println("[")
+		// for i := range ast {
+		// 	fmt.Printf("%s\n", ast[i].StringNested(1))
+		// }
+		// println("]")
+
 		fmt.Printf("%s\n", ast)
 
 		println("\033[1;36mCompiling AST:\033[0m")
