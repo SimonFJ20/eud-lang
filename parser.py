@@ -147,9 +147,12 @@ class Lexer:
             if self.c in '\n\t ':
                 self.next()
             elif self.c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_':
-                tokens.append(self.make_name());
+                tokens.append(self.make_name())
             elif self.c in '123456789':
                 tokens.append(self.make_int())
+            elif self.c == '0':
+                tokens.append(Token(TT.INT, self.c, self.fp.copy()))
+                self.next()
             elif self.c == '(':
                 tokens.append(Token(TT.LPAREN, self.c, self.fp.copy()))
                 self.next()

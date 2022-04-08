@@ -1,0 +1,15 @@
+
+let a: i32
+
+a = 0
+
+while (a < 100) {
+    syscall(72, 1022)
+    syscall(101, 1022)
+    syscall(108, 1022)
+    syscall(108, 1022)
+    syscall(111, 1022)
+    syscall(33, 1022)
+    syscall(10, 1022)
+    a = a + 1
+}

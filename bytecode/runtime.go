@@ -192,6 +192,8 @@ func runInstruction(ctx *Runtime, i Instruction) {
 		runXnor(ctx, i)
 	case SyscallInstruction:
 		runSyscall(ctx, i.(Syscall))
+	case I32ToUsizeInstruction:
+		runI32ToUsize(ctx, i.(I32ToUsize))
 	default:
 		panic(fmt.Sprintf("instruction '%s' not implemented", i.InstructionType()))
 	}
@@ -402,6 +404,8 @@ func runPush(ctx *Runtime, i Push) {
 		ctx.Push(U32Value{Value: uint32(i.Value)})
 	case U64:
 		ctx.Push(U64Value{Value: uint64(i.Value)})
+	case I8:
+		ctx.Push(I8Value{Value: int8(i.Value)})
 	case I16:
 		ctx.Push(I16Value{Value: int16(i.Value)})
 	case I32:
@@ -1226,7 +1230,16 @@ func runSyscall(ctx *Runtime, i Syscall) {
 	switch id {
 	case 1000:
 		ctx.Push(UptrValue{Value: ctx.Pc})
+	case 1012:
+		fmt.Printf("%d", ctx.Pop().(I32Value).Value)
+	case 1022:
+		fmt.Printf("%c", rune(ctx.Pop().(I32Value).Value))
 	default:
 		panic(fmt.Sprintf("no syscall with id %d", id))
 	}
+}
+
+func runI32ToUsize(ctx *Runtime, i I32ToUsize) {
+	value := ctx.Pop().(I32Value).Value
+	ctx.Push(UsizeValue{Value: uint64(value)})
 }

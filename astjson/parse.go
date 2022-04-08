@@ -355,7 +355,7 @@ func ParseJsonElement(raw Object) IElement {
 		for i := range raw["body"].([]interface{}) {
 			body = append(body, ParseJsonElement(raw["body"].([]interface{})[i].(Object)).(IStatementNode))
 		}
-		return IfNode{
+		return WhileNode{
 			Type:      raw["type"].(string),
 			Filepos:   ParseJsonElement(raw["fp"].(Object)).(Position),
 			Condition: ParseJsonElement(raw["condition"].(Object)).(IExpressionNode),

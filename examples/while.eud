@@ -1,0 +1,12 @@
+
+let a: i32
+let b: i32
+
+a = 0
+
+b = 2
+
+while (a < 8) {
+    b = b * 2
+    a = a + 1
+}

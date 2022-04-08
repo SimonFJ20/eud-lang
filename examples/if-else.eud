@@ -1,0 +1,10 @@
+
+let income: i32
+let tax_percentage: i32
+
+
+if (income > 40000) {
+    tax_percentage = 39
+} else {
+    tax_percentage = 5
+}

@@ -52,7 +52,7 @@ func main() {
 	}
 
 	for i := range program.Instructions {
-		fmt.Printf("  %s\n", program.Instructions[i].String())
+		fmt.Printf("  %d:\t%s\n", i, program.Instructions[i].String())
 	}
 
 	println("\033[1;36mRunning bytecode:\033[0m")

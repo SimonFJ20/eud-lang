@@ -63,8 +63,7 @@ func Compile(ast []parser.BaseStatement) (Program, error) {
 		},
 		globals: make(map[string]uintptr),
 	}
-	err := compileStatements(&ctx, ast)
-	if err != nil {
+	if err := compileStatements(&ctx, ast); err != nil {
 		return Program{}, err
 	}
 	return Program{
@@ -93,6 +92,12 @@ func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 		return compileDeclarationStatement(ctx, node.(parser.DeclarationStatement))
 	case parser.FuncDefStatementType:
 		return compileFuncDefStatement(ctx, node.(parser.FuncDefStatement))
+	case parser.WhileStatementType:
+		return compileWhileStatementType(ctx, node.(parser.WhileStatement))
+	case parser.IfElseStatementType:
+		return compileIfElseStatementType(ctx, node.(parser.IfElseStatement))
+	case parser.IfStatementType:
+		return compileIfStatementType(ctx, node.(parser.IfStatement))
 	case parser.ReturnStatementType:
 		return compileReturnStatement(ctx, node.(parser.ReturnStatement))
 	case parser.ExpressionStatementType:
@@ -161,6 +166,58 @@ func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error 
 	return nil
 }
 
+func compileWhileStatementType(ctx *Compiler, node parser.WhileStatement) error {
+	condition_start := len(ctx.instructions)
+	if err := compileBaseExpression(ctx, node.Condition); err != nil {
+		return err
+	}
+	end_jpush_index := len(ctx.instructions)
+	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	ctx.instructions = append(ctx.instructions, JumpIfZero{})
+	if err := compileStatements(ctx, node.Body); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: condition_start})
+	ctx.instructions = append(ctx.instructions, Jump{})
+	ctx.instructions[end_jpush_index] = Push{Type: UPTR, Value: len(ctx.instructions)}
+	return nil
+}
+
+func compileIfElseStatementType(ctx *Compiler, node parser.IfElseStatement) error {
+	if err := compileBaseExpression(ctx, node.Condition); err != nil {
+		return err
+	}
+	else_jpush_index := len(ctx.instructions)
+	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	ctx.instructions = append(ctx.instructions, JumpIfZero{})
+	if err := compileStatements(ctx, node.Truthy); err != nil {
+		return err
+	}
+	end_jpush_index := len(ctx.instructions)
+	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	ctx.instructions = append(ctx.instructions, JumpIfZero{})
+	ctx.instructions[else_jpush_index] = Push{Type: UPTR, Value: len(ctx.instructions)}
+	if err := compileStatements(ctx, node.Falsy); err != nil {
+		return err
+	}
+	ctx.instructions[end_jpush_index] = Push{Type: UPTR, Value: len(ctx.instructions)}
+	return nil
+}
+
+func compileIfStatementType(ctx *Compiler, node parser.IfStatement) error {
+	if err := compileBaseExpression(ctx, node.Condition); err != nil {
+		return err
+	}
+	end_jpush_index := len(ctx.instructions)
+	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	ctx.instructions = append(ctx.instructions, JumpIfZero{})
+	if err := compileStatements(ctx, node.Body); err != nil {
+		return err
+	}
+	ctx.instructions[end_jpush_index] = Push{Type: UPTR, Value: len(ctx.instructions)}
+	return nil
+}
+
 func compileReturnStatement(ctx *Compiler, node parser.ReturnStatement) error {
 	if err := compileBaseExpression(ctx, node.Value); err != nil {
 		return err
@@ -208,6 +265,18 @@ func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 	switch node.ExpressionType() {
 	case parser.VarAssignExpressionType:
 		return compileVarAssignExpression(ctx, node.(parser.VarAssignExpression))
+	case parser.NotEqualExpressionType:
+		return compileNotEqualExpression(ctx, node.(parser.NotEqualExpression))
+	case parser.EqualExpressionType:
+		return compileEqualExpression(ctx, node.(parser.EqualExpression))
+	case parser.GreaterThanOrEqualExpressionType:
+		return compileGreaterThanOrEqualExpression(ctx, node.(parser.GreaterThanOrEqualExpression))
+	case parser.LessThanOrEqualExpressionType:
+		return compileLessThanOrEqualExpression(ctx, node.(parser.LessThanOrEqualExpression))
+	case parser.GreaterThanExpressionType:
+		return compileGreaterThanExpression(ctx, node.(parser.GreaterThanExpression))
+	case parser.LessThanExpressionType:
+		return compileLessThanExpression(ctx, node.(parser.LessThanExpression))
 	case parser.AddExpressionType:
 		return compileAddExpression(ctx, node.(parser.AddExpression))
 	case parser.SubExpressionType:
@@ -240,6 +309,72 @@ func compileVarAssignExpression(ctx *Compiler, node parser.VarAssignExpression) 
 	ctx.instructions = append(ctx.instructions, StoreLocal{Type: symbol.Type, Handle: symbol.Handle})
 	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Handle: symbol.Handle})
 	ctx.lastType = symbol.Type
+	return nil
+}
+
+func compileNotEqualExpression(ctx *Compiler, node parser.NotEqualExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
+		return err
+	}
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, CmpInequal{Type: I32})
+	return nil
+}
+
+func compileEqualExpression(ctx *Compiler, node parser.EqualExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
+		return err
+	}
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, CmpEqual{Type: I32})
+	return nil
+}
+
+func compileGreaterThanOrEqualExpression(ctx *Compiler, node parser.GreaterThanOrEqualExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
+		return err
+	}
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, CmpGTE{Type: I32})
+	return nil
+}
+
+func compileLessThanOrEqualExpression(ctx *Compiler, node parser.LessThanOrEqualExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
+		return err
+	}
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, CmpLTE{Type: I32})
+	return nil
+}
+
+func compileGreaterThanExpression(ctx *Compiler, node parser.GreaterThanExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
+		return err
+	}
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, CmpGT{Type: I32})
+	return nil
+}
+
+func compileLessThanExpression(ctx *Compiler, node parser.LessThanExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
+		return err
+	}
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, CmpLT{Type: I32})
 	return nil
 }
 
@@ -307,11 +442,32 @@ func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) er
 			return err
 		}
 	}
+
+	// HACK
+	if node.Identifier.ExpressionType() == parser.VarAccessExpressionType &&
+		node.Identifier.(parser.VarAccessExpression).Identifier.StringValue == "syscall" {
+		ctx.instructions = append(ctx.instructions, I32ToUsize{})
+		ctx.instructions = append(ctx.instructions, Syscall{})
+		ctx.instructions = append(ctx.instructions, Push{Type: I8, Value: 0})
+		return nil
+	}
+
 	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: len(node.Arguments)})
 	if err := compileBaseExpression(ctx, node.Identifier); err != nil {
 		return err
 	}
+	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 1000000})
+	// ctx.instructions = append(ctx.instructions, CmpGTE{Type: UPTR})
+	// inotsyscall := len(ctx.instructions)
+	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	// ctx.instructions = append(ctx.instructions, JumpIfZero{})
+	// ctx.instructions = append(ctx.instructions, Syscall{})
+	// isyscall := len(ctx.instructions)
+	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
+	// ctx.instructions = append(ctx.instructions, Jump{})
+	// ctx.instructions[inotsyscall] = Push{Type: UPTR, Value: len(ctx.instructions)}
 	ctx.instructions = append(ctx.instructions, Call{Type: UPTR}) // type is omittable
+	// ctx.instructions[isyscall] = Push{Type: UPTR, Value: len(ctx.instructions)}
 	return nil
 }
 

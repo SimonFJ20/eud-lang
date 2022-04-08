@@ -391,8 +391,8 @@ func (n ExpressionStatement) StringNested(nesting int) string {
 		"%s%s(\n%s\n%s)",
 		nstr(nesting),
 		n.StatementType(),
-		// n.Expression.StringNested(nesting+1),
-		fmt.Sprintf("%s<will, because bug, segfault if printed>", nstr(nesting+1)),
+		n.Expression.StringNested(nesting+1),
+		// fmt.Sprintf("%s<will, because bug, segfault if printed>", nstr(nesting+1)),
 		nstr(nesting),
 	)
 }
@@ -439,15 +439,25 @@ func (n ExpressionType) String() string {
 }
 
 func (n VarAssignExpression) ExpressionType() ExpressionType { return VarAssignExpressionType }
-func (n AddExpression) ExpressionType() ExpressionType       { return AddExpressionType }
-func (n SubExpression) ExpressionType() ExpressionType       { return SubExpressionType }
-func (n MulExpression) ExpressionType() ExpressionType       { return MulExpressionType }
-func (n DivExpression) ExpressionType() ExpressionType       { return DivExpressionType }
-func (n ModExpression) ExpressionType() ExpressionType       { return ModExpressionType }
-func (n ExpExpression) ExpressionType() ExpressionType       { return ExpExpressionType }
-func (n FuncCallExpression) ExpressionType() ExpressionType  { return FuncCallExpressionType }
-func (n VarAccessExpression) ExpressionType() ExpressionType { return VarAccessExpressionType }
-func (n IntLiteral) ExpressionType() ExpressionType          { return IntExpressionType }
+func (n NotEqualExpression) ExpressionType() ExpressionType  { return NotEqualExpressionType }
+func (n EqualExpression) ExpressionType() ExpressionType     { return EqualExpressionType }
+func (n GreaterThanOrEqualExpression) ExpressionType() ExpressionType {
+	return GreaterThanOrEqualExpressionType
+}
+func (n LessThanOrEqualExpression) ExpressionType() ExpressionType {
+	return LessThanOrEqualExpressionType
+}
+func (n GreaterThanExpression) ExpressionType() ExpressionType { return GreaterThanExpressionType }
+func (n LessThanExpression) ExpressionType() ExpressionType    { return LessThanExpressionType }
+func (n AddExpression) ExpressionType() ExpressionType         { return AddExpressionType }
+func (n SubExpression) ExpressionType() ExpressionType         { return SubExpressionType }
+func (n MulExpression) ExpressionType() ExpressionType         { return MulExpressionType }
+func (n DivExpression) ExpressionType() ExpressionType         { return DivExpressionType }
+func (n ModExpression) ExpressionType() ExpressionType         { return ModExpressionType }
+func (n ExpExpression) ExpressionType() ExpressionType         { return ExpExpressionType }
+func (n FuncCallExpression) ExpressionType() ExpressionType    { return FuncCallExpressionType }
+func (n VarAccessExpression) ExpressionType() ExpressionType   { return VarAccessExpressionType }
+func (n IntLiteral) ExpressionType() ExpressionType            { return IntExpressionType }
 
 func (n VarAssignExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Value)
