@@ -15,6 +15,7 @@ import (
 
 type Options struct {
 	UsePythonParser bool
+	NoRuntimeDebug  bool
 }
 
 func main() {
@@ -57,7 +58,7 @@ func main() {
 
 	println("\033[1;36mRunning bytecode:\033[0m")
 
-	program.RunWithDebug = true
+	program.RunWithDebug = !options.NoRuntimeDebug
 	runtime := bytecode.Run(program)
 
 	last_useful_index := findLastUsefulIndex(runtime)
@@ -103,6 +104,8 @@ func getOptionsFromArgs() Options {
 		switch args[i] {
 		case "--pyparse":
 			options.UsePythonParser = true
+		case "--nodebug":
+			options.NoRuntimeDebug = true
 		}
 	}
 	return options
