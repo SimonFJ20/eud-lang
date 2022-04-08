@@ -10,6 +10,9 @@ type StatementType int
 const (
 	DeclarationStatementType StatementType = iota
 	FuncDefStatementType
+	WhileStatementType
+	IfElseStatementType
+	IfStatementType
 	ReturnStatementType
 	ExpressionStatementType
 )
@@ -28,6 +31,25 @@ type FuncDefStatement struct {
 	Body       []BaseStatement
 }
 
+type WhileStatement struct {
+	BaseStatement
+	Condition BaseExpression
+	Body      []BaseStatement
+}
+
+type IfElseStatement struct {
+	BaseStatement
+	Condition BaseExpression
+	Truthy    []BaseStatement
+	Falsy     []BaseStatement
+}
+
+type IfStatement struct {
+	BaseStatement
+	Condition BaseExpression
+	Body      []BaseStatement
+}
+
 type BaseExpression interface {
 	ExpressionType() ExpressionType
 	String() string
@@ -44,6 +66,42 @@ type VarAssignExpression struct {
 // 	Left  BaseExpression
 // 	Right BaseExpression
 // }
+
+type NotEqualExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
+}
+
+type EqualExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
+}
+
+type GreaterThanOrEqualExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
+}
+
+type LessThanOrEqualExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
+}
+
+type GreaterThanExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
+}
+
+type LessThanExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
+}
 
 type AddExpression struct {
 	BaseExpression
@@ -64,6 +122,12 @@ type MulExpression struct {
 }
 
 type DivExpression struct {
+	BaseExpression
+	Left  BaseExpression
+	Right BaseExpression
+}
+
+type ModExpression struct {
 	BaseExpression
 	Left  BaseExpression
 	Right BaseExpression
@@ -121,10 +185,17 @@ const (
 	InvalidExpressionType ExpressionType = iota
 	VarAccessExpressionType
 	VarAssignExpressionType
+	NotEqualExpressionType
+	EqualExpressionType
+	GreaterThanOrEqualExpressionType
+	LessThanOrEqualExpressionType
+	GreaterThanExpressionType
+	LessThanExpressionType
 	AddExpressionType
 	SubExpressionType
 	MulExpressionType
 	DivExpressionType
+	ModExpressionType
 	ExpExpressionType
 	IntExpressionType
 	FuncCallExpressionType
@@ -136,6 +207,12 @@ func (n StatementType) String() string {
 		return "DeclarationStatement"
 	case FuncDefStatementType:
 		return "FuncDefStatement"
+	case WhileStatementType:
+		return "WhileStatement"
+	case IfElseStatementType:
+		return "IfElseStatement"
+	case IfStatementType:
+		return "IfStatement"
 	case ExpressionStatementType:
 		return "ExpressionStatement"
 	default:
@@ -145,6 +222,9 @@ func (n StatementType) String() string {
 
 func (n DeclarationStatement) StatementType() StatementType { return DeclarationStatementType }
 func (n FuncDefStatement) StatementType() StatementType     { return FuncDefStatementType }
+func (n WhileStatement) StatementType() StatementType       { return WhileStatementType }
+func (n IfElseStatement) StatementType() StatementType      { return IfElseStatementType }
+func (n IfStatement) StatementType() StatementType          { return IfStatementType }
 func (n ReturnStatement) StatementType() StatementType      { return ReturnStatementType }
 func (n ExpressionStatement) StatementType() StatementType  { return ExpressionStatementType }
 
@@ -153,6 +233,15 @@ func (n DeclarationStatement) String() string {
 }
 func (n FuncDefStatement) String() string {
 	return fmt.Sprintf("%s(%s, %s, %s, %s)", n.StatementType(), n.Identifier, n.ReturnType, n.Parameters, n.Body)
+}
+func (n WhileStatement) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.StatementType(), n.Condition, n.Body)
+}
+func (n IfElseStatement) String() string {
+	return fmt.Sprintf("%s(%s, %s, %s)", n.StatementType(), n.Condition, n.Truthy, n.Falsy)
+}
+func (n IfStatement) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.StatementType(), n.Condition, n.Body)
 }
 func (n ReturnStatement) String() string {
 	return fmt.Sprintf("%s(%s)", n.StatementType(), n.Value)
@@ -205,6 +294,88 @@ func (n FuncDefStatement) StringNested(nesting int) string {
 		nstr(nesting),
 	)
 }
+func (n WhileStatement) StringNested(nesting int) string {
+	body_str := ""
+	first := true
+	for i := range n.Body {
+		if first {
+			body_str += n.Body[i].StringNested(nesting + 2)
+			first = false
+		} else {
+			body_str += ",\n" + n.Body[i].StringNested(nesting+2)
+		}
+	}
+	return fmt.Sprintf(
+		"%s%s(\n%s%s,\n%s[\n%s\n%s]\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		nstr(nesting+1),
+		n.Condition,
+		nstr(nesting+1),
+		body_str,
+		nstr(nesting+1),
+		nstr(nesting),
+	)
+}
+func (n IfElseStatement) StringNested(nesting int) string {
+	t_str := ""
+	tfirst := true
+	for i := range n.Truthy {
+		if tfirst {
+			t_str += n.Truthy[i].StringNested(nesting + 2)
+			tfirst = false
+		} else {
+			t_str += ",\n" + n.Truthy[i].StringNested(nesting+2)
+		}
+	}
+	f_str := ""
+	ffirst := true
+	for i := range n.Falsy {
+		if ffirst {
+			f_str += n.Falsy[i].StringNested(nesting + 2)
+			ffirst = false
+		} else {
+			f_str += ",\n" + n.Falsy[i].StringNested(nesting+2)
+		}
+	}
+	return fmt.Sprintf(
+		"%s%s(\n%s%s,\n%s[\n%s\n%s],\n%s[\n%s\n%s]\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		nstr(nesting+1),
+		n.Condition,
+		nstr(nesting+1),
+		t_str,
+		nstr(nesting+1),
+		nstr(nesting+1),
+		f_str,
+		nstr(nesting+1),
+		nstr(nesting),
+	)
+}
+func (n IfStatement) StringNested(nesting int) string {
+	body_str := ""
+	first := true
+	for i := range n.Body {
+		if first {
+			body_str += n.Body[i].StringNested(nesting + 2)
+			first = false
+		} else {
+			body_str += ",\n" + n.Body[i].StringNested(nesting+2)
+		}
+	}
+	return fmt.Sprintf(
+		"%s%s(\n%s%s,\n%s[\n%s\n%s]\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		nstr(nesting+1),
+		n.Condition,
+		nstr(nesting+1),
+		body_str,
+		nstr(nesting+1),
+		nstr(nesting),
+	)
+}
 func (n ReturnStatement) StringNested(nesting int) string {
 	return fmt.Sprintf(
 		"%s%s(\n%s%s\n%s)",
@@ -221,13 +392,25 @@ func (n ExpressionStatement) StringNested(nesting int) string {
 		nstr(nesting),
 		n.StatementType(),
 		// n.Expression.StringNested(nesting+1),
-		fmt.Sprintf("%s<would segfault if printed>", nstr(nesting+1)),
+		fmt.Sprintf("%s<will, because bug, segfault if printed>", nstr(nesting+1)),
 		nstr(nesting),
 	)
 }
 
 func (n ExpressionType) String() string {
 	switch n {
+	case NotEqualExpressionType:
+		return "inequal"
+	case EqualExpressionType:
+		return "equal"
+	case GreaterThanOrEqualExpressionType:
+		return "gte"
+	case LessThanOrEqualExpressionType:
+		return "lte"
+	case GreaterThanExpressionType:
+		return "gt"
+	case LessThanExpressionType:
+		return "lt"
 	case AddExpressionType:
 		return "add"
 	case SubExpressionType:
@@ -236,6 +419,8 @@ func (n ExpressionType) String() string {
 		return "mul"
 	case DivExpressionType:
 		return "div"
+	case ModExpressionType:
+		return "mod"
 	case ExpExpressionType:
 		return "exp"
 	case IntExpressionType:
@@ -258,6 +443,7 @@ func (n AddExpression) ExpressionType() ExpressionType       { return AddExpress
 func (n SubExpression) ExpressionType() ExpressionType       { return SubExpressionType }
 func (n MulExpression) ExpressionType() ExpressionType       { return MulExpressionType }
 func (n DivExpression) ExpressionType() ExpressionType       { return DivExpressionType }
+func (n ModExpression) ExpressionType() ExpressionType       { return ModExpressionType }
 func (n ExpExpression) ExpressionType() ExpressionType       { return ExpExpressionType }
 func (n FuncCallExpression) ExpressionType() ExpressionType  { return FuncCallExpressionType }
 func (n VarAccessExpression) ExpressionType() ExpressionType { return VarAccessExpressionType }

@@ -57,6 +57,13 @@ class TT(Enum):
     MOD_OP = auto()
     EXP_OP = auto()
     ASGN_OP = auto()
+    CMP_LT_OP = auto()
+    CMP_LTE_OP = auto()
+    CMP_GT_OP = auto()
+    CMP_GTE_OP = auto()
+    CMP_EQ_OP = auto()
+    CMP_NE_OP = auto()
+    LNOT_OP = auto()
     COLON = auto()
     COMMA = auto()
 
@@ -78,6 +85,13 @@ def tokentype_to_string(t: TT) -> str:
     elif t == TT.MOD_OP:        return 'MOD_OP'
     elif t == TT.EXP_OP:        return 'EXP_OP'
     elif t == TT.ASGN_OP:       return 'ASGN_OP'
+    elif t == TT.CMP_LT_OP:     return 'CMP_LT_OP'
+    elif t == TT.CMP_LTE_OP:    return 'CMP_LTE_OP'
+    elif t == TT.CMP_GT_OP:     return 'CMP_GT_OP'
+    elif t == TT.CMP_GTE_OP:    return 'CMP_GTE_OP'
+    elif t == TT.CMP_EQ_OP:     return 'CMP_EQ_OP'
+    elif t == TT.CMP_NE_OP:     return 'CMP_NE_OP'
+    elif t == TT.LNOT_OP:       return 'LOG_NOT'
     elif t == TT.COLON:         return 'COLON'
     elif t == TT.COMMA:         return 'COMMA'
     else: raise Exception('unexhaustive')
@@ -169,14 +183,19 @@ class Lexer:
                 tokens.append(Token(TT.MOD_OP, self.c, self.fp.copy()))
                 self.next()
             elif self.c == '=':
-                tokens.append(Token(TT.ASGN_OP, self.c, self.fp.copy()))
-                self.next()
+                tokens.append(self.make_asgn_or_eq_op())
             elif self.c == ':':
                 tokens.append(Token(TT.COLON, self.c, self.fp.copy()))
                 self.next()
             elif self.c == ',':
                 tokens.append(Token(TT.COMMA, self.c, self.fp.copy()))
                 self.next()
+            elif self.c == '<':
+                tokens.append(self.make_lt_or_lte_op())
+            elif self.c == '>':
+                tokens.append(self.make_gt_or_gte_op())
+            elif self.c == '!':
+                tokens.append(self.make_log_not_or_ne_op())
             else:
                 raise fail(f"unexpected character '{self.c}'", self.fp.copy())
         tokens.append(Token(TT.EOF, '\0', self.fp.copy()))
@@ -210,6 +229,46 @@ class Lexer:
             return Token(TT.EXP_OP, value, self.fp.copy())
         else:
             return Token(TT.MUL_OP, value, self.fp.copy())
+
+    def make_asgn_or_eq_op(self) -> Token:
+        value = self.c
+        self.next()
+        if self.c == '=':
+            value += self.c
+            self.next()
+            return Token(TT.CMP_EQ_OP, value, self.fp.copy())
+        else:
+            return Token(TT.ASGN_OP, value, self.fp.copy())
+
+    def make_lt_or_lte_op(self) -> Token:
+        value = self.c
+        self.next()
+        if self.c == '=':
+            value += self.c
+            self.next()
+            return Token(TT.CMP_LTE_OP, value, self.fp.copy())
+        else:
+            return Token(TT.CMP_LT_OP, value, self.fp.copy())
+
+    def make_gt_or_gte_op(self) -> Token:
+        value = self.c
+        self.next()
+        if self.c == '=':
+            value += self.c
+            self.next()
+            return Token(TT.CMP_GTE_OP, value, self.fp.copy())
+        else:
+            return Token(TT.CMP_GT_OP, value, self.fp.copy())
+
+    def make_log_not_or_ne_op(self) -> Token:
+        value = self.c
+        self.next()
+        if self.c == '=':
+            value += self.c
+            self.next()
+            return Token(TT.CMP_NE_OP, value, self.fp.copy())
+        else:
+            return Token(TT.LNOT_OP, value, self.fp.copy())
 
     def next(self):
         self.pos += 1
@@ -282,6 +341,54 @@ class FuncDef(Statement):
         bodystr = ','.join(map(lambda x:x.to_json(), self.body))
         return f'{{"type":"{self.typestr()}","target":{tstr},"valueType":{vtstr},"params":[{paramstr}],"body":[{bodystr}],"fp":{self.fp.to_json()}}}'
 
+class While(Statement):
+    def __init__(self, condition: Expression, body: List[Statement], fp: Position) -> None:
+        super().__init__(fp)
+        self.condition = condition
+        self.body = body
+    
+    def __repr__(self) -> str:
+        bodystr = ','.join(map(lambda x:x.__repr__(), self.body))
+        return super().__repr__() + f'({self.condition}, [{bodystr}])'
+
+    def to_json(self) -> str:
+        bodystr = ','.join(map(lambda x:x.to_json(), self.body))
+        cstr = self.condition.to_json()
+        return f'{{"type":"{self.typestr()}","condition":{cstr},"body":[{bodystr}],"fp":{self.fp.to_json()}}}'
+
+class IfElse(Statement):
+    def __init__(self, condition: Expression, truthy: List[Statement], falsy: List[Statement], fp: Position) -> None:
+        super().__init__(fp)
+        self.condition = condition
+        self.truthy = truthy
+        self.falsy = falsy
+    
+    def __repr__(self) -> str:
+        truthystr = ','.join(map(lambda x:x.__repr__(), self.truthy))
+        falsystr = ','.join(map(lambda x:x.__repr__(), self.falsy))
+        return super().__repr__() + f'({self.condition}, [{truthystr}], [{falsystr}])'
+
+    def to_json(self) -> str:
+        truthystr = ','.join(map(lambda x:x.to_json(), self.truthy))
+        falsystr = ','.join(map(lambda x:x.to_json(), self.falsy))
+        cstr = self.condition.to_json()
+        return f'{{"type":"{self.typestr()}","condition":{cstr},"truthy":[{truthystr}],"falsy":[{falsystr}],"fp":{self.fp.to_json()}}}'
+
+class If(Statement):
+    def __init__(self, condition: Expression, body: List[Statement], fp: Position) -> None:
+        super().__init__(fp)
+        self.condition = condition
+        self.body = body
+    
+    def __repr__(self) -> str:
+        bodystr = ','.join(map(lambda x:x.__repr__(), self.body))
+        return super().__repr__() + f'({self.condition}, [{bodystr}])'
+
+    def to_json(self) -> str:
+        bodystr = ','.join(map(lambda x:x.to_json(), self.body))
+        cstr = self.condition.to_json()
+        return f'{{"type":"{self.typestr()}","condition":{cstr},"body":[{bodystr}],"fp":{self.fp.to_json()}}}'
+
 class VarDecl(Statement):
     def __init__(self, target: Token, type: Type, fp: Position) -> None:
         super().__init__(fp)
@@ -314,6 +421,30 @@ class BinaryOperation(Expression):
 
     def to_json(self) -> str:
         return f'{{"type":"{self.typestr()}","left":{self.left.to_json()},"right":{self.right.to_json()},"fp":{self.fp.to_json()}}}'
+
+class NotEqual(BinaryOperation):
+    def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
+        super().__init__(left, right, fp)
+
+class Equal(BinaryOperation):
+    def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
+        super().__init__(left, right, fp)
+
+class GreaterThanOrEqual(BinaryOperation):
+    def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
+        super().__init__(left, right, fp)
+
+class LessThanOrEqual(BinaryOperation):
+    def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
+        super().__init__(left, right, fp)
+
+class GreaterThan(BinaryOperation):
+    def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
+        super().__init__(left, right, fp)
+
+class LessThan(BinaryOperation):
+    def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
+        super().__init__(left, right, fp)
 
 class Add(BinaryOperation):
     def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
@@ -399,6 +530,10 @@ class Parser:
             return self.make_func_def()
         elif self.t.value == 'let':
             return self.make_declaration_statement()
+        elif self.t.value == 'while':
+            return self.make_while()
+        elif self.t.value == 'if':
+            return self.make_if_or_if_else()
         else:
             return self.make_expression()
 
@@ -406,11 +541,11 @@ class Parser:
         fp = self.t.fp
         self.next()
         if self.t.type != TT.IDENTIFIER:
-            fail(f'expected identifier, got {self.t}', self.t.fp)
+            fail(f"expected identifier, got {self.t}", self.t.fp)
         target = self.t
         self.next()
         if self.t.type != TT.LPAREN:
-            fail(f'expected \'(\', got {self.t}', self.t.fp)
+            fail(f"expected '(', got {self.t}", self.t.fp)
         self.next()
         params: List[TypedDecl] = []
         while not self.done and self.t.type != TT.RPAREN:
@@ -420,9 +555,9 @@ class Parser:
             elif self.t.type == TT.COMMA:
                 self.next()
             else:
-              fail(f'expected \',\', got {self.t}', self.t.fp)
+              fail(f"expected ',', got {self.t}", self.t.fp)
         if self.t.type != TT.RPAREN:
-            fail(f'expected \')\', got {self.t}', self.t.fp)
+            fail(f"expected ')', got {self.t}", self.t.fp)
         self.next()
         if self.t.type != TT.COLON:
             fail(f'expected \':\', got {self.t}', self.t.fp)
@@ -438,6 +573,55 @@ class Parser:
             fail("expected '}'" + f', got {self.t}', self.t.fp)
         self.next()
         return FuncDef(target, type, params, body, fp)
+
+    def make_while(self):
+        fp = self.t.fp
+        self.next()
+        if self.t.type != TT.LPAREN:
+            fail(f"expected '(', got {self.t}", self.t.fp)
+        self.next()
+        condition = self.make_expression()
+        if self.t.type != TT.RPAREN:
+            fail(f"expected ')', got {self.t}", self.t.fp)
+        self.next()
+        if self.t.type != TT.LBRACE:
+            fail("expected '{'" + f', got {self.t}', self.t.fp)
+        self.next()
+        body = self.make_statements()
+        if self.t.type != TT.RBRACE:
+            fail("expected '}'" + f', got {self.t}', self.t.fp)
+        self.next()
+        return While(condition, body, fp)
+
+    def make_if_or_if_else(self):
+        fp = self.t.fp
+        self.next()
+        if self.t.type != TT.LPAREN:
+            fail(f"expected '(', got {self.t}", self.t.fp)
+        self.next()
+        condition = self.make_expression()
+        if self.t.type != TT.RPAREN:
+            fail(f"expected ')', got {self.t}", self.t.fp)
+        self.next()
+        if self.t.type != TT.LBRACE:
+            fail("expected '{'" + f', got {self.t}', self.t.fp)
+        self.next()
+        body = self.make_statements()
+        if self.t.type != TT.RBRACE:
+            fail("expected '}'" + f', got {self.t}', self.t.fp)
+        self.next()
+        if self.t.value == 'else':
+            self.next()
+            if self.t.type != TT.LBRACE:
+                fail("expected '{'" + f', got {self.t}', self.t.fp)
+            self.next()
+            falsy = self.make_statements()
+            if self.t.type != TT.RBRACE:
+                fail("expected '}'" + f', got {self.t}', self.t.fp)
+            self.next()
+            return IfElse(condition, body, falsy, fp)
+        else:
+            return If(condition, body, fp)
 
     def make_typed_declaration(self) -> TypedDecl:
         target = self.t
@@ -482,8 +666,61 @@ class Parser:
             return Assign(target, value, target.fp)
         else:
             self.previus()
-            return self.make_addition()
+            return self.make_not_equal()
 
+    def make_not_equal(self) -> Expression:
+        left = self.make_equal()
+        if self.t.type == TT.CMP_NE_OP:
+            self.next()
+            right = self.make_not_equal()
+            return NotEqual(left, right, left.fp)
+        else:
+            return left
+
+    def make_equal(self) -> Expression:
+        left = self.make_greater_than_or_equal()
+        if self.t.type == TT.CMP_EQ_OP:
+            self.next()
+            right = self.make_equal()
+            return Equal(left, right, left.fp)
+        else:
+            return left
+
+    def make_greater_than_or_equal(self) -> Expression:
+        left = self.make_less_than_or_equal()
+        if self.t.type == TT.CMP_GTE_OP:
+            self.next()
+            right = self.make_greater_than_or_equal()
+            return GreaterThanOrEqual(left, right, left.fp)
+        else:
+            return left
+
+    def make_less_than_or_equal(self) -> Expression:
+        left = self.make_greater_than()
+        if self.t.type == TT.CMP_LTE_OP:
+            self.next()
+            right = self.make_less_than_or_equal()
+            return LessThanOrEqual(left, right, left.fp)
+        else:
+            return left
+
+    def make_greater_than(self) -> Expression:
+        left = self.make_less_than()
+        if self.t.type == TT.CMP_GT_OP:
+            self.next()
+            right = self.make_greater_than()
+            return GreaterThan(left, right, left.fp)
+        else:
+            return left
+
+    def make_less_than(self) -> Expression:
+        left = self.make_addition()
+        if self.t.type == TT.CMP_LT_OP:
+            self.next()
+            right = self.make_less_than()
+            return LessThan(left, right, left.fp)
+        else:
+            return left
 
     def make_addition(self) -> Expression:
         left = self.make_subtraction()
@@ -553,7 +790,7 @@ class Parser:
                 else:
                     fail(f'expected \',\', got {self.t}', self.t.fp)
             if self.t.type != TT.RPAREN:
-                fail(f'expected \')\', got {self.t}', self.t.fp)
+                fail(f"expected ')', got {self.t}", self.t.fp)
             self.next()
             return FuncCall(target, args)
         else:

@@ -77,6 +77,37 @@ type FuncDefNode struct {
 	Body      []IStatementNode `json:"body"`
 }
 
+type WhileNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Condition IExpressionNode  `json:"value"`
+	Body      []IStatementNode `json:"body"`
+}
+
+type IfElseNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Condition IExpressionNode  `json:"value"`
+	Truthy    []IStatementNode `json:"truthy"`
+	Falsy     []IStatementNode `json:"falsy"`
+}
+
+type IfNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Condition IExpressionNode  `json:"value"`
+	Body      []IStatementNode `json:"body"`
+}
+
 type VarDeclNode struct {
 	Type string `json:"type"`
 	IElement
@@ -95,6 +126,66 @@ type AssignNode struct {
 	IExpressionNode
 	Target Token           `json:"target"`
 	Value  IExpressionNode `json:"value"`
+}
+
+type NotEqualNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Left  IExpressionNode `json:"left"`
+	Right IExpressionNode `json:"right"`
+}
+
+type EqualNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Left  IExpressionNode `json:"left"`
+	Right IExpressionNode `json:"right"`
+}
+
+type GreaterThanOrEqualNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Left  IExpressionNode `json:"left"`
+	Right IExpressionNode `json:"right"`
+}
+
+type LessThanOrEqualNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Left  IExpressionNode `json:"left"`
+	Right IExpressionNode `json:"right"`
+}
+
+type GreaterThanNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Left  IExpressionNode `json:"left"`
+	Right IExpressionNode `json:"right"`
+}
+
+type LessThanNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Left  IExpressionNode `json:"left"`
+	Right IExpressionNode `json:"right"`
 }
 
 type AddNode struct {
@@ -185,25 +276,34 @@ type VarNode struct {
 	Token Token `json:"token"`
 }
 
-func (e Element) GetType() string        { return e.Type }
-func (e Position) GetType() string       { return e.Type }
-func (e Token) GetType() string          { return e.Type }
-func (e StatementNode) GetType() string  { return e.Type }
-func (e ExpressionNode) GetType() string { return e.Type }
-func (e TypeNode) GetType() string       { return e.Type }
-func (e TypedDeclNode) GetType() string  { return e.Type }
-func (e FuncDefNode) GetType() string    { return e.Type }
-func (e VarDeclNode) GetType() string    { return e.Type }
-func (e AssignNode) GetType() string     { return e.Type }
-func (e AddNode) GetType() string        { return e.Type }
-func (e SubNode) GetType() string        { return e.Type }
-func (e MulNode) GetType() string        { return e.Type }
-func (e DivNode) GetType() string        { return e.Type }
-func (e ModNode) GetType() string        { return e.Type }
-func (e ExpNode) GetType() string        { return e.Type }
-func (e FuncCallNode) GetType() string   { return e.Type }
-func (e IntNode) GetType() string        { return e.Type }
-func (e VarNode) GetType() string        { return e.Type }
+func (e Element) GetType() string                { return e.Type }
+func (e Position) GetType() string               { return e.Type }
+func (e Token) GetType() string                  { return e.Type }
+func (e StatementNode) GetType() string          { return e.Type }
+func (e ExpressionNode) GetType() string         { return e.Type }
+func (e TypeNode) GetType() string               { return e.Type }
+func (e TypedDeclNode) GetType() string          { return e.Type }
+func (e FuncDefNode) GetType() string            { return e.Type }
+func (e WhileNode) GetType() string              { return e.Type }
+func (e IfElseNode) GetType() string             { return e.Type }
+func (e IfNode) GetType() string                 { return e.Type }
+func (e VarDeclNode) GetType() string            { return e.Type }
+func (e AssignNode) GetType() string             { return e.Type }
+func (e NotEqualNode) GetType() string           { return e.Type }
+func (e EqualNode) GetType() string              { return e.Type }
+func (e GreaterThanOrEqualNode) GetType() string { return e.Type }
+func (e LessThanOrEqualNode) GetType() string    { return e.Type }
+func (e GreaterThanNode) GetType() string        { return e.Type }
+func (e LessThanNode) GetType() string           { return e.Type }
+func (e AddNode) GetType() string                { return e.Type }
+func (e SubNode) GetType() string                { return e.Type }
+func (e MulNode) GetType() string                { return e.Type }
+func (e DivNode) GetType() string                { return e.Type }
+func (e ModNode) GetType() string                { return e.Type }
+func (e ExpNode) GetType() string                { return e.Type }
+func (e FuncCallNode) GetType() string           { return e.Type }
+func (e IntNode) GetType() string                { return e.Type }
+func (e VarNode) GetType() string                { return e.Type }
 
 type Object = map[string]interface{}
 
@@ -250,6 +350,44 @@ func ParseJsonElement(raw Object) IElement {
 			Params:    params,
 			Body:      body,
 		}
+	case "WhileNode":
+		body := []IStatementNode{}
+		for i := range raw["body"].([]interface{}) {
+			body = append(body, ParseJsonElement(raw["body"].([]interface{})[i].(Object)).(IStatementNode))
+		}
+		return IfNode{
+			Type:      raw["type"].(string),
+			Filepos:   ParseJsonElement(raw["fp"].(Object)).(Position),
+			Condition: ParseJsonElement(raw["condition"].(Object)).(IExpressionNode),
+			Body:      body,
+		}
+	case "IfElseNode":
+		body_truthy := []IStatementNode{}
+		for i := range raw["body"].([]interface{}) {
+			body_truthy = append(body_truthy, ParseJsonElement(raw["body"].([]interface{})[i].(Object)).(IStatementNode))
+		}
+		body_falsy := []IStatementNode{}
+		for i := range raw["body"].([]interface{}) {
+			body_falsy = append(body_falsy, ParseJsonElement(raw["body"].([]interface{})[i].(Object)).(IStatementNode))
+		}
+		return IfElseNode{
+			Type:      raw["type"].(string),
+			Filepos:   ParseJsonElement(raw["fp"].(Object)).(Position),
+			Condition: ParseJsonElement(raw["condition"].(Object)).(IExpressionNode),
+			Truthy:    body_truthy,
+			Falsy:     body_falsy,
+		}
+	case "IfNode":
+		body := []IStatementNode{}
+		for i := range raw["body"].([]interface{}) {
+			body = append(body, ParseJsonElement(raw["body"].([]interface{})[i].(Object)).(IStatementNode))
+		}
+		return IfNode{
+			Type:      raw["type"].(string),
+			Filepos:   ParseJsonElement(raw["fp"].(Object)).(Position),
+			Condition: ParseJsonElement(raw["condition"].(Object)).(IExpressionNode),
+			Body:      body,
+		}
 	case "VarDeclNode":
 		return VarDeclNode{
 			Type:      raw["type"].(string),
@@ -274,6 +412,48 @@ func ParseJsonElement(raw Object) IElement {
 			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
 			Target:  ParseJsonElement(raw["target"].(Object)).(Token),
 			Value:   ParseJsonElement(raw["value"].(Object)).(IExpressionNode),
+		}
+	case "NotEqualNode":
+		return NotEqualNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Left:    ParseJsonElement(raw["left"].(Object)).(IExpressionNode),
+			Right:   ParseJsonElement(raw["right"].(Object)).(IExpressionNode),
+		}
+	case "EqualNode":
+		return EqualNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Left:    ParseJsonElement(raw["left"].(Object)).(IExpressionNode),
+			Right:   ParseJsonElement(raw["right"].(Object)).(IExpressionNode),
+		}
+	case "GreaterThanOrEqualNode":
+		return GreaterThanOrEqualNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Left:    ParseJsonElement(raw["left"].(Object)).(IExpressionNode),
+			Right:   ParseJsonElement(raw["right"].(Object)).(IExpressionNode),
+		}
+	case "LessThanOrEqualNode":
+		return LessThanOrEqualNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Left:    ParseJsonElement(raw["left"].(Object)).(IExpressionNode),
+			Right:   ParseJsonElement(raw["right"].(Object)).(IExpressionNode),
+		}
+	case "GreaterThanNode":
+		return GreaterThanNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Left:    ParseJsonElement(raw["left"].(Object)).(IExpressionNode),
+			Right:   ParseJsonElement(raw["right"].(Object)).(IExpressionNode),
+		}
+	case "LessThanNode":
+		return LessThanNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Left:    ParseJsonElement(raw["left"].(Object)).(IExpressionNode),
+			Right:   ParseJsonElement(raw["right"].(Object)).(IExpressionNode),
 		}
 	case "AddNode":
 		return AddNode{
@@ -359,8 +539,34 @@ func ParseStatement(element IStatementNode) parser.BaseStatement {
 			Parameters: params,
 			Body:       body,
 		}
+	case "WhileNode":
+		n := element.(WhileNode)
+		condition := ParseBaseExpression(n.Condition)
+		body := ParseStatements(n.Body)
+		return parser.WhileStatement{
+			Condition: condition,
+			Body:      body,
+		}
+	case "IfElseNode":
+		n := element.(IfElseNode)
+		condition := ParseBaseExpression(n.Condition)
+		body_truthy := ParseStatements(n.Truthy)
+		body_falsy := ParseStatements(n.Falsy)
+		return parser.IfElseStatement{
+			Condition: condition,
+			Truthy:    body_truthy,
+			Falsy:     body_falsy,
+		}
+	case "IfNode":
+		n := element.(IfNode)
+		condition := ParseBaseExpression(n.Condition)
+		body := ParseStatements(n.Body)
+		return parser.IfStatement{
+			Condition: condition,
+			Body:      body,
+		}
 	case "VarDeclNode":
-		n := element.(VarDeclNode) // VarDeclNode but Go...
+		n := element.(VarDeclNode)
 		return parser.DeclarationStatement{
 			TypedDeclaration: ParseTypedDeclaration(TypedDeclNode{
 				Type:      n.Type,
@@ -371,6 +577,36 @@ func ParseStatement(element IStatementNode) parser.BaseStatement {
 		}
 	case "AssignNode":
 		n := element.(AssignNode)
+		return parser.ExpressionStatement{
+			Expression: ParseBaseExpression(n),
+		}
+	case "NotEqualNode":
+		n := element.(NotEqualNode)
+		return parser.ExpressionStatement{
+			Expression: ParseBaseExpression(n),
+		}
+	case "EqualNode":
+		n := element.(EqualNode)
+		return parser.ExpressionStatement{
+			Expression: ParseBaseExpression(n),
+		}
+	case "GreaterThanOrEqualNode":
+		n := element.(GreaterThanOrEqualNode)
+		return parser.ExpressionStatement{
+			Expression: ParseBaseExpression(n),
+		}
+	case "LessThanOrEqualNode":
+		n := element.(LessThanOrEqualNode)
+		return parser.ExpressionStatement{
+			Expression: ParseBaseExpression(n),
+		}
+	case "GreaterThanNode":
+		n := element.(GreaterThanNode)
+		return parser.ExpressionStatement{
+			Expression: ParseBaseExpression(n),
+		}
+	case "LessThanNode":
+		n := element.(LessThanNode)
 		return parser.ExpressionStatement{
 			Expression: ParseBaseExpression(n),
 		}
@@ -420,7 +656,7 @@ func ParseStatement(element IStatementNode) parser.BaseStatement {
 			Expression: ParseBaseExpression(n),
 		}
 	default:
-		panic(fmt.Sprintf("'%s' unexpected", element.(Element).Type))
+		panic(fmt.Sprintf("'%s' unexpected", element.(IElement).GetType()))
 	}
 
 }
@@ -455,6 +691,54 @@ func ParseBaseExpression(element IExpressionNode) parser.BaseExpression {
 		return parser.VarAssignExpression{
 			Identifier: n.Target.Convert(),
 			Value:      ParseBaseExpression(n.Value),
+		}
+	case "NotEqualNode":
+		n := element.(NotEqualNode)
+		return parser.NotEqualExpression{
+			// LeftRightExpression: parser.LeftRightExpression{
+			Left:  ParseBaseExpression(n.Left),
+			Right: ParseBaseExpression(n.Right),
+			// },
+		}
+	case "EqualNode":
+		n := element.(EqualNode)
+		return parser.EqualExpression{
+			// LeftRightExpression: parser.LeftRightExpression{
+			Left:  ParseBaseExpression(n.Left),
+			Right: ParseBaseExpression(n.Right),
+			// },
+		}
+	case "GreaterThanOrEqualNode":
+		n := element.(GreaterThanOrEqualNode)
+		return parser.GreaterThanOrEqualExpression{
+			// LeftRightExpression: parser.LeftRightExpression{
+			Left:  ParseBaseExpression(n.Left),
+			Right: ParseBaseExpression(n.Right),
+			// },
+		}
+	case "LessThanOrEqualNode":
+		n := element.(LessThanOrEqualNode)
+		return parser.LessThanOrEqualExpression{
+			// LeftRightExpression: parser.LeftRightExpression{
+			Left:  ParseBaseExpression(n.Left),
+			Right: ParseBaseExpression(n.Right),
+			// },
+		}
+	case "GreaterThanNode":
+		n := element.(GreaterThanNode)
+		return parser.GreaterThanExpression{
+			// LeftRightExpression: parser.LeftRightExpression{
+			Left:  ParseBaseExpression(n.Left),
+			Right: ParseBaseExpression(n.Right),
+			// },
+		}
+	case "LessThanNode":
+		n := element.(LessThanNode)
+		return parser.LessThanExpression{
+			// LeftRightExpression: parser.LeftRightExpression{
+			Left:  ParseBaseExpression(n.Left),
+			Right: ParseBaseExpression(n.Right),
+			// },
 		}
 	case "AddNode":
 		n := element.(AddNode)
@@ -514,7 +798,7 @@ func ParseBaseExpression(element IExpressionNode) parser.BaseExpression {
 			Identifier: n.Token.Convert(),
 		}
 	default:
-		panic(fmt.Sprintf("'%s' unexpected", element.(Element).Type))
+		panic(fmt.Sprintf("'%s' unexpected", element.(IElement).GetType()))
 	}
 }
 
