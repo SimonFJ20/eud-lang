@@ -1,6 +1,6 @@
 
 func sum(a: i32, b: i32): i32 {
-    a + b
+    return a + b
 }
 
 let x: i32
@@ -8,3 +8,4 @@ x = 4
 
 let y: i32
 y = sum(5, 3)
+y = y + 1

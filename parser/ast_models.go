@@ -61,12 +61,6 @@ type VarAssignExpression struct {
 	Value      BaseExpression
 }
 
-// type LeftRightExpression struct {
-// 	BaseExpression
-// 	Left  BaseExpression
-// 	Right BaseExpression
-// }
-
 type NotEqualExpression struct {
 	BaseExpression
 	Left  BaseExpression
@@ -207,6 +201,8 @@ func (n StatementType) String() string {
 		return "DeclarationStatement"
 	case FuncDefStatementType:
 		return "FuncDefStatement"
+	case ReturnStatementType:
+		return "ReturnStatement"
 	case WhileStatementType:
 		return "WhileStatement"
 	case IfElseStatementType:
@@ -222,10 +218,10 @@ func (n StatementType) String() string {
 
 func (n DeclarationStatement) StatementType() StatementType { return DeclarationStatementType }
 func (n FuncDefStatement) StatementType() StatementType     { return FuncDefStatementType }
+func (n ReturnStatement) StatementType() StatementType      { return ReturnStatementType }
 func (n WhileStatement) StatementType() StatementType       { return WhileStatementType }
 func (n IfElseStatement) StatementType() StatementType      { return IfElseStatementType }
 func (n IfStatement) StatementType() StatementType          { return IfStatementType }
-func (n ReturnStatement) StatementType() StatementType      { return ReturnStatementType }
 func (n ExpressionStatement) StatementType() StatementType  { return ExpressionStatementType }
 
 func (n DeclarationStatement) String() string {
@@ -462,10 +458,42 @@ func (n IntLiteral) ExpressionType() ExpressionType            { return IntExpre
 func (n VarAssignExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Value)
 }
-
-// func (n LeftRightExpression) String() string {
-// 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
-// }
+func (n NotEqualExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n EqualExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n GreaterThanOrEqualExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n LessThanOrEqualExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n GreaterThanExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n LessThanExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n AddExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n SubExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n MulExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n DivExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n ModExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n ExpExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
 func (n FuncCallExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Arguments)
 }
@@ -484,15 +512,114 @@ func (n VarAssignExpression) StringNested(nesting int) string {
 	)
 }
 
-// func (n LeftRightExpression) StringNested(nesting int) string {
-// 	return fmt.Sprintf(
-// 		"%s%s(%s, %s)",
-// 		nstr(nesting),
-// 		n.ExpressionType(),
-// 		n.Left,
-// 		n.Right,
-// 	)
-// }
+func (n NotEqualExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n EqualExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n GreaterThanOrEqualExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n LessThanOrEqualExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n GreaterThanExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n LessThanExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n AddExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n SubExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n MulExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n DivExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n ModExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
+func (n ExpExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, %s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Left,
+		n.Right,
+	)
+}
 
 func (n FuncCallExpression) StringNested(nesting int) string {
 	return fmt.Sprintf(

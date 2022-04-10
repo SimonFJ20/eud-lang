@@ -77,6 +77,15 @@ type FuncDefNode struct {
 	Body      []IStatementNode `json:"body"`
 }
 
+type ReturnNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Value IExpressionNode `json:"value"`
+}
+
 type WhileNode struct {
 	Type string `json:"type"`
 	IElement
@@ -284,6 +293,7 @@ func (e ExpressionNode) GetType() string         { return e.Type }
 func (e TypeNode) GetType() string               { return e.Type }
 func (e TypedDeclNode) GetType() string          { return e.Type }
 func (e FuncDefNode) GetType() string            { return e.Type }
+func (e ReturnNode) GetType() string             { return e.Type }
 func (e WhileNode) GetType() string              { return e.Type }
 func (e IfElseNode) GetType() string             { return e.Type }
 func (e IfNode) GetType() string                 { return e.Type }
@@ -349,6 +359,12 @@ func ParseJsonElement(raw Object) IElement {
 			ValueType: ParseJsonElement(raw["valueType"].(Object)).(TypeNode),
 			Params:    params,
 			Body:      body,
+		}
+	case "ReturnNode":
+		return ReturnNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Value:   ParseJsonElement(raw["value"].(Object)).(IExpressionNode),
 		}
 	case "WhileNode":
 		body := []IStatementNode{}
@@ -538,6 +554,11 @@ func ParseStatement(element IStatementNode) parser.BaseStatement {
 			ReturnType: n.ValueType.Token.Convert(),
 			Parameters: params,
 			Body:       body,
+		}
+	case "ReturnNode":
+		n := element.(ReturnNode)
+		return parser.ReturnStatement{
+			Value: ParseBaseExpression(n.Value),
 		}
 	case "WhileNode":
 		n := element.(WhileNode)

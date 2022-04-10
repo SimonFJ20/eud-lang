@@ -344,6 +344,16 @@ class FuncDef(Statement):
         bodystr = ','.join(map(lambda x:x.to_json(), self.body))
         return f'{{"type":"{self.typestr()}","target":{tstr},"valueType":{vtstr},"params":[{paramstr}],"body":[{bodystr}],"fp":{self.fp.to_json()}}}'
 
+class Return(Expression):
+    def __init__(self, value: Expression, fp: Position) -> None:
+        super().__init__(fp)
+        self.value = value
+
+    def __repr__(self) -> str: return super().__repr__() + f'({self.value})'
+
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","value":{self.value.to_json()},"fp":{self.fp.to_json()}}}'
+
 class While(Statement):
     def __init__(self, condition: Expression, body: List[Statement], fp: Position) -> None:
         super().__init__(fp)
@@ -531,6 +541,8 @@ class Parser:
     def make_statement(self) -> Statement:
         if self.t.value == 'func':
             return self.make_func_def()
+        elif self.t.value == 'return':
+            return self.make_return()
         elif self.t.value == 'let':
             return self.make_declaration_statement()
         elif self.t.value == 'while':
@@ -577,7 +589,13 @@ class Parser:
         self.next()
         return FuncDef(target, type, params, body, fp)
 
-    def make_while(self):
+    def make_return(self) -> Return:
+        fp = self.t.fp
+        self.next()
+        value = self.make_expression()
+        return Return(value, fp)
+
+    def make_while(self) -> While:
         fp = self.t.fp
         self.next()
         if self.t.type != TT.LPAREN:
@@ -596,7 +614,7 @@ class Parser:
         self.next()
         return While(condition, body, fp)
 
-    def make_if_or_if_else(self):
+    def make_if_or_if_else(self) -> Statement:
         fp = self.t.fp
         self.next()
         if self.t.type != TT.LPAREN:
