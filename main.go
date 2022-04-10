@@ -39,7 +39,7 @@ func main() {
 
 	println("\033[1;36mCompiling AST:\033[0m")
 
-	program, err := bytecode.Compile(ast)
+	program, err := bytecode.Compile_old(ast)
 
 	if err != nil {
 		log.Fatal(err)
