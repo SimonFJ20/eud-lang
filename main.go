@@ -14,8 +14,7 @@ import (
 )
 
 type Options struct {
-	UsePythonParser bool
-	NoRuntimeDebug  bool
+	NoRuntimeDebug bool
 }
 
 func main() {
@@ -31,12 +30,7 @@ func main() {
 
 	fmt.Printf("\033[1;36mInput:\033[0m\n%s\n\n", text)
 
-	var ast []parser.BaseStatement
-	if options.UsePythonParser {
-		ast = parseUsingPythonParser(text, file)
-	} else {
-		ast = parseUsingGoParser(text)
-	}
+	ast := parseUsingPythonParser(text, file)
 
 	// fmt.Printf("%s\n", ast)
 	for i := range ast {
@@ -97,13 +91,9 @@ func getFileFromArgs() string {
 
 func getOptionsFromArgs() Options {
 	args := os.Args[2:]
-	options := Options{
-		UsePythonParser: false,
-	}
+	options := Options{}
 	for i := range args {
 		switch args[i] {
-		case "--pyparse":
-			options.UsePythonParser = true
 		case "--nodebug":
 			options.NoRuntimeDebug = true
 		}
@@ -119,19 +109,6 @@ func fileExists(filename string) bool {
 		log.Fatal("error checking file existance")
 	}
 	return true
-}
-
-func parseUsingGoParser(text string) []parser.BaseStatement {
-	println("\033[1;36mTokenizing text:\033[0m")
-
-	tokens := parser.TokenizeString(text)
-
-	println("\033[1;36mParsing tokens:\033[0m")
-
-	p := parser.Parser{}
-
-	ast := p.Parse(tokens)
-	return ast
 }
 
 func parseUsingPythonParser(text string, filepath string) []parser.BaseStatement {
