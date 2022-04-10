@@ -88,6 +88,8 @@ func compileStatements(ctx *Compiler, nodes []parser.BaseStatement) error {
 
 func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 	switch node.StatementType() {
+	case parser.TypedInitStatementType:
+		return compileTypedInitStatement(ctx, node.(parser.TypedInitStatement))
 	case parser.DeclarationStatementType:
 		return compileDeclarationStatement(ctx, node.(parser.DeclarationStatement))
 	case parser.FuncDefStatementType:
@@ -123,6 +125,21 @@ func compileExpressionStatement(ctx *Compiler, node parser.BaseStatement) error 
 	//  which isn't hard to enforce.
 	ctx.instructions = append(ctx.instructions, Pop{Type: ctx.lastType})
 
+	return nil
+}
+
+func compileTypedInitStatement(ctx *Compiler, node parser.TypedInitStatement) error {
+	t, err := compileType(ctx, node.DeclType)
+	if err != nil {
+		return err
+	}
+	handle := ctx.nextVarId()
+	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Handle: handle})
+	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
+	if err := compileBaseExpression(ctx, node.Value); err != nil {
+		return err
+	}
+	ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Handle: handle})
 	return nil
 }
 
@@ -269,10 +286,10 @@ func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 		return compileNotEqualExpression(ctx, node.(parser.NotEqualExpression))
 	case parser.EqualExpressionType:
 		return compileEqualExpression(ctx, node.(parser.EqualExpression))
-	case parser.GreaterThanOrEqualExpressionType:
-		return compileGreaterThanOrEqualExpression(ctx, node.(parser.GreaterThanOrEqualExpression))
-	case parser.LessThanOrEqualExpressionType:
-		return compileLessThanOrEqualExpression(ctx, node.(parser.LessThanOrEqualExpression))
+	case parser.GTEExpressionType:
+		return compileGreaterThanOrEqualExpression(ctx, node.(parser.GTEExpression))
+	case parser.LTEExpressionType:
+		return compileLessThanOrEqualExpression(ctx, node.(parser.LTEExpression))
 	case parser.GreaterThanExpressionType:
 		return compileGreaterThanExpression(ctx, node.(parser.GreaterThanExpression))
 	case parser.LessThanExpressionType:
@@ -334,7 +351,7 @@ func compileEqualExpression(ctx *Compiler, node parser.EqualExpression) error {
 	return nil
 }
 
-func compileGreaterThanOrEqualExpression(ctx *Compiler, node parser.GreaterThanOrEqualExpression) error {
+func compileGreaterThanOrEqualExpression(ctx *Compiler, node parser.GTEExpression) error {
 	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
@@ -345,7 +362,7 @@ func compileGreaterThanOrEqualExpression(ctx *Compiler, node parser.GreaterThanO
 	return nil
 }
 
-func compileLessThanOrEqualExpression(ctx *Compiler, node parser.LessThanOrEqualExpression) error {
+func compileLessThanOrEqualExpression(ctx *Compiler, node parser.LTEExpression) error {
 	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}

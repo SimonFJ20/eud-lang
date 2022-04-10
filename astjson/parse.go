@@ -117,6 +117,17 @@ type IfNode struct {
 	Body      []IStatementNode `json:"body"`
 }
 
+type VarInitNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Target    Token           `json:"target"`
+	ValueType TypeNode        `json:"valueType"`
+	Value     IExpressionNode `json:"value"`
+}
+
 type VarDeclNode struct {
 	Type string `json:"type"`
 	IElement
@@ -297,6 +308,7 @@ func (e ReturnNode) GetType() string             { return e.Type }
 func (e WhileNode) GetType() string              { return e.Type }
 func (e IfElseNode) GetType() string             { return e.Type }
 func (e IfNode) GetType() string                 { return e.Type }
+func (e VarInitNode) GetType() string            { return e.Type }
 func (e VarDeclNode) GetType() string            { return e.Type }
 func (e AssignNode) GetType() string             { return e.Type }
 func (e NotEqualNode) GetType() string           { return e.Type }
@@ -403,6 +415,14 @@ func ParseJsonElement(raw Object) IElement {
 			Filepos:   ParseJsonElement(raw["fp"].(Object)).(Position),
 			Condition: ParseJsonElement(raw["condition"].(Object)).(IExpressionNode),
 			Body:      body,
+		}
+	case "VarInitNode":
+		return VarInitNode{
+			Type:      raw["type"].(string),
+			Filepos:   ParseJsonElement(raw["fp"].(Object)).(Position),
+			Target:    ParseJsonElement(raw["target"].(Object)).(Token),
+			ValueType: ParseJsonElement(raw["valueType"].(Object)).(TypeNode),
+			Value:     ParseJsonElement(raw["value"].(Object)).(IExpressionNode),
 		}
 	case "VarDeclNode":
 		return VarDeclNode{
@@ -586,6 +606,17 @@ func ParseStatement(element IStatementNode) parser.BaseStatement {
 			Condition: condition,
 			Body:      body,
 		}
+	case "VarInitNode":
+		n := element.(VarInitNode)
+		return parser.TypedInitStatement{
+			TypedDeclaration: ParseTypedDeclaration(TypedDeclNode{
+				Type:      n.Type,
+				Filepos:   n.Filepos,
+				Target:    n.Target,
+				ValueType: n.ValueType,
+			}),
+			Value: ParseBaseExpression(n.Value),
+		}
 	case "VarDeclNode":
 		n := element.(VarDeclNode)
 		return parser.DeclarationStatement{
@@ -731,7 +762,7 @@ func ParseBaseExpression(element IExpressionNode) parser.BaseExpression {
 		}
 	case "GreaterThanOrEqualNode":
 		n := element.(GreaterThanOrEqualNode)
-		return parser.GreaterThanOrEqualExpression{
+		return parser.GTEExpression{
 			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
@@ -739,7 +770,7 @@ func ParseBaseExpression(element IExpressionNode) parser.BaseExpression {
 		}
 	case "LessThanOrEqualNode":
 		n := element.(LessThanOrEqualNode)
-		return parser.LessThanOrEqualExpression{
+		return parser.LTEExpression{
 			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),

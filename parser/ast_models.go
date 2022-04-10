@@ -9,6 +9,7 @@ type StatementType int
 
 const (
 	DeclarationStatementType StatementType = iota
+	TypedInitStatementType
 	FuncDefStatementType
 	WhileStatementType
 	IfElseStatementType
@@ -73,13 +74,13 @@ type EqualExpression struct {
 	Right BaseExpression
 }
 
-type GreaterThanOrEqualExpression struct {
+type GTEExpression struct {
 	BaseExpression
 	Left  BaseExpression
 	Right BaseExpression
 }
 
-type LessThanOrEqualExpression struct {
+type LTEExpression struct {
 	BaseExpression
 	Left  BaseExpression
 	Right BaseExpression
@@ -156,6 +157,12 @@ type ReturnStatement struct {
 	Value BaseExpression
 }
 
+type TypedInitStatement struct {
+	BaseStatement
+	TypedDeclaration
+	Value BaseExpression
+}
+
 type DeclarationStatement struct {
 	BaseStatement
 	TypedDeclaration
@@ -181,8 +188,8 @@ const (
 	VarAssignExpressionType
 	NotEqualExpressionType
 	EqualExpressionType
-	GreaterThanOrEqualExpressionType
-	LessThanOrEqualExpressionType
+	GTEExpressionType
+	LTEExpressionType
 	GreaterThanExpressionType
 	LessThanExpressionType
 	AddExpressionType
@@ -197,6 +204,8 @@ const (
 
 func (n StatementType) String() string {
 	switch n {
+	case TypedInitStatementType:
+		return "TypedInitStatement"
 	case DeclarationStatementType:
 		return "DeclarationStatement"
 	case FuncDefStatementType:
@@ -217,6 +226,7 @@ func (n StatementType) String() string {
 }
 
 func (n DeclarationStatement) StatementType() StatementType { return DeclarationStatementType }
+func (n TypedInitStatement) StatementType() StatementType   { return TypedInitStatementType }
 func (n FuncDefStatement) StatementType() StatementType     { return FuncDefStatementType }
 func (n ReturnStatement) StatementType() StatementType      { return ReturnStatementType }
 func (n WhileStatement) StatementType() StatementType       { return WhileStatementType }
@@ -226,6 +236,9 @@ func (n ExpressionStatement) StatementType() StatementType  { return ExpressionS
 
 func (n DeclarationStatement) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.StatementType(), n.Identifier, n.DeclType)
+}
+func (n TypedInitStatement) String() string {
+	return fmt.Sprintf("%s(%s, %s, %s)", n.StatementType(), n.Identifier, n.DeclType, n.Value)
 }
 func (n FuncDefStatement) String() string {
 	return fmt.Sprintf("%s(%s, %s, %s, %s)", n.StatementType(), n.Identifier, n.ReturnType, n.Parameters, n.Body)
@@ -259,6 +272,21 @@ func (n DeclarationStatement) StringNested(nesting int) string {
 		n.Identifier,
 		nstr(nesting+1),
 		n.DeclType,
+		nstr(nesting),
+	)
+}
+
+func (n TypedInitStatement) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(\n%s%s,\n%s%s,\n%s%s\n%s)",
+		nstr(nesting),
+		n.StatementType(),
+		nstr(nesting+1),
+		n.Identifier,
+		nstr(nesting+1),
+		n.DeclType,
+		nstr(nesting+1),
+		n.Value,
 		nstr(nesting),
 	)
 }
@@ -399,9 +427,9 @@ func (n ExpressionType) String() string {
 		return "inequal"
 	case EqualExpressionType:
 		return "equal"
-	case GreaterThanOrEqualExpressionType:
+	case GTEExpressionType:
 		return "gte"
-	case LessThanOrEqualExpressionType:
+	case LTEExpressionType:
 		return "lte"
 	case GreaterThanExpressionType:
 		return "gt"
@@ -434,15 +462,11 @@ func (n ExpressionType) String() string {
 	}
 }
 
-func (n VarAssignExpression) ExpressionType() ExpressionType { return VarAssignExpressionType }
-func (n NotEqualExpression) ExpressionType() ExpressionType  { return NotEqualExpressionType }
-func (n EqualExpression) ExpressionType() ExpressionType     { return EqualExpressionType }
-func (n GreaterThanOrEqualExpression) ExpressionType() ExpressionType {
-	return GreaterThanOrEqualExpressionType
-}
-func (n LessThanOrEqualExpression) ExpressionType() ExpressionType {
-	return LessThanOrEqualExpressionType
-}
+func (n VarAssignExpression) ExpressionType() ExpressionType   { return VarAssignExpressionType }
+func (n NotEqualExpression) ExpressionType() ExpressionType    { return NotEqualExpressionType }
+func (n EqualExpression) ExpressionType() ExpressionType       { return EqualExpressionType }
+func (n GTEExpression) ExpressionType() ExpressionType         { return GTEExpressionType }
+func (n LTEExpression) ExpressionType() ExpressionType         { return LTEExpressionType }
 func (n GreaterThanExpression) ExpressionType() ExpressionType { return GreaterThanExpressionType }
 func (n LessThanExpression) ExpressionType() ExpressionType    { return LessThanExpressionType }
 func (n AddExpression) ExpressionType() ExpressionType         { return AddExpressionType }
@@ -464,10 +488,10 @@ func (n NotEqualExpression) String() string {
 func (n EqualExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
 }
-func (n GreaterThanOrEqualExpression) String() string {
+func (n GTEExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
 }
-func (n LessThanOrEqualExpression) String() string {
+func (n LTEExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
 }
 func (n GreaterThanExpression) String() string {
@@ -530,7 +554,7 @@ func (n EqualExpression) StringNested(nesting int) string {
 		n.Right,
 	)
 }
-func (n GreaterThanOrEqualExpression) StringNested(nesting int) string {
+func (n GTEExpression) StringNested(nesting int) string {
 	return fmt.Sprintf(
 		"%s%s(%s, %s)",
 		nstr(nesting),
@@ -539,7 +563,7 @@ func (n GreaterThanOrEqualExpression) StringNested(nesting int) string {
 		n.Right,
 	)
 }
-func (n LessThanOrEqualExpression) StringNested(nesting int) string {
+func (n LTEExpression) StringNested(nesting int) string {
 	return fmt.Sprintf(
 		"%s%s(%s, %s)",
 		nstr(nesting),

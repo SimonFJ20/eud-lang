@@ -402,6 +402,18 @@ class If(Statement):
         cstr = self.condition.to_json()
         return f'{{"type":"{self.typestr()}","condition":{cstr},"body":[{bodystr}],"fp":{self.fp.to_json()}}}'
 
+class VarInit(Statement):
+    def __init__(self, target: Token, type: Type, value: Expression, fp: Position) -> None:
+        super().__init__(fp)
+        self.target = target
+        self.type = type
+        self.value = value
+    
+    def __repr__(self) -> str: return super().__repr__() + f'({self.target.value}, {self.type}, {self.value})'
+
+    def to_json(self) -> str:
+        return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"valueType":{self.type.to_json()},"value":{self.value.to_json()},"fp":{self.fp.to_json()}}}'
+
 class VarDecl(Statement):
     def __init__(self, target: Token, type: Type, fp: Position) -> None:
         super().__init__(fp)
@@ -544,7 +556,7 @@ class Parser:
         elif self.t.value == 'return':
             return self.make_return()
         elif self.t.value == 'let':
-            return self.make_declaration_statement()
+            return self.make_declaration_or_initialization()
         elif self.t.value == 'while':
             return self.make_while()
         elif self.t.value == 'if':
@@ -655,7 +667,7 @@ class Parser:
         type = self.make_type()
         return TypedDecl(target, type)
 
-    def make_declaration_statement(self) -> VarDecl:
+    def make_declaration_or_initialization(self) -> Statement:
         fp = self.t.fp
         self.next()
         if self.t.type != TT.IDENTIFIER:
@@ -666,7 +678,12 @@ class Parser:
             fail(f"expected ':', got {self.t}", self.t.fp)
         self.next()
         type = self.make_type()
-        return VarDecl(target, type, fp)
+        if self.t.type == TT.ASGN_OP:
+            self.next()
+            value = self.make_expression()
+            return VarInit(target, type, value, fp)
+        else:
+            return VarDecl(target, type, fp)
 
     def make_type(self) -> Type:
         if self.t.value not in ['u8', 'u16', 'u32', 'u64', 'i8', 'i16', 'i32', 'i64', 'char', 'usize', 'uptr']:

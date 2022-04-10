@@ -20,6 +20,9 @@ clear
 ./eud examples/if-statement.eud --pyparse
 
 clear
+./eud examples/initialisation.eud --pyparse
+
+clear
 ./eud examples/math-simple.eud --pyparse
 
 clear
@@ -32,7 +35,7 @@ clear
 ./eud examples/variables.eud --pyparse
 
 clear
-./eud examples/while-print.eud --pyparse
+./eud examples/while-print.eud --pyparse --nodebug
 
 clear
 ./eud examples/while.eud --pyparse

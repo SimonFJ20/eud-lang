@@ -48,7 +48,7 @@ func main() {
 	program, err := bytecode.Compile(ast)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		return
 	}
 
