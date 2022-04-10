@@ -148,10 +148,6 @@ type IntLiteral struct {
 	Tok *Token
 }
 
-type Parser struct {
-	tok *Token
-}
-
 type ReturnStatement struct {
 	BaseStatement
 	Value BaseExpression
