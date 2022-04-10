@@ -379,12 +379,12 @@ func ParseJsonElement(raw Object) IElement {
 		}
 	case "IfElseNode":
 		body_truthy := []IStatementNode{}
-		for i := range raw["body"].([]interface{}) {
-			body_truthy = append(body_truthy, ParseJsonElement(raw["body"].([]interface{})[i].(Object)).(IStatementNode))
+		for i := range raw["truthy"].([]interface{}) {
+			body_truthy = append(body_truthy, ParseJsonElement(raw["truthy"].([]interface{})[i].(Object)).(IStatementNode))
 		}
 		body_falsy := []IStatementNode{}
-		for i := range raw["body"].([]interface{}) {
-			body_falsy = append(body_falsy, ParseJsonElement(raw["body"].([]interface{})[i].(Object)).(IStatementNode))
+		for i := range raw["falsy"].([]interface{}) {
+			body_falsy = append(body_falsy, ParseJsonElement(raw["falsy"].([]interface{})[i].(Object)).(IStatementNode))
 		}
 		return IfElseNode{
 			Type:      raw["type"].(string),
