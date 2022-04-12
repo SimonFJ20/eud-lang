@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"eud/astjson"
 	"eud/bytecode"
 	"eud/parser"
 	"fmt"
@@ -130,7 +131,7 @@ func parseUsingPythonParser(text string, filepath string) []parser.BaseStatement
 		log.Fatal(err)
 	}
 	println("\033[1;36mParsing AST json to internal AST:\033[0m")
-	ast := bytecode.Parse(astjsonstring)
+	ast := astjson.Parse(astjsonstring)
 	return ast
 }
 
