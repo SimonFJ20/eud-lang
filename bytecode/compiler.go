@@ -5,21 +5,21 @@ import (
 	"fmt"
 )
 
-type Symbol_old struct {
+type Symbol struct {
 	Type   Type
 	Handle uint
 }
 
-type SymbolTable_old struct {
-	parent  *SymbolTable_old
-	symbols map[string]Symbol_old
+type SymbolTable struct {
+	parent  *SymbolTable
+	symbols map[string]Symbol
 }
 
-func (s *SymbolTable_old) Set(name string, symbol Symbol_old) {
+func (s *SymbolTable) Set(name string, symbol Symbol) {
 	s.symbols[name] = symbol
 }
 
-func (s *SymbolTable_old) Get(name string) (Symbol_old, error) {
+func (s *SymbolTable) Get(name string) (Symbol, error) {
 	for i := range s.symbols {
 		if i == name {
 			return s.symbols[i], nil
@@ -28,10 +28,10 @@ func (s *SymbolTable_old) Get(name string) (Symbol_old, error) {
 	if s.parent != nil {
 		return s.parent.Get(name)
 	}
-	return Symbol_old{}, fmt.Errorf("symbol \"%s\" undeclared", name)
+	return Symbol{}, fmt.Errorf("symbol \"%s\" undeclared", name)
 }
 
-func (s *SymbolTable_old) DefinedLocally(name string) bool {
+func (s *SymbolTable) DefinedLocally(name string) bool {
 	for i := range s.symbols {
 		if i == name {
 			return true
@@ -40,30 +40,30 @@ func (s *SymbolTable_old) DefinedLocally(name string) bool {
 	return false
 }
 
-type Compiler_old struct {
+type Compiler struct {
 	instructions []Instruction
 	varId        uint
-	symtable     SymbolTable_old
+	symtable     SymbolTable
 	globals      map[string]uintptr
 	lastType     Type
 }
 
-func (ctx *Compiler_old) nextVarId() uint {
+func (ctx *Compiler) nextVarId() uint {
 	ctx.varId++
 	return ctx.varId - 1
 }
 
-func Compile_old(ast []parser.BaseStatement) (Program, error) {
-	ctx := Compiler_old{
+func Compile(ast []parser.BaseStatement) (Program, error) {
+	ctx := Compiler{
 		instructions: []Instruction{},
 		varId:        0,
-		symtable: SymbolTable_old{
+		symtable: SymbolTable{
 			parent:  nil,
-			symbols: map[string]Symbol_old{},
+			symbols: map[string]Symbol{},
 		},
 		globals: make(map[string]uintptr),
 	}
-	if err := compileStatements_old(&ctx, ast); err != nil {
+	if err := compileStatements(&ctx, ast); err != nil {
 		return Program{}, err
 	}
 	return Program{
@@ -71,14 +71,14 @@ func Compile_old(ast []parser.BaseStatement) (Program, error) {
 	}, nil
 }
 
-func compileStatements_old(ctx *Compiler_old, nodes []parser.BaseStatement) error {
+func compileStatements(ctx *Compiler, nodes []parser.BaseStatement) error {
 	symtable := ctx.symtable
-	ctx.symtable = SymbolTable_old{
+	ctx.symtable = SymbolTable{
 		parent:  &symtable,
-		symbols: map[string]Symbol_old{},
+		symbols: map[string]Symbol{},
 	}
 	for i := range nodes {
-		if err := compileBaseStatement_old(ctx, nodes[i]); err != nil {
+		if err := compileBaseStatement(ctx, nodes[i]); err != nil {
 			return err
 		}
 	}
@@ -86,32 +86,32 @@ func compileStatements_old(ctx *Compiler_old, nodes []parser.BaseStatement) erro
 	return nil
 }
 
-func compileBaseStatement_old(ctx *Compiler_old, node parser.BaseStatement) error {
+func compileBaseStatement(ctx *Compiler, node parser.BaseStatement) error {
 	switch node.StatementType() {
 	case parser.TypedInitStatementType:
-		return compileTypedInitStatement_old(ctx, node.(parser.TypedInitStatement))
+		return compileTypedInitStatement(ctx, node.(parser.TypedInitStatement))
 	case parser.DeclarationStatementType:
-		return compileDeclarationStatement_old(ctx, node.(parser.DeclarationStatement))
+		return compileDeclarationStatement(ctx, node.(parser.DeclarationStatement))
 	case parser.FuncDefStatementType:
-		return compileFuncDefStatement_old(ctx, node.(parser.FuncDefStatement))
+		return compileFuncDefStatement(ctx, node.(parser.FuncDefStatement))
 	case parser.WhileStatementType:
-		return compileWhileStatementType_old(ctx, node.(parser.WhileStatement))
+		return compileWhileStatementType(ctx, node.(parser.WhileStatement))
 	case parser.IfElseStatementType:
-		return compileIfElseStatementType_old(ctx, node.(parser.IfElseStatement))
+		return compileIfElseStatementType(ctx, node.(parser.IfElseStatement))
 	case parser.IfStatementType:
-		return compileIfStatementType_old(ctx, node.(parser.IfStatement))
+		return compileIfStatementType(ctx, node.(parser.IfStatement))
 	case parser.ReturnStatementType:
-		return compileReturnStatement_old(ctx, node.(parser.ReturnStatement))
+		return compileReturnStatement(ctx, node.(parser.ReturnStatement))
 	case parser.ExpressionStatementType:
-		return compileExpressionStatement_old(ctx, node)
+		return compileExpressionStatement(ctx, node)
 
 	default:
 		return fmt.Errorf("unknown or unexpected statement type '%s'", node.StatementType())
 	}
 }
 
-func compileExpressionStatement_old(ctx *Compiler_old, node parser.BaseStatement) error {
-	if err := compileBaseExpression_old(ctx, node.(parser.ExpressionStatement).Expression); err != nil {
+func compileExpressionStatement(ctx *Compiler, node parser.BaseStatement) error {
+	if err := compileBaseExpression(ctx, node.(parser.ExpressionStatement).Expression); err != nil {
 		return err
 	}
 
@@ -128,51 +128,51 @@ func compileExpressionStatement_old(ctx *Compiler_old, node parser.BaseStatement
 	return nil
 }
 
-func compileTypedInitStatement_old(ctx *Compiler_old, node parser.TypedInitStatement) error {
-	t, err := compileType_old(ctx, node.DeclType)
+func compileTypedInitStatement(ctx *Compiler, node parser.TypedInitStatement) error {
+	t, err := compileType(ctx, node.DeclType)
 	if err != nil {
 		return err
 	}
 	handle := ctx.nextVarId()
-	ctx.symtable.Set(node.Identifier.StringValue, Symbol_old{Type: t, Handle: handle})
+	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Handle: handle})
 	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
-	if err := compileBaseExpression_old(ctx, node.Value); err != nil {
+	if err := compileBaseExpression(ctx, node.Value); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Handle: handle})
 	return nil
 }
 
-func compileDeclarationStatement_old(ctx *Compiler_old, node parser.DeclarationStatement) error {
-	t, err := compileType_old(ctx, node.DeclType)
+func compileDeclarationStatement(ctx *Compiler, node parser.DeclarationStatement) error {
+	t, err := compileType(ctx, node.DeclType)
 	if err != nil {
 		return err
 	}
 	handle := ctx.nextVarId()
-	ctx.symtable.Set(node.Identifier.StringValue, Symbol_old{Type: t, Handle: handle})
+	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Handle: handle})
 	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
 	return nil
 }
 
-func compileFuncDefStatement_old(ctx *Compiler_old, node parser.FuncDefStatement) error {
+func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error {
 	start := len(ctx.instructions)
 	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
 	ctx.instructions = append(ctx.instructions, Jump{})
 	ctx.globals[node.Identifier.StringValue] = uintptr(start + 2)
 	for i := range node.Parameters {
-		t, err := compileType_old(ctx, node.Parameters[i].DeclType)
+		t, err := compileType(ctx, node.Parameters[i].DeclType)
 		if err != nil {
 			return err
 		}
 		handle := ctx.nextVarId()
 		ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
 		ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Handle: handle})
-		ctx.symtable.Set(node.Parameters[i].Identifier.StringValue, Symbol_old{Type: t, Handle: handle})
+		ctx.symtable.Set(node.Parameters[i].Identifier.StringValue, Symbol{Type: t, Handle: handle})
 	}
-	if err := compileStatements_old(ctx, node.Body); err != nil {
+	if err := compileStatements(ctx, node.Body); err != nil {
 		return err
 	}
-	t, err := compileType_old(ctx, node.ReturnType)
+	t, err := compileType(ctx, node.ReturnType)
 	if err != nil {
 		return err
 	}
@@ -183,15 +183,15 @@ func compileFuncDefStatement_old(ctx *Compiler_old, node parser.FuncDefStatement
 	return nil
 }
 
-func compileWhileStatementType_old(ctx *Compiler_old, node parser.WhileStatement) error {
+func compileWhileStatementType(ctx *Compiler, node parser.WhileStatement) error {
 	condition_start := len(ctx.instructions)
-	if err := compileBaseExpression_old(ctx, node.Condition); err != nil {
+	if err := compileBaseExpression(ctx, node.Condition); err != nil {
 		return err
 	}
 	end_jpush_index := len(ctx.instructions)
 	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
 	ctx.instructions = append(ctx.instructions, JumpIfZero{})
-	if err := compileStatements_old(ctx, node.Body); err != nil {
+	if err := compileStatements(ctx, node.Body); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: condition_start})
@@ -200,43 +200,43 @@ func compileWhileStatementType_old(ctx *Compiler_old, node parser.WhileStatement
 	return nil
 }
 
-func compileIfElseStatementType_old(ctx *Compiler_old, node parser.IfElseStatement) error {
-	if err := compileBaseExpression_old(ctx, node.Condition); err != nil {
+func compileIfElseStatementType(ctx *Compiler, node parser.IfElseStatement) error {
+	if err := compileBaseExpression(ctx, node.Condition); err != nil {
 		return err
 	}
 	else_jpush_index := len(ctx.instructions)
 	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
 	ctx.instructions = append(ctx.instructions, JumpIfZero{})
-	if err := compileStatements_old(ctx, node.Truthy); err != nil {
+	if err := compileStatements(ctx, node.Truthy); err != nil {
 		return err
 	}
 	end_jpush_index := len(ctx.instructions)
 	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
 	ctx.instructions = append(ctx.instructions, JumpIfZero{})
 	ctx.instructions[else_jpush_index] = Push{Type: UPTR, Value: len(ctx.instructions)}
-	if err := compileStatements_old(ctx, node.Falsy); err != nil {
+	if err := compileStatements(ctx, node.Falsy); err != nil {
 		return err
 	}
 	ctx.instructions[end_jpush_index] = Push{Type: UPTR, Value: len(ctx.instructions)}
 	return nil
 }
 
-func compileIfStatementType_old(ctx *Compiler_old, node parser.IfStatement) error {
-	if err := compileBaseExpression_old(ctx, node.Condition); err != nil {
+func compileIfStatementType(ctx *Compiler, node parser.IfStatement) error {
+	if err := compileBaseExpression(ctx, node.Condition); err != nil {
 		return err
 	}
 	end_jpush_index := len(ctx.instructions)
 	ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
 	ctx.instructions = append(ctx.instructions, JumpIfZero{})
-	if err := compileStatements_old(ctx, node.Body); err != nil {
+	if err := compileStatements(ctx, node.Body); err != nil {
 		return err
 	}
 	ctx.instructions[end_jpush_index] = Push{Type: UPTR, Value: len(ctx.instructions)}
 	return nil
 }
 
-func compileReturnStatement_old(ctx *Compiler_old, node parser.ReturnStatement) error {
-	if err := compileBaseExpression_old(ctx, node.Value); err != nil {
+func compileReturnStatement(ctx *Compiler, node parser.ReturnStatement) error {
+	if err := compileBaseExpression(ctx, node.Value); err != nil {
 		return err
 	}
 
@@ -245,7 +245,7 @@ func compileReturnStatement_old(ctx *Compiler_old, node parser.ReturnStatement) 
 	return nil
 }
 
-func compileType_old(ctx *Compiler_old, t parser.Token) (Type, error) {
+func compileType(ctx *Compiler, t parser.Token) (Type, error) {
 	switch t.StringValue {
 	case "u8":
 		return U8, nil
@@ -278,45 +278,45 @@ func compileType_old(ctx *Compiler_old, t parser.Token) (Type, error) {
 	}
 }
 
-func compileBaseExpression_old(ctx *Compiler_old, node parser.BaseExpression) error {
+func compileBaseExpression(ctx *Compiler, node parser.BaseExpression) error {
 	switch node.ExpressionType() {
 	case parser.VarAssignExpressionType:
-		return compileVarAssignExpression_old(ctx, node.(parser.VarAssignExpression))
+		return compileVarAssignExpression(ctx, node.(parser.VarAssignExpression))
 	case parser.NotEqualExpressionType:
-		return compileNotEqualExpression_old(ctx, node.(parser.NotEqualExpression))
+		return compileNotEqualExpression(ctx, node.(parser.NotEqualExpression))
 	case parser.EqualExpressionType:
-		return compileEqualExpression_old(ctx, node.(parser.EqualExpression))
+		return compileEqualExpression(ctx, node.(parser.EqualExpression))
 	case parser.GTEExpressionType:
-		return compileGreaterThanOrEqualExpression_old(ctx, node.(parser.GTEExpression))
+		return compileGreaterThanOrEqualExpression(ctx, node.(parser.GTEExpression))
 	case parser.LTEExpressionType:
-		return compileLessThanOrEqualExpression_old(ctx, node.(parser.LTEExpression))
+		return compileLessThanOrEqualExpression(ctx, node.(parser.LTEExpression))
 	case parser.GreaterThanExpressionType:
-		return compileGreaterThanExpression_old(ctx, node.(parser.GreaterThanExpression))
+		return compileGreaterThanExpression(ctx, node.(parser.GreaterThanExpression))
 	case parser.LessThanExpressionType:
-		return compileLessThanExpression_old(ctx, node.(parser.LessThanExpression))
+		return compileLessThanExpression(ctx, node.(parser.LessThanExpression))
 	case parser.AddExpressionType:
-		return compileAddExpression_old(ctx, node.(parser.AddExpression))
+		return compileAddExpression(ctx, node.(parser.AddExpression))
 	case parser.SubExpressionType:
-		return compileSubExpression_old(ctx, node.(parser.SubExpression))
+		return compileSubExpression(ctx, node.(parser.SubExpression))
 	case parser.MulExpressionType:
-		return compileMulExpression_old(ctx, node.(parser.MulExpression))
+		return compileMulExpression(ctx, node.(parser.MulExpression))
 	case parser.DivExpressionType:
-		return compileDivExpression_old(ctx, node.(parser.DivExpression))
+		return compileDivExpression(ctx, node.(parser.DivExpression))
 	case parser.ExpExpressionType:
-		return compileExpExpression_old(ctx, node.(parser.ExpExpression))
+		return compileExpExpression(ctx, node.(parser.ExpExpression))
 	case parser.FuncCallExpressionType:
-		return compileFuncCallExpression_old(ctx, node.(parser.FuncCallExpression))
+		return compileFuncCallExpression(ctx, node.(parser.FuncCallExpression))
 	case parser.VarAccessExpressionType:
-		return compileVarAccessExpression_old(ctx, node.(parser.VarAccessExpression))
+		return compileVarAccessExpression(ctx, node.(parser.VarAccessExpression))
 	case parser.IntExpressionType:
-		return compileIntLiteral_old(ctx, node.(parser.IntLiteral))
+		return compileIntLiteral(ctx, node.(parser.IntLiteral))
 	default:
 		return fmt.Errorf("unknown or unexpected expression type '%s'", node.ExpressionType())
 	}
 }
 
-func compileVarAssignExpression_old(ctx *Compiler_old, node parser.VarAssignExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Value); err != nil {
+func compileVarAssignExpression(ctx *Compiler, node parser.VarAssignExpression) error {
+	if err := compileBaseExpression(ctx, node.Value); err != nil {
 		return err
 	}
 	symbol, err := ctx.symtable.Get(node.Identifier.StringValue)
@@ -329,123 +329,123 @@ func compileVarAssignExpression_old(ctx *Compiler_old, node parser.VarAssignExpr
 	return nil
 }
 
-func compileNotEqualExpression_old(ctx *Compiler_old, node parser.NotEqualExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileNotEqualExpression(ctx *Compiler, node parser.NotEqualExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, CmpInequal{Type: I32})
 	return nil
 }
 
-func compileEqualExpression_old(ctx *Compiler_old, node parser.EqualExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileEqualExpression(ctx *Compiler, node parser.EqualExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, CmpEqual{Type: I32})
 	return nil
 }
 
-func compileGreaterThanOrEqualExpression_old(ctx *Compiler_old, node parser.GTEExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileGreaterThanOrEqualExpression(ctx *Compiler, node parser.GTEExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, CmpGTE{Type: I32})
 	return nil
 }
 
-func compileLessThanOrEqualExpression_old(ctx *Compiler_old, node parser.LTEExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileLessThanOrEqualExpression(ctx *Compiler, node parser.LTEExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, CmpLTE{Type: I32})
 	return nil
 }
 
-func compileGreaterThanExpression_old(ctx *Compiler_old, node parser.GreaterThanExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileGreaterThanExpression(ctx *Compiler, node parser.GreaterThanExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, CmpGT{Type: I32})
 	return nil
 }
 
-func compileLessThanExpression_old(ctx *Compiler_old, node parser.LessThanExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileLessThanExpression(ctx *Compiler, node parser.LessThanExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, CmpLT{Type: I32})
 	return nil
 }
 
-func compileAddExpression_old(ctx *Compiler_old, node parser.AddExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileAddExpression(ctx *Compiler, node parser.AddExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Add{Type: I32})
 	return nil
 }
 
-func compileSubExpression_old(ctx *Compiler_old, node parser.SubExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileSubExpression(ctx *Compiler, node parser.SubExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Subtract{Type: I32})
 	return nil
 }
 
-func compileMulExpression_old(ctx *Compiler_old, node parser.MulExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileMulExpression(ctx *Compiler, node parser.MulExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Multiply{Type: I32})
 	return nil
 }
 
-func compileDivExpression_old(ctx *Compiler_old, node parser.DivExpression) error {
-	if err := compileBaseExpression_old(ctx, node.Left); err != nil {
+func compileDivExpression(ctx *Compiler, node parser.DivExpression) error {
+	if err := compileBaseExpression(ctx, node.Left); err != nil {
 		return err
 	}
-	if err := compileBaseExpression_old(ctx, node.Right); err != nil {
+	if err := compileBaseExpression(ctx, node.Right); err != nil {
 		return err
 	}
 	ctx.instructions = append(ctx.instructions, Divide{Type: I32})
 	return nil
 }
 
-func compileExpExpression_old(ctx *Compiler_old, node parser.ExpExpression) error {
+func compileExpExpression(ctx *Compiler, node parser.ExpExpression) error {
 	var err error = nil
-	err = compileBaseExpression_old(ctx, node.Left)
+	err = compileBaseExpression(ctx, node.Left)
 	if err != nil {
 		return err
 	}
-	err = compileBaseExpression_old(ctx, node.Right)
+	err = compileBaseExpression(ctx, node.Right)
 	if err != nil {
 		return err
 	}
@@ -453,9 +453,9 @@ func compileExpExpression_old(ctx *Compiler_old, node parser.ExpExpression) erro
 	return nil
 }
 
-func compileFuncCallExpression_old(ctx *Compiler_old, node parser.FuncCallExpression) error {
+func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) error {
 	for i := range node.Arguments {
-		if err := compileBaseExpression_old(ctx, node.Arguments[i]); err != nil {
+		if err := compileBaseExpression(ctx, node.Arguments[i]); err != nil {
 			return err
 		}
 	}
@@ -470,7 +470,7 @@ func compileFuncCallExpression_old(ctx *Compiler_old, node parser.FuncCallExpres
 	}
 
 	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: len(node.Arguments)})
-	if err := compileBaseExpression_old(ctx, node.Identifier); err != nil {
+	if err := compileBaseExpression(ctx, node.Identifier); err != nil {
 		return err
 	}
 	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 1000000})
@@ -488,7 +488,7 @@ func compileFuncCallExpression_old(ctx *Compiler_old, node parser.FuncCallExpres
 	return nil
 }
 
-func compileVarAccessExpression_old(ctx *Compiler_old, node parser.VarAccessExpression) error {
+func compileVarAccessExpression(ctx *Compiler, node parser.VarAccessExpression) error {
 	for i := range ctx.globals {
 		if i == node.Identifier.StringValue {
 			ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: int(ctx.globals[i])})
@@ -504,7 +504,7 @@ func compileVarAccessExpression_old(ctx *Compiler_old, node parser.VarAccessExpr
 	return nil
 }
 
-func compileIntLiteral_old(ctx *Compiler_old, node parser.IntLiteral) error {
+func compileIntLiteral(ctx *Compiler, node parser.IntLiteral) error {
 	ctx.instructions = append(ctx.instructions, Push{Type: I32, Value: node.Tok.IntValue})
 	return nil
 }

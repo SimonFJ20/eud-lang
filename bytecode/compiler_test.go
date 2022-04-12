@@ -8,7 +8,7 @@ import (
 )
 
 func TestFunctions(t *testing.T) {
-	program, err := bytecode.Compile_old([]parser.BaseStatement{
+	program, err := bytecode.Compile([]parser.BaseStatement{
 		parser.FuncDefStatement{
 			Identifier: parser.Token{
 				Type: parser.IdentifierToken, StringValue: "sum", Next: nil,
@@ -107,7 +107,7 @@ func TestFunctions(t *testing.T) {
 }
 
 func TestVariables(t *testing.T) {
-	program, err := bytecode.Compile_old([]parser.BaseStatement{
+	program, err := bytecode.Compile([]parser.BaseStatement{
 		parser.DeclarationStatement{
 			TypedDeclaration: parser.TypedDeclaration{
 				DeclType: parser.Token{
@@ -165,7 +165,7 @@ func TestVariables(t *testing.T) {
 }
 
 func TestMath(t *testing.T) {
-	program, err := bytecode.Compile_old([]parser.BaseStatement{
+	program, err := bytecode.Compile([]parser.BaseStatement{
 		parser.ExpressionStatement{
 			Expression: parser.MulExpression{
 				// LeftRightExpression: parser.LeftRightExpression{
