@@ -60,7 +60,7 @@ type AllocationEntry struct {
 
 type Runtime struct {
 	Stack   []RuntimeValue
-	Locals  map[uint]RuntimeValue
+	Locals  []RuntimeValue
 	Globals map[uintptr]RuntimeValue
 	Pc      uintptr
 	Sp      uint
@@ -103,7 +103,7 @@ func (ctx *Runtime) Pop() RuntimeValue {
 func Run(p Program) Runtime {
 	ctx := Runtime{
 		Stack:   make([]RuntimeValue, 8192),
-		Locals:  make(map[uint]RuntimeValue),
+		Locals:  []RuntimeValue{},
 		Globals: make(map[uintptr]RuntimeValue),
 		Pc:      0,
 		Sp:      0,
@@ -134,6 +134,8 @@ func runInstruction(ctx *Runtime, i Instruction) {
 		runLoad(ctx, i.(Load))
 	case DeclareLocalInstruction:
 		runDeclareLocal(ctx, i.(DeclareLocal))
+	case UndeclareLocalInstruction:
+		runUndeclareLocal(ctx, i.(UndeclareLocal))
 	case StoreLocalInstruction:
 		runStoreLocal(ctx, i.(StoreLocal))
 	case LoadLocalInstruction:
@@ -293,36 +295,40 @@ func runLoad(ctx *Runtime, i Load) {
 func runDeclareLocal(ctx *Runtime, i DeclareLocal) {
 	switch i.Type {
 	case U8:
-		ctx.Locals[i.Handle] = U8Value{}
+		ctx.Locals = append(ctx.Locals, U8Value{})
 	case U16:
-		ctx.Locals[i.Handle] = U16Value{}
+		ctx.Locals = append(ctx.Locals, U16Value{})
 	case U32:
-		ctx.Locals[i.Handle] = U32Value{}
+		ctx.Locals = append(ctx.Locals, U32Value{})
 	case U64:
-		ctx.Locals[i.Handle] = U64Value{}
+		ctx.Locals = append(ctx.Locals, U64Value{})
 	case I8:
-		ctx.Locals[i.Handle] = I8Value{}
+		ctx.Locals = append(ctx.Locals, I8Value{})
 	case I16:
-		ctx.Locals[i.Handle] = I16Value{}
+		ctx.Locals = append(ctx.Locals, I16Value{})
 	case I32:
-		ctx.Locals[i.Handle] = I32Value{}
+		ctx.Locals = append(ctx.Locals, I32Value{})
 	case I64:
-		ctx.Locals[i.Handle] = I64Value{}
+		ctx.Locals = append(ctx.Locals, I64Value{})
 	case CHAR:
-		ctx.Locals[i.Handle] = CharValue{}
+		ctx.Locals = append(ctx.Locals, CharValue{})
 	case USIZE:
-		ctx.Locals[i.Handle] = UsizeValue{}
+		ctx.Locals = append(ctx.Locals, UsizeValue{})
 	case UPTR:
-		ctx.Locals[i.Handle] = UptrValue{}
+		ctx.Locals = append(ctx.Locals, UptrValue{})
 	}
 }
 
+func runUndeclareLocal(ctx *Runtime, i UndeclareLocal) {
+	ctx.Locals = ctx.Locals[:len(ctx.Locals)-2]
+}
+
 func runStoreLocal(ctx *Runtime, i StoreLocal) {
-	ctx.Locals[i.Handle] = ctx.Pop()
+	ctx.Locals[len(ctx.Locals)-int(i.Offset)-1] = ctx.Pop()
 }
 
 func runLoadLocal(ctx *Runtime, i LoadLocal) {
-	ctx.Push(ctx.Locals[i.Handle])
+	ctx.Push(ctx.Locals[len(ctx.Locals)-int(i.Offset)-1])
 }
 
 func runJump(ctx *Runtime, i Jump) {

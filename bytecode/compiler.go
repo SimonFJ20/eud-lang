@@ -7,7 +7,7 @@ import (
 
 type Symbol struct {
 	Type   Type
-	Handle uint
+	Offset uint
 }
 
 type SymbolTable struct {
@@ -40,17 +40,36 @@ func (s *SymbolTable) DefinedLocally(name string) bool {
 	return false
 }
 
+func (s *SymbolTable) IncreaseOffset() {
+	for i := range s.symbols {
+		s.symbols[i] = Symbol{
+			Type:   s.symbols[i].Type,
+			Offset: s.symbols[i].Offset + 1,
+		}
+	}
+	if s.parent != nil {
+		s.parent.IncreaseOffset()
+	}
+}
+
+func (s *SymbolTable) DecreaseOffset() {
+	for i := range s.symbols {
+		s.symbols[i] = Symbol{
+			Type:   s.symbols[i].Type,
+			Offset: s.symbols[i].Offset - 1,
+		}
+	}
+	if s.parent != nil {
+		s.parent.DecreaseOffset()
+	}
+}
+
 type Compiler struct {
 	instructions []Instruction
 	varId        uint
 	symtable     SymbolTable
 	globals      map[string]uintptr
 	lastType     Type
-}
-
-func (ctx *Compiler) nextVarId() uint {
-	ctx.varId++
-	return ctx.varId - 1
 }
 
 func Compile(ast []parser.BaseStatement) (Program, error) {
@@ -81,6 +100,9 @@ func compileStatements(ctx *Compiler, nodes []parser.BaseStatement) error {
 		if err := compileBaseStatement(ctx, nodes[i]); err != nil {
 			return err
 		}
+	}
+	for range ctx.symtable.symbols {
+		ctx.symtable.DecreaseOffset()
 	}
 	ctx.symtable = symtable
 	return nil
@@ -133,13 +155,13 @@ func compileTypedInitStatement(ctx *Compiler, node parser.TypedInitStatement) er
 	if err != nil {
 		return err
 	}
-	handle := ctx.nextVarId()
-	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Handle: handle})
-	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
+	ctx.symtable.IncreaseOffset()
+	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Offset: 0})
+	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t})
 	if err := compileBaseExpression(ctx, node.Value); err != nil {
 		return err
 	}
-	ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Handle: handle})
+	ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Offset: 0})
 	return nil
 }
 
@@ -148,9 +170,9 @@ func compileDeclarationStatement(ctx *Compiler, node parser.DeclarationStatement
 	if err != nil {
 		return err
 	}
-	handle := ctx.nextVarId()
-	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Handle: handle})
-	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
+	ctx.symtable.IncreaseOffset()
+	ctx.symtable.Set(node.Identifier.StringValue, Symbol{Type: t, Offset: 0})
+	ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t})
 	return nil
 }
 
@@ -164,10 +186,10 @@ func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error 
 		if err != nil {
 			return err
 		}
-		handle := ctx.nextVarId()
-		ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t, Handle: handle})
-		ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Handle: handle})
-		ctx.symtable.Set(node.Parameters[i].Identifier.StringValue, Symbol{Type: t, Handle: handle})
+		ctx.symtable.IncreaseOffset()
+		ctx.instructions = append(ctx.instructions, DeclareLocal{Type: t})
+		ctx.instructions = append(ctx.instructions, StoreLocal{Type: t, Offset: 0})
+		ctx.symtable.Set(node.Parameters[i].Identifier.StringValue, Symbol{Type: t, Offset: 0})
 	}
 	if err := compileStatements(ctx, node.Body); err != nil {
 		return err
@@ -323,8 +345,8 @@ func compileVarAssignExpression(ctx *Compiler, node parser.VarAssignExpression) 
 	if err != nil {
 		return err
 	}
-	ctx.instructions = append(ctx.instructions, StoreLocal{Type: symbol.Type, Handle: symbol.Handle})
-	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Handle: symbol.Handle})
+	ctx.instructions = append(ctx.instructions, StoreLocal{Type: symbol.Type, Offset: symbol.Offset})
+	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Offset: symbol.Offset})
 	ctx.lastType = symbol.Type
 	return nil
 }
@@ -499,7 +521,7 @@ func compileVarAccessExpression(ctx *Compiler, node parser.VarAccessExpression) 
 	if err != nil {
 		return err
 	}
-	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Handle: symbol.Handle})
+	ctx.instructions = append(ctx.instructions, LoadLocal{Type: symbol.Type, Offset: symbol.Offset})
 	ctx.lastType = symbol.Type
 	return nil
 }

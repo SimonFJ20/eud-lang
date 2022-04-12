@@ -98,7 +98,7 @@ func TestFunctions(t *testing.T) {
 		t.Error(err)
 	}
 	program.RunWithDebug = true
-	program.Instructions = append(program.Instructions, bytecode.LoadLocal{Type: bytecode.I32, Handle: 2})
+	program.Instructions = append(program.Instructions, bytecode.LoadLocal{Type: bytecode.I32, Offset: 0})
 	runtime := bytecode.Run(program)
 	result := runtime.Stack[0].(bytecode.I32Value).Value
 	if result != 8 {
@@ -156,7 +156,7 @@ func TestVariables(t *testing.T) {
 		t.Error(err)
 	}
 	program.RunWithDebug = true
-	program.Instructions = append(program.Instructions, bytecode.LoadLocal{Type: bytecode.I32, Handle: 0})
+	program.Instructions = append(program.Instructions, bytecode.LoadLocal{Type: bytecode.I32, Offset: 0})
 	runtime := bytecode.Run(program)
 	result := runtime.Stack[0].(bytecode.I32Value).Value
 	if result != 65 {

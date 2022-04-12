@@ -8,18 +8,18 @@ import (
 func TestHeap(t *testing.T) {
 	runtime := bytecode.Run(bytecode.Program{
 		Instructions: []bytecode.Instruction{
-			bytecode.DeclareLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.DeclareLocal{Type: bytecode.UPTR},
 			bytecode.Push{Type: bytecode.I32, Value: 5},
 			bytecode.Push{Type: bytecode.USIZE, Value: 1},
 			bytecode.Allocate{Type: bytecode.I32},
-			bytecode.StoreLocal{Type: bytecode.UPTR, Handle: 0},
-			bytecode.LoadLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.StoreLocal{Type: bytecode.UPTR, Offset: 0},
+			bytecode.LoadLocal{Type: bytecode.UPTR, Offset: 0},
 			bytecode.Store{Type: bytecode.I32},
 			bytecode.Push{Type: bytecode.I32, Value: 3},
-			bytecode.LoadLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.LoadLocal{Type: bytecode.UPTR, Offset: 0},
 			bytecode.Load{Type: bytecode.I32},
 			bytecode.Add{Type: bytecode.I32},
-			bytecode.LoadLocal{Type: bytecode.UPTR, Handle: 0},
+			bytecode.LoadLocal{Type: bytecode.UPTR, Offset: 0},
 			bytecode.Deallocate{Type: bytecode.I32},
 		},
 		RunWithDebug: true})
@@ -118,37 +118,37 @@ func TestJumpFunction(t *testing.T) {
 		Instructions: []bytecode.Instruction{
 			bytecode.Push{Type: bytecode.UPTR, Value: 16}, // 16 = start
 			bytecode.Jump{},
-			bytecode.DeclareLocal{Type: bytecode.UPTR, Handle: 3},
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 4},
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 5},
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 6},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 5},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 4},
-			bytecode.StoreLocal{Type: bytecode.UPTR, Handle: 3},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 4},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 5},
+			bytecode.DeclareLocal{Type: bytecode.UPTR}, // 3
+			bytecode.DeclareLocal{Type: bytecode.I32},  // 4
+			bytecode.DeclareLocal{Type: bytecode.I32},  // 5
+			bytecode.DeclareLocal{Type: bytecode.I32},  // 6
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 1},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 2},
+			bytecode.StoreLocal{Type: bytecode.UPTR, Offset: 3},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 2},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 1},
 			bytecode.Add{Type: bytecode.I32},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 6},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 6},
-			bytecode.LoadLocal{Type: bytecode.UPTR, Handle: 3},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 0},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 0},
+			bytecode.LoadLocal{Type: bytecode.UPTR, Offset: 3},
 			bytecode.Jump{},
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 0},
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 1},
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 2},
+			bytecode.DeclareLocal{Type: bytecode.I32}, // 0
+			bytecode.DeclareLocal{Type: bytecode.I32}, // 1
+			bytecode.DeclareLocal{Type: bytecode.I32}, // 2
 			bytecode.Push{Type: bytecode.I32, Value: 5},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 0},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 2},
 			bytecode.Push{Type: bytecode.I32, Value: 3},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 1},
 			bytecode.Push{Type: bytecode.USIZE, Value: 1000}, // program_counter
 			bytecode.Syscall{},
 			bytecode.Push{Type: bytecode.UPTR, Value: 7},
 			bytecode.Add{Type: bytecode.UPTR},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 1},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 0},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 1},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 2},
 			bytecode.Push{Type: bytecode.UPTR, Value: 2}, // 2 = sum
 			bytecode.Jump{},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 2},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 2},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 0},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 0},
 		},
 	})
 	result := runtime.Pop().(bytecode.I32Value).Value
@@ -184,19 +184,19 @@ func TestJump(t *testing.T) {
 	*/
 	runtime := bytecode.Run(bytecode.Program{
 		Instructions: []bytecode.Instruction{
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.DeclareLocal{Type: bytecode.I32},
 			bytecode.Push{Type: bytecode.I32, Value: 0},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 1},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 0},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 0},
 			bytecode.Push{Type: bytecode.UPTR, Value: 10},
 			bytecode.JumpIfZero{},
 			bytecode.Push{Type: bytecode.I32, Value: 4},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 0},
 			bytecode.Push{Type: bytecode.UPTR, Value: 12},
 			bytecode.Jump{},
 			bytecode.Push{Type: bytecode.I32, Value: 5},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 1},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 0},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 0},
 		},
 	})
 	result := runtime.Pop().(bytecode.I32Value).Value
@@ -208,16 +208,16 @@ func TestJump(t *testing.T) {
 func TestLocals(t *testing.T) {
 	runtime := bytecode.Run(bytecode.Program{
 		Instructions: []bytecode.Instruction{
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 0},
-			bytecode.DeclareLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.DeclareLocal{Type: bytecode.I32},
+			bytecode.DeclareLocal{Type: bytecode.I32},
 			bytecode.Push{Type: bytecode.I32, Value: 4},
 			bytecode.Push{Type: bytecode.I32, Value: 3},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 0},
-			bytecode.StoreLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 1},
+			bytecode.StoreLocal{Type: bytecode.I32, Offset: 0},
 			bytecode.Push{Type: bytecode.I32, Value: 5},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 0},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 1},
 			bytecode.Add{Type: bytecode.I32},
-			bytecode.LoadLocal{Type: bytecode.I32, Handle: 1},
+			bytecode.LoadLocal{Type: bytecode.I32, Offset: 0},
 			bytecode.Add{Type: bytecode.I32},
 		},
 	})
