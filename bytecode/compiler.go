@@ -495,18 +495,7 @@ func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) er
 	if err := compileBaseExpression(ctx, node.Identifier); err != nil {
 		return err
 	}
-	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 1000000})
-	// ctx.instructions = append(ctx.instructions, CmpGTE{Type: UPTR})
-	// inotsyscall := len(ctx.instructions)
-	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
-	// ctx.instructions = append(ctx.instructions, JumpIfZero{})
-	// ctx.instructions = append(ctx.instructions, Syscall{})
-	// isyscall := len(ctx.instructions)
-	// ctx.instructions = append(ctx.instructions, Push{Type: UPTR, Value: 0})
-	// ctx.instructions = append(ctx.instructions, Jump{})
-	// ctx.instructions[inotsyscall] = Push{Type: UPTR, Value: len(ctx.instructions)}
 	ctx.instructions = append(ctx.instructions, Call{Type: UPTR}) // type is omittable
-	// ctx.instructions[isyscall] = Push{Type: UPTR, Value: len(ctx.instructions)}
 	return nil
 }
 
