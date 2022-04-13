@@ -194,8 +194,8 @@ func runInstruction(ctx *Runtime, i Instruction) {
 		runXnor(ctx, i)
 	case SyscallInstruction:
 		runSyscall(ctx, i.(Syscall))
-	case I32ToUsizeInstruction:
-		runI32ToUsize(ctx, i.(I32ToUsize))
+	case ConvertInstruction:
+		runConvert(ctx, i.(Convert))
 	default:
 		panic(fmt.Sprintf("instruction '%s' not implemented", i.InstructionType()))
 	}
@@ -1245,7 +1245,15 @@ func runSyscall(ctx *Runtime, i Syscall) {
 	}
 }
 
-func runI32ToUsize(ctx *Runtime, i I32ToUsize) {
-	value := ctx.Pop().(I32Value).Value
-	ctx.Push(UsizeValue{Value: uint64(value)})
+func runConvert(ctx *Runtime, i Convert) {
+	switch i.Src {
+	case I32:
+		switch i.Dst {
+		case USIZE:
+			ctx.Push(UsizeValue{Value: uint64(ctx.Pop().(I32Value).Value)})
+			return
+		}
+	}
+	panic(fmt.Sprintf("conversion from %s to %s not implemented", i.Src, i.Dst))
+
 }

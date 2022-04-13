@@ -75,7 +75,7 @@ const (
 	NandInstruction
 	XnorInstruction
 	SyscallInstruction
-	I32ToUsizeInstruction
+	ConvertInstruction
 )
 
 type Instruction interface {
@@ -257,8 +257,10 @@ type Syscall struct {
 	Instruction
 }
 
-type I32ToUsize struct {
+type Convert struct {
 	Instruction
+	Dst Type
+	Src Type
 }
 
 func (t Type) String() string {
@@ -366,8 +368,8 @@ func (it InstructionType) String() string {
 		return "XnorInstruction"
 	case SyscallInstruction:
 		return "SyscallInstruction"
-	case I32ToUsizeInstruction:
-		return "I32ToUsizeInstruction"
+	case ConvertInstruction:
+		return "ConvertInstruction"
 	default:
 		panic("unknown")
 	}
@@ -408,7 +410,7 @@ func (n Nor) InstructionType() InstructionType            { return NorInstructio
 func (n Nand) InstructionType() InstructionType           { return NandInstruction }
 func (n Xnor) InstructionType() InstructionType           { return XnorInstruction }
 func (n Syscall) InstructionType() InstructionType        { return SyscallInstruction }
-func (n I32ToUsize) InstructionType() InstructionType     { return I32ToUsizeInstruction }
+func (n Convert) InstructionType() InstructionType        { return ConvertInstruction }
 
 func (n Allocate) String() string       { return fmt.Sprintf("Allocate<%s>\t", n.Type) }
 func (n Deallocate) String() string     { return fmt.Sprintf("Deallocate<%s>\t", n.Type) }
@@ -445,4 +447,4 @@ func (n Nor) String() string            { return fmt.Sprintf("Nor<%s>\t", n.Type
 func (n Nand) String() string           { return fmt.Sprintf("Nand<%s>\t", n.Type) }
 func (n Xnor) String() string           { return fmt.Sprintf("Xnor<%s>\t", n.Type) }
 func (n Syscall) String() string        { return "Syscall\t" }
-func (n I32ToUsize) String() string     { return "I32ToUsize\t" }
+func (n Convert) String() string        { return fmt.Sprintf("Convert<%s, %s>\t", n.Dst, n.Src) }

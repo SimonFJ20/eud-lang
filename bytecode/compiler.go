@@ -485,7 +485,7 @@ func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) er
 	// HACK
 	if node.Identifier.ExpressionType() == parser.VarAccessExpressionType &&
 		node.Identifier.(parser.VarAccessExpression).Identifier.StringValue == "syscall" {
-		ctx.instructions = append(ctx.instructions, I32ToUsize{})
+		ctx.instructions = append(ctx.instructions, Convert{Dst: USIZE, Src: I32})
 		ctx.instructions = append(ctx.instructions, Syscall{})
 		ctx.instructions = append(ctx.instructions, Push{Type: I8, Value: 0})
 		return nil
