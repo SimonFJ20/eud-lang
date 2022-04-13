@@ -8,37 +8,37 @@ clear
 go build
 
 clear
-./eud examples/functions-simple.eud --pyparse
+./eud examples/functions-simple.eud
 
 clear
-./eud examples/functions.eud --pyparse
+./eud examples/functions.eud
 
 clear
-./eud examples/if-else.eud --pyparse
+./eud examples/if-else.eud
 
 clear
-./eud examples/if-statement.eud --pyparse
+./eud examples/if-statement.eud
 
 clear
-./eud examples/initialisation.eud --pyparse
+./eud examples/initialisation.eud
 
 clear
-./eud examples/math-simple.eud --pyparse
+./eud examples/math-simple.eud
 
 clear
-./eud examples/sys-print-i32.eud --pyparse
+./eud examples/sys-print-i32.eud
 
 clear
-./eud examples/sys-put-i32.eud --pyparse
+./eud examples/sys-put-i32.eud
 
 clear
-./eud examples/variables.eud --pyparse
+./eud examples/variables.eud
 
 clear
-./eud examples/while-print.eud --pyparse --nodebug
+./eud examples/while-print.eud --nodebug
 
 clear
-./eud examples/while.eud --pyparse
+./eud examples/while.eud
 
 set +xe
 
