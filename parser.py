@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from lib2to3.pgen2 import token
 import sys
 from typing import List, Optional
 
@@ -130,6 +131,11 @@ KEYWORDS: List[str] = [
     'char',
     'usize',
     'uptr',
+    '__syscall__',
+    '__alloc__',
+    '__dealloc__',
+    '__addrof__',
+    '__deref__',
 ]
 
 class Lexer:
@@ -494,6 +500,64 @@ class Mod(BinaryOperation):
 class Exp(BinaryOperation):
     def __init__(self, left: Expression, right: Expression, fp: Position) -> None:
         super().__init__(left, right, fp)
+
+class NonStdAlloc(Expression):
+    def __init__(self, size: Expression, fp: Position) -> None:
+        super().__init__(fp)
+        self.size = size
+    
+    def __repr__(self) -> str:
+        return super().__repr__() + f'({self.size})'
+
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","target":{self.size.to_json()},"fp":{self.fp.to_json()}}}'
+
+class NonStdDealloc(Expression):
+    def __init__(self, pointer: Expression, fp: Position) -> None:
+        super().__init__(fp)
+        self.pointer = pointer
+    
+    def __repr__(self) -> str:
+        return super().__repr__() + f'({self.pointer})'
+
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","target":{self.pointer.to_json()},"fp":{self.fp.to_json()}}}'
+
+class NonStdSyscall(Expression):
+    def __init__(self, syscall: Expression, args: List[Expression]) -> None:
+        super().__init__(syscall.fp)
+        self.syscall = syscall
+        self.args = args
+    
+    def __repr__(self) -> str:
+        argstr = ','.join(map(lambda x:x.__repr__(), self.args))
+        return super().__repr__() + f'({self.syscall}, [{argstr}])'
+
+    def to_json(self):
+        argstr = ','.join(map(lambda x:x.to_json(), self.args))
+        return f'{{"type":"{self.typestr()}","target":{self.syscall.to_json()},"args":[{argstr}],"fp":{self.fp.to_json()}}}'
+
+class NonStdAddrOf(Expression):
+    def __init__(self, target: Token, fp: Position) -> None:
+        super().__init__(fp)
+        self.target = target
+    
+    def __repr__(self) -> str:
+        return super().__repr__() + f'({self.target})'
+
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"fp":{self.fp.to_json()}}}'
+
+class NonStdDereference(Expression):
+    def __init__(self, target: Expression, fp: Position) -> None:
+        super().__init__(fp)
+        self.target = target
+    
+    def __repr__(self) -> str:
+        return super().__repr__() + f'({self.target})'
+
+    def to_json(self):
+        return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"fp":{self.fp.to_json()}}}'
 
 class FuncCall(Expression):
     def __init__(self, target: Expression, args: List[Expression]) -> None:
