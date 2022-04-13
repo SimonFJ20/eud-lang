@@ -524,8 +524,8 @@ class NonStdDealloc(Expression):
         return f'{{"type":"{self.typestr()}","target":{self.pointer.to_json()},"fp":{self.fp.to_json()}}}'
 
 class NonStdSyscall(Expression):
-    def __init__(self, syscall: Expression, args: List[Expression]) -> None:
-        super().__init__(syscall.fp)
+    def __init__(self, syscall: Expression, args: List[Expression], fp: Position) -> None:
+        super().__init__(fp)
         self.syscall = syscall
         self.args = args
     
@@ -870,13 +870,89 @@ class Parser:
             return left
 
     def make_exponentation(self) -> Expression:
-        left = self.make_func_call()
+        left = self.make_non_std_addr_of()
         if self.t.type == TT.EXP_OP:
             self.next()
             right = self.make_exponentation()
             return Exp(left, right, left.fp)
         else:
             return left
+
+    def make_non_std_addr_of(self) -> Expression:
+        if self.t.type == TT.KEYWORD and self.t.value == '__addrof__':
+            fp = self.t.fp
+            self.next()
+            if self.t.type != TT.IDENTIFIER:
+                fail(f'expected identifier, got {self.t}', self.t.fp)
+            target = self.t
+            self.next()
+            return NonStdAddrOf(target, fp)
+        else:
+            return self.make_non_std_dereference()
+
+    def make_non_std_dereference(self) -> Expression:
+        if self.t.type == TT.KEYWORD and self.t.value == '__deref__':
+            fp = self.t.fp
+            self.next()
+            target = self.make_expression()
+            return NonStdDereference(target, fp)
+        else:
+            return self.make_non_std_alloc()
+
+    def make_non_std_alloc(self) -> Expression:
+        if self.t.type == TT.KEYWORD and self.t.value == '__alloc__':
+            fp = self.t.fp
+            self.next()
+            if self.t.type != TT.LPAREN:
+                fail(f"expected '(', got {self.t}", self.t.fp)
+            self.next()
+            size = self.make_expression()
+            if self.t.type != TT.RPAREN:
+                fail(f"expected ')', got {self.t}", self.t.fp)
+            self.next()
+            return NonStdAlloc(size, fp)
+        else:
+            return self.make_non_std_dealloc()
+
+    def make_non_std_dealloc(self) -> Expression:
+        if self.t.type == TT.KEYWORD and self.t.value == '__dealloc__':
+            fp = self.t.fp
+            self.next()
+            if self.t.type != TT.LPAREN:
+                fail(f"expected '(', got {self.t}", self.t.fp)
+            self.next()
+            target = self.make_expression()
+            if self.t.type != TT.RPAREN:
+                fail(f"expected ')', got {self.t}", self.t.fp)
+            self.next()
+            return NonStdDealloc(target, fp)
+        else:
+            return self.make_non_std_syscall()
+
+    def make_non_std_syscall(self) -> Expression:
+        if self.t.type == TT.KEYWORD and self.t.value == '__syscall__':
+            fp = self.t.fp
+            self.next()
+            if self.t.type != TT.LPAREN:
+                fail(f"expected '(', got {self.t}", self.t.fp)
+            self.next()
+            args: List[Expression] = []
+            while not self.done and self.t.type != TT.RPAREN:
+                args.append(self.make_expression())
+                if self.t.type == TT.RPAREN:
+                    break
+                elif self.t.type == TT.COMMA:
+                    self.next()
+                else:
+                    fail(f'expected \',\', got {self.t}', self.t.fp)
+            if len(args) == 0:
+                fail(f'expected syscall selector (expression), got {self.t}', self.t.fp)
+            if self.t.type != TT.RPAREN:
+                fail(f"expected ')', got {self.t}", self.t.fp)
+            self.next()
+            return NonStdSyscall(args[0], args[1:], fp)
+        else:
+            return self.make_func_call()
 
     def make_func_call(self) -> Expression:
         target = self.make_value()

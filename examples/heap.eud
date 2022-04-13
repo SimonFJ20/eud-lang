@@ -1,0 +1,7 @@
+
+let a: uptr = __alloc__(4)
+
+let b: i32 = __deref__ a
+a = __addrof__ b
+
+free(a)

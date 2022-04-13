@@ -200,7 +200,6 @@ func compileFuncDefStatement(ctx *Compiler, node parser.FuncDefStatement) error 
 	}
 	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: 0})
 	ctx.instructions = append(ctx.instructions, Return{Type: t})
-	fmt.Printf("bruhrbuhrubhr     %d\n", len(ctx.instructions)-start)
 	ctx.instructions[start] = Push{Type: UPTR, Value: len(ctx.instructions) - start}
 	return nil
 }
@@ -480,15 +479,6 @@ func compileFuncCallExpression(ctx *Compiler, node parser.FuncCallExpression) er
 		if err := compileBaseExpression(ctx, node.Arguments[i]); err != nil {
 			return err
 		}
-	}
-
-	// HACK
-	if node.Identifier.ExpressionType() == parser.VarAccessExpressionType &&
-		node.Identifier.(parser.VarAccessExpression).Identifier.StringValue == "syscall" {
-		ctx.instructions = append(ctx.instructions, Convert{Dst: USIZE, Src: I32})
-		ctx.instructions = append(ctx.instructions, Syscall{})
-		ctx.instructions = append(ctx.instructions, Push{Type: I8, Value: 0})
-		return nil
 	}
 
 	ctx.instructions = append(ctx.instructions, Push{Type: USIZE, Value: len(node.Arguments)})

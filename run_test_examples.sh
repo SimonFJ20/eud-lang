@@ -14,6 +14,9 @@ clear
 ./eud examples/functions.eud
 
 clear
+./eud examples/heap.eud
+
+clear
 ./eud examples/if-else.eud
 
 clear
