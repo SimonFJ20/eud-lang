@@ -510,7 +510,7 @@ class NonStdAlloc(Expression):
         return super().__repr__() + f'({self.size})'
 
     def to_json(self):
-        return f'{{"type":"{self.typestr()}","target":{self.size.to_json()},"fp":{self.fp.to_json()}}}'
+        return f'{{"type":"{self.typestr()}","size":{self.size.to_json()},"fp":{self.fp.to_json()}}}'
 
 class NonStdDealloc(Expression):
     def __init__(self, pointer: Expression, fp: Position) -> None:
@@ -521,7 +521,7 @@ class NonStdDealloc(Expression):
         return super().__repr__() + f'({self.pointer})'
 
     def to_json(self):
-        return f'{{"type":"{self.typestr()}","target":{self.pointer.to_json()},"fp":{self.fp.to_json()}}}'
+        return f'{{"type":"{self.typestr()}","pointer":{self.pointer.to_json()},"fp":{self.fp.to_json()}}}'
 
 class NonStdSyscall(Expression):
     def __init__(self, syscall: Expression, args: List[Expression], fp: Position) -> None:
@@ -535,7 +535,7 @@ class NonStdSyscall(Expression):
 
     def to_json(self):
         argstr = ','.join(map(lambda x:x.to_json(), self.args))
-        return f'{{"type":"{self.typestr()}","target":{self.syscall.to_json()},"args":[{argstr}],"fp":{self.fp.to_json()}}}'
+        return f'{{"type":"{self.typestr()}","syscall":{self.syscall.to_json()},"args":[{argstr}],"fp":{self.fp.to_json()}}}'
 
 class NonStdAddrOf(Expression):
     def __init__(self, target: Token, fp: Position) -> None:
@@ -548,7 +548,7 @@ class NonStdAddrOf(Expression):
     def to_json(self):
         return f'{{"type":"{self.typestr()}","target":{self.target.to_json()},"fp":{self.fp.to_json()}}}'
 
-class NonStdDereference(Expression):
+class NonStdDeref(Expression):
     def __init__(self, target: Expression, fp: Position) -> None:
         super().__init__(fp)
         self.target = target
@@ -895,7 +895,7 @@ class Parser:
             fp = self.t.fp
             self.next()
             target = self.make_expression()
-            return NonStdDereference(target, fp)
+            return NonStdDeref(target, fp)
         else:
             return self.make_non_std_alloc()
 

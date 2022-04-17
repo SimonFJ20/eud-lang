@@ -134,6 +134,27 @@ type ExpExpression struct {
 	Right BaseExpression
 }
 
+type NonStdAllocExpression struct {
+	Size BaseExpression
+}
+
+type NonStdDeallocExpression struct {
+	Pointer BaseExpression
+}
+
+type NonStdSyscallExpression struct {
+	Syscall   BaseExpression
+	Arguments []BaseExpression
+}
+
+type NonStdAddrOfExpression struct {
+	Target Token
+}
+
+type NonStdDerefExpression struct {
+	Target BaseExpression
+}
+
 type FuncCallExpression struct {
 	Identifier BaseExpression
 	Arguments  []BaseExpression
@@ -196,6 +217,11 @@ const (
 	ExpExpressionType
 	IntExpressionType
 	FuncCallExpressionType
+	NonStdAllocExpressionType
+	NonStdDeallocExpressionType
+	NonStdSyscallExpressionType
+	NonStdAddrOfExpressionType
+	NonStdDerefExpressionType
 )
 
 func (n StatementType) String() string {
@@ -451,6 +477,16 @@ func (n ExpressionType) String() string {
 		return "var_access"
 	case VarAssignExpressionType:
 		return "var_assign"
+	case NonStdAllocExpressionType:
+		return "non_std_alloc"
+	case NonStdDeallocExpressionType:
+		return "non_std_dealloc"
+	case NonStdSyscallExpressionType:
+		return "non_std_syscall"
+	case NonStdAddrOfExpressionType:
+		return "non_std_addr_of"
+	case NonStdDerefExpressionType:
+		return "non_std_deref"
 	case FuncCallExpressionType:
 		return "func_call"
 	default:
@@ -458,22 +494,27 @@ func (n ExpressionType) String() string {
 	}
 }
 
-func (n VarAssignExpression) ExpressionType() ExpressionType   { return VarAssignExpressionType }
-func (n NotEqualExpression) ExpressionType() ExpressionType    { return NotEqualExpressionType }
-func (n EqualExpression) ExpressionType() ExpressionType       { return EqualExpressionType }
-func (n GTEExpression) ExpressionType() ExpressionType         { return GTEExpressionType }
-func (n LTEExpression) ExpressionType() ExpressionType         { return LTEExpressionType }
-func (n GreaterThanExpression) ExpressionType() ExpressionType { return GreaterThanExpressionType }
-func (n LessThanExpression) ExpressionType() ExpressionType    { return LessThanExpressionType }
-func (n AddExpression) ExpressionType() ExpressionType         { return AddExpressionType }
-func (n SubExpression) ExpressionType() ExpressionType         { return SubExpressionType }
-func (n MulExpression) ExpressionType() ExpressionType         { return MulExpressionType }
-func (n DivExpression) ExpressionType() ExpressionType         { return DivExpressionType }
-func (n ModExpression) ExpressionType() ExpressionType         { return ModExpressionType }
-func (n ExpExpression) ExpressionType() ExpressionType         { return ExpExpressionType }
-func (n FuncCallExpression) ExpressionType() ExpressionType    { return FuncCallExpressionType }
-func (n VarAccessExpression) ExpressionType() ExpressionType   { return VarAccessExpressionType }
-func (n IntLiteral) ExpressionType() ExpressionType            { return IntExpressionType }
+func (n VarAssignExpression) ExpressionType() ExpressionType     { return VarAssignExpressionType }
+func (n NotEqualExpression) ExpressionType() ExpressionType      { return NotEqualExpressionType }
+func (n EqualExpression) ExpressionType() ExpressionType         { return EqualExpressionType }
+func (n GTEExpression) ExpressionType() ExpressionType           { return GTEExpressionType }
+func (n LTEExpression) ExpressionType() ExpressionType           { return LTEExpressionType }
+func (n GreaterThanExpression) ExpressionType() ExpressionType   { return GreaterThanExpressionType }
+func (n LessThanExpression) ExpressionType() ExpressionType      { return LessThanExpressionType }
+func (n AddExpression) ExpressionType() ExpressionType           { return AddExpressionType }
+func (n SubExpression) ExpressionType() ExpressionType           { return SubExpressionType }
+func (n MulExpression) ExpressionType() ExpressionType           { return MulExpressionType }
+func (n DivExpression) ExpressionType() ExpressionType           { return DivExpressionType }
+func (n ModExpression) ExpressionType() ExpressionType           { return ModExpressionType }
+func (n ExpExpression) ExpressionType() ExpressionType           { return ExpExpressionType }
+func (n FuncCallExpression) ExpressionType() ExpressionType      { return FuncCallExpressionType }
+func (n NonStdAllocExpression) ExpressionType() ExpressionType   { return NonStdAllocExpressionType }
+func (n NonStdDeallocExpression) ExpressionType() ExpressionType { return NonStdDeallocExpressionType }
+func (n NonStdSyscallExpression) ExpressionType() ExpressionType { return NonStdSyscallExpressionType }
+func (n NonStdAddrOfExpression) ExpressionType() ExpressionType  { return NonStdAddrOfExpressionType }
+func (n NonStdDerefExpression) ExpressionType() ExpressionType   { return NonStdDerefExpressionType }
+func (n VarAccessExpression) ExpressionType() ExpressionType     { return VarAccessExpressionType }
+func (n IntLiteral) ExpressionType() ExpressionType              { return IntExpressionType }
 
 func (n VarAssignExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Value)
@@ -513,6 +554,21 @@ func (n ModExpression) String() string {
 }
 func (n ExpExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Left, n.Right)
+}
+func (n NonStdAllocExpression) String() string {
+	return fmt.Sprintf("%s(%s)", n.ExpressionType(), n.Size)
+}
+func (n NonStdDeallocExpression) String() string {
+	return fmt.Sprintf("%s(%s)", n.ExpressionType(), n.Pointer)
+}
+func (n NonStdSyscallExpression) String() string {
+	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Syscall, n.Arguments)
+}
+func (n NonStdAddrOfExpression) String() string {
+	return fmt.Sprintf("%s(%s)", n.ExpressionType(), n.Target)
+}
+func (n NonStdDerefExpression) String() string {
+	return fmt.Sprintf("%s(%s)", n.ExpressionType(), n.Target)
 }
 func (n FuncCallExpression) String() string {
 	return fmt.Sprintf("%s(%s, %s)", n.ExpressionType(), n.Identifier, n.Arguments)
@@ -640,7 +696,47 @@ func (n ExpExpression) StringNested(nesting int) string {
 		n.Right,
 	)
 }
-
+func (n NonStdAllocExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Size,
+	)
+}
+func (n NonStdDeallocExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Pointer,
+	)
+}
+func (n NonStdSyscallExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s, [%s])",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Syscall,
+		n.Arguments,
+	)
+}
+func (n NonStdAddrOfExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Target,
+	)
+}
+func (n NonStdDerefExpression) StringNested(nesting int) string {
+	return fmt.Sprintf(
+		"%s%s(%s)",
+		nstr(nesting),
+		n.ExpressionType(),
+		n.Target,
+	)
+}
 func (n FuncCallExpression) StringNested(nesting int) string {
 	return fmt.Sprintf(
 		"%s%s(%s, [%s])",

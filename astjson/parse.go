@@ -268,6 +268,52 @@ type ExpNode struct {
 	Right IExpressionNode `json:"right"`
 }
 
+type NonStdAllocNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Size IExpressionNode `json:"size"`
+}
+
+type NonStdDeallocNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Pointer IExpressionNode `json:"pointer"`
+}
+
+type NonStdSyscallNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Syscall IExpressionNode   `json:"syscall"`
+	Args    []IExpressionNode `json:"args"`
+}
+
+type NonStdAddrOfNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Target Token `json:"target"`
+}
+
+type NonStdDerefNode struct {
+	Type string `json:"type"`
+	IElement
+	Filepos Position `json:"fp"`
+	IStatementNode
+	IExpressionNode
+	Target IExpressionNode `json:"target"`
+}
+
 type FuncCallNode struct {
 	Type string `json:"type"`
 	IElement
@@ -323,6 +369,11 @@ func (e MulNode) GetType() string                { return e.Type }
 func (e DivNode) GetType() string                { return e.Type }
 func (e ModNode) GetType() string                { return e.Type }
 func (e ExpNode) GetType() string                { return e.Type }
+func (e NonStdAllocNode) GetType() string        { return e.Type }
+func (e NonStdDeallocNode) GetType() string      { return e.Type }
+func (e NonStdSyscallNode) GetType() string      { return e.Type }
+func (e NonStdAddrOfNode) GetType() string       { return e.Type }
+func (e NonStdDerefNode) GetType() string        { return e.Type }
 func (e FuncCallNode) GetType() string           { return e.Type }
 func (e IntNode) GetType() string                { return e.Type }
 func (e VarNode) GetType() string                { return e.Type }
@@ -526,6 +577,41 @@ func ParseJsonElement(raw Object) IElement {
 			Left:    ParseJsonElement(raw["left"].(Object)).(IExpressionNode),
 			Right:   ParseJsonElement(raw["right"].(Object)).(IExpressionNode),
 		}
+	case "NonStdAllocNode":
+		return NonStdAllocNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Size:    ParseJsonElement(raw["size"].(Object)).(IExpressionNode),
+		}
+	case "NonStdDeallocNode":
+		return NonStdDeallocNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Pointer: ParseJsonElement(raw["pointer"].(Object)).(IExpressionNode),
+		}
+	case "NonStdSyscallNode":
+		args := []IExpressionNode{}
+		for i := range raw["args"].([]interface{}) {
+			args = append(args, ParseJsonElement(raw["args"].([]interface{})[i].(Object)).(IExpressionNode))
+		}
+		return NonStdSyscallNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Syscall: ParseJsonElement(raw["syscall"].(Object)).(IExpressionNode),
+			Args:    args,
+		}
+	case "NonStdAddrOfNode":
+		return NonStdAddrOfNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Target:  ParseJsonElement(raw["target"].(Object)).(Token),
+		}
+	case "NonStdDerefNode":
+		return NonStdDerefNode{
+			Type:    raw["type"].(string),
+			Filepos: ParseJsonElement(raw["fp"].(Object)).(Position),
+			Target:  ParseJsonElement(raw["target"].(Object)).(IExpressionNode),
+		}
 	case "FuncCallNode":
 		args := []IExpressionNode{}
 		for i := range raw["args"].([]interface{}) {
@@ -708,7 +794,8 @@ func ParseStatement(element IStatementNode) parser.BaseStatement {
 			Expression: ParseBaseExpression(n),
 		}
 	default:
-		panic(fmt.Sprintf("'%s' unexpected", element.(IElement).GetType()))
+		log.Fatalf("statement '%s' unexpected", element.(IElement).GetType())
+		panic("unreachable")
 	}
 
 }
@@ -832,6 +919,32 @@ func ParseBaseExpression(element IExpressionNode) parser.BaseExpression {
 			Right: ParseBaseExpression(n.Right),
 			// },
 		}
+	case "NonStdAllocNode":
+		n := element.(NonStdAllocNode)
+		return parser.NonStdAllocExpression{
+			Size: ParseBaseExpression(n.Size),
+		}
+	case "NonStdDeallocNode":
+		n := element.(NonStdDeallocNode)
+		return parser.NonStdDeallocExpression{
+			Pointer: ParseBaseExpression(n.Pointer),
+		}
+	case "NonStdSyscallNode":
+		n := element.(NonStdSyscallNode)
+		return parser.NonStdSyscallExpression{
+			Syscall:   ParseBaseExpression(n.Syscall),
+			Arguments: ParseBaseExpressions(n.Args),
+		}
+	case "NonStdAddrOfNode":
+		n := element.(NonStdAddrOfNode)
+		return parser.NonStdAddrOfExpression{
+			Target: n.Target.Convert(),
+		}
+	case "NonStdDerefNode":
+		n := element.(NonStdDerefNode)
+		return parser.NonStdDerefExpression{
+			Target: ParseBaseExpression(n.Target),
+		}
 	case "FuncCallNode":
 		n := element.(FuncCallNode)
 		return parser.FuncCallExpression{
@@ -850,7 +963,8 @@ func ParseBaseExpression(element IExpressionNode) parser.BaseExpression {
 			Identifier: n.Token.Convert(),
 		}
 	default:
-		panic(fmt.Sprintf("'%s' unexpected", element.(IElement).GetType()))
+		log.Fatalf("expression '%s' unexpected", element.(IElement).GetType())
+		panic("unreachable")
 	}
 }
 
