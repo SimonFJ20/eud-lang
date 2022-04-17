@@ -834,90 +834,68 @@ func ParseBaseExpression(element IExpressionNode) parser.BaseExpression {
 	case "NotEqualNode":
 		n := element.(NotEqualNode)
 		return parser.NotEqualExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "EqualNode":
 		n := element.(EqualNode)
 		return parser.EqualExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "GreaterThanOrEqualNode":
 		n := element.(GreaterThanOrEqualNode)
 		return parser.GTEExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "LessThanOrEqualNode":
 		n := element.(LessThanOrEqualNode)
 		return parser.LTEExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "GreaterThanNode":
 		n := element.(GreaterThanNode)
 		return parser.GreaterThanExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "LessThanNode":
 		n := element.(LessThanNode)
 		return parser.LessThanExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "AddNode":
 		n := element.(AddNode)
 		return parser.AddExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "SubNode":
 		n := element.(SubNode)
 		return parser.SubExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "MulNode":
 		n := element.(MulNode)
 		return parser.MulExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "DivNode":
 		n := element.(DivNode)
 		return parser.DivExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "ExpNode":
 		n := element.(ExpNode)
 		return parser.ExpExpression{
-			// LeftRightExpression: parser.LeftRightExpression{
 			Left:  ParseBaseExpression(n.Left),
 			Right: ParseBaseExpression(n.Right),
-			// },
 		}
 	case "NonStdAllocNode":
 		n := element.(NonStdAllocNode)

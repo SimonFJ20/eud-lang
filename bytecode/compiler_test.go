@@ -37,7 +37,6 @@ func TestFunctions(t *testing.T) {
 			Body: []parser.BaseStatement{
 				parser.ReturnStatement{
 					Value: parser.AddExpression{
-						// LeftRightExpression: parser.LeftRightExpression{
 						Left: parser.VarAccessExpression{
 							Identifier: parser.Token{
 								Type: parser.IdentifierToken, StringValue: "a", Next: nil,
@@ -48,7 +47,6 @@ func TestFunctions(t *testing.T) {
 								Type: parser.IdentifierToken, StringValue: "b", Next: nil,
 							},
 						},
-						// },
 					},
 				},
 			},
@@ -136,7 +134,6 @@ func TestVariables(t *testing.T) {
 					Type: parser.IdentifierToken, StringValue: "a", Next: nil,
 				},
 				Value: parser.AddExpression{
-					// LeftRightExpression: parser.LeftRightExpression{
 					Left: parser.VarAccessExpression{
 						Identifier: parser.Token{
 							Type: parser.IdentifierToken, StringValue: "a", Next: nil,
@@ -147,7 +144,6 @@ func TestVariables(t *testing.T) {
 							Type: parser.IntToken, IntValue: 5, StringValue: "5", Next: nil,
 						},
 					},
-					// },
 				},
 			},
 		},
@@ -168,9 +164,7 @@ func TestMath(t *testing.T) {
 	program, err := bytecode.Compile([]parser.BaseStatement{
 		parser.ExpressionStatement{
 			Expression: parser.MulExpression{
-				// LeftRightExpression: parser.LeftRightExpression{
 				Left: parser.AddExpression{
-					// LeftRightExpression: parser.LeftRightExpression{
 					Left: parser.IntLiteral{
 						Tok: &parser.Token{
 							Type: parser.IntToken, IntValue: 3, StringValue: "3", Next: nil,
@@ -180,7 +174,6 @@ func TestMath(t *testing.T) {
 						Tok: &parser.Token{
 							Type: parser.IntToken, IntValue: 4, StringValue: "4", Next: nil,
 						},
-						// },
 					},
 				},
 				Right: parser.IntLiteral{
@@ -188,7 +181,6 @@ func TestMath(t *testing.T) {
 						Type: parser.IntToken, IntValue: 5, StringValue: "5", Next: nil,
 					},
 				},
-				// },
 			},
 		},
 	})
